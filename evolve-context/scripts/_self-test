@@ -6,6 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(dirname "$SCRIPT_DIR")"
 VALIDATOR="$SKILL_DIR/scripts/validate-context"
+BOOTSTRAP="$SKILL_DIR/scripts/_bootstrap"
 
 PASS=0
 FAIL=0
@@ -34,6 +35,8 @@ assert "Layer 2: docs/README.md exists"      "[[ -f '$SKILL_DIR/docs/README.md' 
 assert "Layer 3: docs/ directory exists"     "[[ -d '$SKILL_DIR/docs' ]]"
 assert "SKILL.md exists"                     "[[ -f '$SKILL_DIR/SKILL.md' ]]"
 assert "CHANGELOG.md exists"                 "[[ -f '$SKILL_DIR/CHANGELOG.md' ]]"
+assert "scripts/_bootstrap exists"           "[[ -f '$BOOTSTRAP' ]]"
+assert "_bootstrap executable"               "[[ -x '$BOOTSTRAP' ]]"
 echo
 
 # --- Connectivity invariant ---
@@ -61,6 +64,9 @@ echo
 # --- validate-context ---
 echo "Validator (validate-context):"
 assert "Validator script exists" "[[ -f '$VALIDATOR' ]]"
+assert "Bootstrap has set -euo pipefail" "head -8 '$BOOTSTRAP' | grep -q 'set -euo pipefail'"
+assert "Bootstrap installs validate-context" "grep -q 'TARGET_VALIDATOR=' '$BOOTSTRAP' && grep -q 'cp .*TARGET_VALIDATOR' '$BOOTSTRAP'"
+assert "Bootstrap does NOT install self-test" "! grep -q 'self-test\|SELF_TEST' '$BOOTSTRAP'"
 
 # Test on self (the skill itself should pass)
 SELF_OUT=$(cd "$SKILL_DIR" && VALIDATE_CONTEXT_ROOT=. bash "$VALIDATOR" 2>&1)

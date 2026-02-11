@@ -2,7 +2,7 @@
 name: evolve-context
 description: Self-evolving context protocol that captures insights, prevents repeated mistakes, and evolves project documentation through structured feedback loops.
 metadata:
-  version: 0.4.0
+  version: 1.0.0
 ---
 
 # Self-Evolving Context Protocol
@@ -19,12 +19,12 @@ metadata:
 
 - '`SKILL_DIR`' — the directory containing this `SKILL.md` file (resolved by the agent at runtime)
 - 'Scripts': `${SKILL_DIR}/scripts/` — skill automation scripts
-- 'Detailed docs': [`${SKILL_DIR}/docs/protocols.md`](./docs/protocols.md) — full protocol specifications
+- 'Detailed docs': [`${SKILL_DIR}/docs/protocols.md`](./docs/protocols.md) — adaptation rules, lifecycle management, validation checklist
 
 ### Managed Targets
 
 - 'Root README': `README.md` — human entry point
-- 'Index File': One of `AGENTS.md` | `CLAUDE.md` | `CODEX.md` | `GEMINI.md` | `CONTEXT.md`
+- 'Index File': `AGENTS.md` (alternatives: `CLAUDE.md`, `CODEX.md`, `GEMINI.md`, `CONTEXT.md`)
 - 'Docs Index': `/docs/README.md` — living index of `/docs`
 - 'Project Docs': `/docs/'` — documentation files
 
@@ -63,7 +63,7 @@ Every piece of knowledge lives in exactly one place. Navigate via hierarchy, nev
 Layer 0: README.md            ← "what is this & where to go"
 Layer 1: AGENTS.md (index)    ← "how we work" (conventions, insights, mistakes)
 Layer 2: /docs/README.md      ← "what docs exist"
-Layer 3: /docs/'             ← "what we build"
+Layer 3: /docs/'              ← "what we build"
 ```
 
 ### Routing Decision Tree
@@ -76,7 +76,9 @@ About project identity?    → Layer 0 (README.md)
 
 ### Connectivity Invariant
 
-README.md → /docs/README.md → /docs/'. README.md → AGENTS.md.
+README.md → /docs/README.md → /docs/'.
+README.md → AGENTS.md.
+
 Every doc reachable within 2 clicks from root. No dead ends.
 
 ---
@@ -104,7 +106,13 @@ activity instead of prevented errors is the Farmville trap.
 3. SYNC — ensure /docs/README.md is current
 
 'Full post-task' (>3 files changed OR architectural impact detected):
-1–7. Full protocol steps (see [protocols.md](./docs/protocols.md#post-task-protocol-full)) 8. VALIDATE — `bash "${SKILL_DIR}/scripts/validate-context"`
+
+1. EVALUATE — anything worth capturing? If no → skip
+2. ROUTE & WRITE — update appropriate layer
+3. CONSOLIDATE — deduplicate, merge overlapping content
+4. SYNC — ensure /docs/README.md is current
+5. EVOLVE — update index file sections, add Change History entry
+6. VALIDATE — `bash "${SKILL_DIR}/scripts/validate-context"`
 
 ### Mode 2: ALWAYS_ON (Opt-in)
 
@@ -159,6 +167,7 @@ Full templates: [`docs/templates.md`](./docs/templates.md)
 Automated documentation health checker. Detects index file, validates links (skipping code blocks),
 analyzes bloat heuristically, checks docs index coverage.
 
+- 'Bootstrap': `"${SKILL_DIR}/scripts/_bootstrap"` installs `validate-context` into `~/.local/bin`
 - 'Design': [`docs/validation-design.md`](./docs/validation-design.md)
 - 'Usage': `bash "${SKILL_DIR}/scripts/validate-context"` from project working directory
 - 'Override root': `VALIDATE_CONTEXT_ROOT=/path/to/project bash ...`

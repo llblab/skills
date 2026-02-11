@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Persistent faster-whisper server with real-time streaming transcription.
 
-Keeps the model loaded in memory. Communicates via a Unix socket.
+Keeps the model loaded in memory and acts as the default backend for `listen`
+and agent-driven duplex mode. Communicates via a Unix socket.
 Supports two modes:
   1. File mode: client sends JSON {"wav": "/path/to.wav", "lang": null}
   2. Stream mode (real-time): client streams PCM, server sends partial
@@ -30,6 +31,31 @@ import sys
 import threading
 import wave
 
+def _ensure_dep(import_name, pip_name=None):
+    """Auto-install a missing Python dependency."""
+    pip_name = pip_name or import_name
+    try:
+        __import__(import_name)
+        return True
+    except ImportError:
+        pass
+    print(f"⚙ Installing {pip_name}...", file=sys.stderr)
+    import subprocess
+    for cmd in [
+        [sys.executable, "-m", "pip", "install", pip_name],
+        [sys.executable, "-m", "pip", "install", "--user", pip_name],
+        [sys.executable, "-m", "pip", "install", "--user", "--break-system-packages", pip_name],
+    ]:
+        try:
+            subprocess.run(cmd, capture_output=True, check=True)
+            print(f"✓ {pip_name} installed", file=sys.stderr)
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            continue
+    print(f"✗ Failed to install {pip_name}. Run: pip install {pip_name}", file=sys.stderr)
+    return False
+
+
 SOCK_PATH = "/tmp/listen-server.sock"
 PID_PATH = "/tmp/listen-server.pid"
 STREAM_HEADER = b"STRM"
@@ -37,6 +63,8 @@ STREAM_END = b"END\n"
 
 
 def start_server(model_name="small"):
+    if not _ensure_dep("faster_whisper", "faster-whisper"):
+        sys.exit(1)
     from faster_whisper import WhisperModel
 
     # Check if already running
@@ -65,7 +93,7 @@ def start_server(model_name="small"):
     # Setup socket
     server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     server.bind(SOCK_PATH)
-    server.listen(1)
+    server.listen(4)
 
     def cleanup(signum=None, frame=None):
         server.close()

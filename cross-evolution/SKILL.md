@@ -2,7 +2,7 @@
 name: cross-evolution
 description: Horizontal Gene Transfer protocol for skills. Synchronizes best practices and architectural patterns across the skill library.
 metadata:
-  version: 0.3.0
+  version: 1.0.0
 ---
 
 # Cross-Evolution

@@ -1,12 +1,14 @@
 # Voice Mode Super-Skill
 
-Unified voice I/O skill for agents:
+Offline-first voice I/O skill for agents:
 
 - `Output`: `say` (TTS)
 - `Input`: `listen` (STT)
-- `Duplex helper`: `duplex` (`say` → `listen` loop)
+- `Duplex mode`: agent-level orchestration (`say` → `listen`) built on the atomic scripts
 
-Use `say` and `listen` independently or run continuous duplex dialogue.
+Speech recognition runs locally via `faster-whisper`, and speech synthesis uses local `piper` models after the initial voice download.
+
+Use `say` and `listen` independently or let the agent run continuous duplex dialogue.
 
 ## Platform Support
 
@@ -16,7 +18,7 @@ Use `say` and `listen` independently or run continuous duplex dialogue.
 ## Quick Start
 
 ```bash
-"${SKILL_DIR}/scripts/bootstrap"
+"${SKILL_DIR}/scripts/_bootstrap"
 ```
 
 ## Quick Links

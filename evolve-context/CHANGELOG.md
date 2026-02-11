@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0
+
+- Structural cleanup: protocols.md 261→90 lines, removed Session Initialization ceremony, During-Task YAML tracking, Post-Task Protocol Full (now inline in SKILL.md)
+- Context Template made minimal and A2-aligned: removed 9 Meta-Protocol Principles, Pre/Post-Task protocols from template
+- Full post-task steps inlined in SKILL.md (no external link dependency)
+- Index file naming: `AGENTS.md` primary, alternatives listed as fallback
+- Added discovered constraints: A2-templates, self-contradiction, LLM YAML fiction, ceremonial formalization
+- protocols.md now contains only delta: adaptation rules, lifecycle management, validation checklist
+
 ## 0.4.0
 
 - Added self-test script (32 assertions)

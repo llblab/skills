@@ -1,6 +1,6 @@
 ---
 name: voice-mode
-description: "Unified voice I/O super-skill: speak via say, listen via listen, and run duplex voice dialogue."
+description: "Offline-first voice I/O super-skill: speak via say, listen via listen, and run agent-orchestrated duplex dialogue."
 metadata:
   version: 1.0.0
 ---
@@ -13,9 +13,10 @@ This skill unifies voice output and voice input in one place:
 
 - `say` — text-to-speech (TTS)
 - `listen` — speech-to-text (STT)
-- `duplex` — helper wrapper (`say` → `listen`) built on atomic commands
+- `duplex mode` — agent orchestration (`say` → `listen`) built on the atomic scripts
 
-Use `say` and `listen` independently, or combine them into continuous duplex dialogue.
+Use `say` and `listen` independently, or let the agent combine them into continuous duplex dialogue.
+This is an offline-first skill: STT runs locally via `faster-whisper`, and TTS uses local `piper` models after the initial voice download.
 
 ## Atomic Commands
 
@@ -23,6 +24,9 @@ Use `say` and `listen` independently, or combine them into continuous duplex dia
 
 ```bash
 say "text to announce"
+say --lang ru "<text in Russian>"
+# short alias is also supported:
+say -l ru "<text in Russian>"
 ```
 
 ### 2) Listen
@@ -31,13 +35,15 @@ say "text to announce"
 listen
 ```
 
-### 3) Duplex helper (optional)
+### 3) Duplex mode (agent orchestration)
 
 ```bash
-duplex "Готово. Озвучила результат. Что делаем дальше?"
+say --lang ru "<spoken reply in the conversation language>"
+listen -l ru -d 0 -s 1
 ```
 
-`duplex` is only a convenience wrapper. Core protocol remains atomic: `say` then `listen`.
+Duplex mode is not a standalone shell script in this skill. Core protocol remains atomic: `say` then `listen`.
+In duplex sessions, prefer `listen -d 0 -s 1`: no hard timeout, stop by user pause.
 
 ## Operating Modes
 
@@ -51,24 +57,37 @@ duplex "Готово. Озвучила результат. Что делаем �
 When explicitly requested by the user:
 
 1. Use `say` for every response.
-2. Do not duplicate full spoken content in chat.
-3. For code/tables: describe briefly by voice (language, purpose, size), avoid reading raw code line by line.
+2. Speak the entire assistant reply through `say`, not just a short follow-up question.
+3. Do not duplicate full spoken content in chat.
+4. For code/tables: describe briefly by voice (language, purpose, size), avoid reading raw code line by line.
 
 ### Mode C: Voice Input On-Demand
 
 - Call `listen` when the user wants to dictate the next prompt.
 - `listen` prints recognized text to stdout.
 
-### Mode D: Duplex Continuous Dialogue (say → listen)
+### Mode D: Duplex Continuous Dialogue (`say` → `listen`)
 
-When user enables duplex mode (e.g. "включи дуплекс", "полный голосовой режим"):
+When the user enables duplex mode (e.g. "turn on duplex", "full voice mode"):
 
-1. Speak response via `say`.
-2. Immediately call `listen` (same conversation language).
-3. Treat recognized text as the next user prompt.
-4. Repeat loop until stop phrase: "стоп", "выключи прослушивание", "stop listening".
+1. Generate the full assistant response first.
+2. Speak the full response via `say`.
+3. Immediately call `listen -d 0 -s 1` in the same conversation language.
+4. Treat recognized text as the next user prompt.
+5. Normalize the recognized text and stop when a stop phrase intent is heard: `стоп`, `выключи прослушивание`, `выключи дуплекс`, `stop listening`.
 
-This is hands-free conversational flow.
+Canonical agent loop:
+
+```text
+answer = full assistant reply
+say --lang <lang> "<answer>"
+heard = listen -l <lang> -d 0 -s 1
+if heard matches a stop phrase intent:
+  exit duplex mode
+```
+
+This is a hands-free conversational flow owned by the agent, not by a dedicated shell helper.
+Never keep the substantive reply only in chat while sending a shorter handoff question to speech.
 
 ### Mode E: Autonomous Voice Alerts (optional)
 
@@ -98,7 +117,7 @@ Before `listen`: ask if voice input is actually needed right now. Do not invoke 
 Run bootstrap once:
 
 ```bash
-"${SKILL_DIR}/scripts/bootstrap"
+"${SKILL_DIR}/scripts/_bootstrap"
 ```
 
 Bootstrap installs to `~/.local/bin`:
@@ -106,7 +125,6 @@ Bootstrap installs to `~/.local/bin`:
 - `say`
 - `listen`
 - `listen-server`
-- `duplex`
 
 ## Platform Support
 
