@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+# Self-test for cross-evolution skill
+# Validates: genes.md parsing, audit output, discovery phase, lifecycle tables
+# Supported Platforms: Linux, macOS
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SKILL_DIR="$(dirname "$SCRIPT_DIR")"
+AUDIT_SCRIPT="$SKILL_DIR/scripts/audit-genes"
+GENES_FILE="$SKILL_DIR/docs/genes.md"
+
+PASS=0
+FAIL=0
+TOTAL=0
+
+assert() {
+  local desc=$1
+  TOTAL=$((TOTAL + 1))
+  if eval "$2" >/dev/null 2>&1; then
+    echo "  ✓ $desc"
+    PASS=$((PASS + 1))
+  else
+    echo "  ✗ $desc"
+    FAIL=$((FAIL + 1))
+  fi
+}
+
+echo ">>> SELF-TEST: cross-evolution <<<"
+echo
+
+echo "File Structure:"
+assert "SKILL.md exists"             "[[ -f '$SKILL_DIR/SKILL.md' ]]"
+assert "AGENTS.md exists"            "[[ -f '$SKILL_DIR/AGENTS.md' ]]"
+assert "README.md exists"            "[[ -f '$SKILL_DIR/README.md' ]]"
+assert "docs/genes.md exists"        "[[ -f '$GENES_FILE' ]]"
+assert "docs/README.md exists"       "[[ -f '$SKILL_DIR/docs/README.md' ]]"
+assert "scripts/audit-genes exists"  "[[ -f '$AUDIT_SCRIPT' ]]"
+assert "audit-genes is executable"   "[[ -x '$AUDIT_SCRIPT' ]]"
+assert "scripts/self-test is executable" "[[ -x '$SCRIPT_DIR/self-test' ]]"
+echo
+
+echo "Gene Registry (docs/genes.md):"
+assert "Has Proposed Genes section"  "grep -q '## Proposed Genes' '$GENES_FILE'"
+assert "Has Active Genes section"    "grep -q '## Active Genes' '$GENES_FILE'"
+assert "Has Deprecated section"      "grep -q '## Deprecated' '$GENES_FILE'"
+assert "Has Extinct section"         "grep -q '## Extinct' '$GENES_FILE'"
+assert "Has Gene Conflicts section"  "grep -q '## Gene Conflicts' '$GENES_FILE'"
+assert "Has Fitness Scoring"         "grep -q '## Fitness Scoring' '$GENES_FILE'"
+assert "Has lifecycle diagram"       "grep -q 'Proposed.*Active.*Deprecated.*Extinct' '$GENES_FILE'"
+
+ACTIVE_GENES=$(awk '/^## Active Genes/{f=1;next} /^## /{f=0} f' "$GENES_FILE" | grep -cE '^\| [a-z]' || true)
+assert "At least 5 active genes" "[[ $ACTIVE_GENES -ge 5 ]]"
+echo
+
+echo "Audit Script Execution:"
+OUTPUT=$(bash "$AUDIT_SCRIPT" "$SKILL_DIR/.." 2>&1)
+EXIT_CODE=$?
+assert "audit-genes exits cleanly (code 0)" "[[ $EXIT_CODE -eq 0 ]]"
+assert "Output contains gene matrix" "grep -q 'CROSS-EVOLUTION GENE AUDIT' <<< '$OUTPUT'"
+assert "Output contains fitness scores" "grep -q 'Fitness Scores' <<< '$OUTPUT'"
+assert "Output contains genetic drift" "grep -q 'Genetic Drift' <<< '$OUTPUT'"
+assert "Output contains recommendations" "grep -q 'Recommendations' <<< '$OUTPUT'"
+assert "Output contains discovery phase" "grep -q 'Gene Discovery' <<< '$OUTPUT'"
+
+mapfile -t EXPECTED_SKILLS < <(
+  find "$SKILL_DIR/.." -type f -name "SKILL.md" ! -path "*/.git/*" \
+  | sed "s#^$SKILL_DIR/../##;s#/SKILL.md##" \
+  | sort
+)
+for skill in "${EXPECTED_SKILLS[@]}"; do
+  assert "Detects skill: $skill" "grep -q '$skill' <<< '$OUTPUT'"
+done
+echo
+
+echo "Table Parsing Integrity:"
+for gid in self-docs cross-platform self-test error-handling docs-dir; do
+  assert "Gene '$gid' parsed from table" "grep -q '$gid' <<< '$OUTPUT'"
+done
+assert "Fitness scores are numeric" "PERCENT=\$(awk 'match(\$0,/[0-9]+%/){print substr(\$0,RSTART,RLENGTH); exit}' <<< '$OUTPUT'); [[ -n \"\$PERCENT\" ]] && [[ \"\$PERCENT\" =~ ^[0-9]+%$ ]]"
+echo
+
+echo "CLI Flags:"
+NO_DISCOVERY_OUT=$(bash "$AUDIT_SCRIPT" "$SKILL_DIR/.." --no-discovery 2>&1)
+assert "Supports --no-discovery" "grep -q 'Discovery disabled' <<< '$NO_DISCOVERY_OUT'"
+
+NO_SYNC_OUT=$(bash "$AUDIT_SCRIPT" "$SKILL_DIR/.." --no-sync-discovery 2>&1)
+assert "Supports --no-sync-discovery" "grep -q 'Gene Discovery' <<< '$NO_SYNC_OUT'"
+echo
+
+echo "Edge Cases:"
+ERR_OUT=$(bash "$AUDIT_SCRIPT" "/nonexistent/path" 2>&1 || true)
+assert "Handles missing skills dir" "grep -qi 'no skills found\\|error' <<< '$ERR_OUT'"
+assert "Has local fallback default path" "grep -q 'LOCAL_SKILLS_DIR' '$AUDIT_SCRIPT'"
+echo
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Results: $PASS/$TOTAL passed, $FAIL failed"
+if [[ $FAIL -eq 0 ]]; then
+  echo "✅ All tests passed"
+  exit 0
+else
+  echo "❌ $FAIL test(s) failed"
+  exit 1
+fi

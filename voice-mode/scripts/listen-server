@@ -1,0 +1,292 @@
+#!/usr/bin/env python3
+"""Persistent faster-whisper server with real-time streaming transcription.
+
+Keeps the model loaded in memory. Communicates via a Unix socket.
+Supports two modes:
+  1. File mode: client sends JSON {"wav": "/path/to.wav", "lang": null}
+  2. Stream mode (real-time): client streams PCM, server sends partial
+     transcriptions as audio arrives, then final result on END.
+
+Stream protocol:
+  Client → Server:
+    - 4-byte header: b"STRM"
+    - JSON config line (\\n terminated): {"lang": null, "interval": 3}
+    - Raw PCM int16 16kHz mono chunks (any size)
+    - 4-byte end marker: b"END\\n"
+  Server → Client (during streaming):
+    - JSON lines (\\n terminated): {"partial": "text so far..."}
+    - Final JSON line: {"text": "final text", "lang": "en"}
+
+Start: listen-server start [--model small]
+Stop:  listen-server stop
+"""
+
+import io
+import json
+import os
+import signal
+import socket
+import sys
+import threading
+import wave
+
+SOCK_PATH = "/tmp/listen-server.sock"
+PID_PATH = "/tmp/listen-server.pid"
+STREAM_HEADER = b"STRM"
+STREAM_END = b"END\n"
+
+
+def start_server(model_name="small"):
+    from faster_whisper import WhisperModel
+
+    # Check if already running
+    if os.path.exists(PID_PATH):
+        try:
+            pid = int(open(PID_PATH).read().strip())
+            os.kill(pid, 0)
+            print(f"✗ Server already running (pid {pid})", file=sys.stderr)
+            sys.exit(1)
+        except (ProcessLookupError, ValueError):
+            pass  # stale pid file
+
+    # Load model
+    print(f"Loading model '{model_name}'...", file=sys.stderr)
+    model = WhisperModel(model_name, device="cpu", compute_type="int8")
+    print(f"✓ Model loaded. Listening on {SOCK_PATH}", file=sys.stderr)
+
+    # Clean up old socket
+    if os.path.exists(SOCK_PATH):
+        os.unlink(SOCK_PATH)
+
+    # Write PID
+    with open(PID_PATH, "w") as f:
+        f.write(str(os.getpid()))
+
+    # Setup socket
+    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    server.bind(SOCK_PATH)
+    server.listen(1)
+
+    def cleanup(signum=None, frame=None):
+        server.close()
+        if os.path.exists(SOCK_PATH):
+            os.unlink(SOCK_PATH)
+        if os.path.exists(PID_PATH):
+            os.unlink(PID_PATH)
+        sys.exit(0)
+
+    signal.signal(signal.SIGTERM, cleanup)
+    signal.signal(signal.SIGINT, cleanup)
+
+    # Transcription lock — one transcription at a time
+    transcribe_lock = threading.Lock()
+
+    while True:
+        conn = None
+        try:
+            conn, _ = server.accept()
+            conn.settimeout(120)
+
+            header = _recv_exact(conn, 4)
+            if header is None:
+                conn.close()
+                continue
+
+            if header == STREAM_HEADER:
+                _handle_stream(conn, model, transcribe_lock)
+            else:
+                _handle_file(conn, model, header, transcribe_lock)
+
+        except Exception as e:
+            try:
+                if conn:
+                    resp = json.dumps({"error": str(e)}) + "\n"
+                    conn.sendall(resp.encode())
+                    conn.close()
+            except Exception:
+                pass
+
+
+def _recv_exact(conn, n):
+    """Receive exactly n bytes. Returns None on EOF."""
+    data = b""
+    while len(data) < n:
+        chunk = conn.recv(n - len(data))
+        if not chunk:
+            return None if not data else data
+        data += chunk
+    return data
+
+
+def _transcribe(model, audio_bytes, lang, lock):
+    """Transcribe PCM int16 audio bytes. Returns (text, lang_code)."""
+    if len(audio_bytes) < 3200:  # < 0.1s
+        return "", ""
+
+    wav_buf = io.BytesIO()
+    with wave.open(wav_buf, "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(16000)
+        wf.writeframes(audio_bytes)
+    wav_buf.seek(0)
+
+    with lock:
+        segments, info = model.transcribe(
+            wav_buf, language=lang, beam_size=5, vad_filter=True
+        )
+        text = " ".join(seg.text.strip() for seg in segments).strip()
+
+    return text, info.language
+
+
+def _handle_file(conn, model, initial_bytes, lock):
+    """Handle legacy file-mode request."""
+    remaining = conn.recv(4096)
+    data = (initial_bytes + remaining).decode().strip()
+    req = json.loads(data)
+
+    wav_path = req["wav"]
+    lang = req.get("lang")
+
+    with lock:
+        segments, info = model.transcribe(
+            wav_path, language=lang, beam_size=5, vad_filter=True
+        )
+        text = " ".join(seg.text.strip() for seg in segments).strip()
+
+    resp = json.dumps({"text": text, "lang": info.language})
+    conn.sendall(resp.encode())
+    conn.close()
+
+
+def _handle_stream(conn, model, lock):
+    """Handle real-time streaming: receive PCM, send partial transcriptions."""
+    # Read config line
+    config_buf = b""
+    while True:
+        byte = conn.recv(1)
+        if not byte:
+            conn.close()
+            return
+        config_buf += byte
+        if byte == b"\n":
+            break
+
+    config = json.loads(config_buf.decode())
+    lang = config.get("lang")
+    interval = config.get("interval", 3)  # transcribe every N seconds
+
+    # Shared state between receiver and transcriber
+    audio_buf = bytearray()
+    buf_lock = threading.Lock()
+    finished = threading.Event()
+    last_partial = [""]
+
+    def send_json(obj):
+        """Send a JSON line to the client."""
+        try:
+            line = json.dumps(obj) + "\n"
+            conn.sendall(line.encode())
+        except Exception:
+            pass
+
+    def receive_audio():
+        """Receive audio chunks until END marker."""
+        nonlocal audio_buf
+        while True:
+            try:
+                chunk = conn.recv(65536)
+            except Exception:
+                break
+            if not chunk:
+                break
+
+            with buf_lock:
+                audio_buf.extend(chunk)
+                # Check for END marker
+                if len(audio_buf) >= 4 and audio_buf[-4:] == STREAM_END:
+                    audio_buf = audio_buf[:-4]
+                    break
+
+        finished.set()
+
+    def periodic_transcribe():
+        """Periodically transcribe accumulated audio and send partials."""
+        while not finished.is_set():
+            finished.wait(timeout=interval)
+
+            with buf_lock:
+                snapshot = bytes(audio_buf)
+
+            if len(snapshot) < 3200:
+                continue
+
+            text, detected_lang = _transcribe(model, snapshot, lang, lock)
+            if text and text != last_partial[0]:
+                last_partial[0] = text
+                send_json({"partial": text})
+
+    # Start receiver thread
+    recv_thread = threading.Thread(target=receive_audio, daemon=True)
+    recv_thread.start()
+
+    # Start periodic transcription thread
+    trans_thread = threading.Thread(target=periodic_transcribe, daemon=True)
+    trans_thread.start()
+
+    # Wait for audio reception to finish
+    recv_thread.join(timeout=300)
+    trans_thread.join(timeout=60)
+
+    # Final transcription on complete audio
+    with buf_lock:
+        final_audio = bytes(audio_buf)
+
+    if len(final_audio) < 3200:
+        send_json({"text": "", "lang": ""})
+        conn.close()
+        return
+
+    text, detected_lang = _transcribe(model, final_audio, lang, lock)
+
+    send_json({"text": text, "lang": detected_lang})
+    conn.close()
+
+
+def stop_server():
+    if os.path.exists(PID_PATH):
+        try:
+            pid = int(open(PID_PATH).read().strip())
+            os.kill(pid, signal.SIGTERM)
+            print(f"✓ Server stopped (pid {pid})")
+        except (ProcessLookupError, ValueError):
+            print("✗ Server not running (stale pid)")
+        try:
+            os.unlink(PID_PATH)
+        except FileNotFoundError:
+            pass
+    else:
+        print("✗ Server not running")
+
+    if os.path.exists(SOCK_PATH):
+        os.unlink(SOCK_PATH)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: listen-server start [--model small] | stop")
+        sys.exit(1)
+
+    cmd = sys.argv[1]
+    if cmd == "start":
+        model = "small"
+        if "--model" in sys.argv:
+            idx = sys.argv.index("--model")
+            model = sys.argv[idx + 1]
+        start_server(model)
+    elif cmd == "stop":
+        stop_server()
+    else:
+        print(f"Unknown command: {cmd}")
+        sys.exit(1)

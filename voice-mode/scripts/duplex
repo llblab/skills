@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Duplex helper: speak first, then immediately listen.
+# Built on top of atomic commands: say + listen.
+
+USAGE="Usage: duplex [OPTIONS] \"text to speak\"
+
+Options:
+  --say-lang LANG      Language for say (optional)
+  -d, --duration SEC   listen duration; 0 = no limit (default: 10)
+  -m, --model MODEL    listen model (default: small)
+  -l, --lang LANG      listen language hint
+  -p, --preset NAME    listen preset: fast | accurate | noisy
+  -s, --silence SEC    listen silence cutoff (default: 1)
+  -i, --interval SEC   listen partial interval (default: 2)
+  -h, --help           Show this help
+
+Examples:
+  duplex \"Готово, что делаем дальше?\"
+  duplex --say-lang ru -l ru -d 15 \"Слушаю ваш следующий запрос\""
+
+SAY_LANG=""
+LISTEN_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --say-lang)
+      SAY_LANG="$2"
+      shift 2
+      ;;
+    -d|--duration|-m|--model|-l|--lang|-p|--preset|-s|--silence|-i|--interval)
+      LISTEN_ARGS+=("$1" "$2")
+      shift 2
+      ;;
+    -h|--help)
+      echo "$USAGE"
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+if [[ -p /dev/stdin ]]; then
+  SPEECH_TEXT="$(cat)"
+else
+  SPEECH_TEXT="$*"
+fi
+
+if [[ -z "${SPEECH_TEXT}" ]]; then
+  echo "ERROR: missing text to speak" >&2
+  echo "$USAGE" >&2
+  exit 1
+fi
+
+if [[ -n "$SAY_LANG" ]]; then
+  say --lang "$SAY_LANG" "$SPEECH_TEXT"
+else
+  say "$SPEECH_TEXT"
+fi
+
+exec listen "${LISTEN_ARGS[@]}"

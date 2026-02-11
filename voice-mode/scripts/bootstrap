@@ -1,0 +1,157 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Unified bootstrap for voice-mode super-skill.
+# Installs atomic commands:
+#   - say (TTS)
+#   - listen (STT)
+#   - listen-server (persistent STT server)
+#   - duplex (helper: say -> listen)
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+INSTALL_DIR="${HOME}/.local/bin"
+
+SOURCE_SAY="${SCRIPT_DIR}/say"
+SOURCE_LISTEN="${SCRIPT_DIR}/listen"
+SOURCE_LISTEN_SERVER="${SCRIPT_DIR}/listen-server"
+SOURCE_DUPLEX="${SCRIPT_DIR}/duplex"
+
+TARGET_SAY="${INSTALL_DIR}/say"
+TARGET_LISTEN="${INSTALL_DIR}/listen"
+TARGET_LISTEN_SERVER="${INSTALL_DIR}/listen-server"
+TARGET_DUPLEX="${INSTALL_DIR}/duplex"
+
+OS_TYPE="$(uname -s)"
+case "$OS_TYPE" in
+  Linux|Darwin)
+    ;;
+  *)
+    echo "ERROR: Unsupported OS: ${OS_TYPE}" >&2
+    echo "This skill supports Linux and macOS only." >&2
+    exit 1
+    ;;
+esac
+
+echo "=== voice-mode bootstrap (super-skill) ==="
+echo "Platform: ${OS_TYPE}"
+
+warn() {
+  echo "WARNING: $*" >&2
+}
+
+ok() {
+  echo "✓ $*"
+}
+
+# ---- Dependency checks (non-fatal; install still proceeds) ----
+
+if command -v piper >/dev/null 2>&1; then
+  ok "piper found (say ready)"
+else
+  warn "'piper' not found. 'say' will not work until installed."
+  warn "Install from: https://github.com/rhasspy/piper/releases"
+fi
+
+if [[ "$OS_TYPE" == "Linux" ]]; then
+  if command -v aplay >/dev/null 2>&1; then
+    ok "aplay found (Linux playback ready)"
+  else
+    warn "'aplay' not found. Install alsa-utils for voice playback."
+  fi
+else
+  if command -v afplay >/dev/null 2>&1; then
+    ok "afplay found (macOS playback ready)"
+  else
+    warn "'afplay' not found. Audio playback may fail."
+  fi
+fi
+
+if command -v python3 >/dev/null 2>&1; then
+  ok "python3 found"
+else
+  warn "python3 not found. 'listen' and 'listen-server' will not work."
+fi
+
+if command -v python3 >/dev/null 2>&1; then
+  if python3 -c "from faster_whisper import WhisperModel" >/dev/null 2>&1; then
+    ok "faster-whisper found (listen transcription ready)"
+  else
+    warn "faster-whisper not found. Install: pip install faster-whisper"
+  fi
+
+  if python3 -c "import pyaudio" >/dev/null 2>&1; then
+    ok "pyaudio found (streaming listen mode ready)"
+  else
+    warn "pyaudio not found. listen will fallback to file recording mode."
+    warn "Install for streaming mode: pip install pyaudio"
+  fi
+
+  if python3 -c "import numpy" >/dev/null 2>&1; then
+    ok "numpy found"
+  else
+    warn "numpy not found. Install: pip install numpy"
+  fi
+fi
+
+if [[ "$OS_TYPE" == "Linux" ]]; then
+  if command -v arecord >/dev/null 2>&1; then
+    ok "arecord found (Linux fallback recording ready)"
+  else
+    warn "arecord not found. Install alsa-utils for fallback recording."
+  fi
+
+  if command -v sox >/dev/null 2>&1; then
+    ok "sox found"
+  else
+    warn "sox not found (optional, useful for silence handling)."
+  fi
+else
+  if command -v sox >/dev/null 2>&1 || command -v rec >/dev/null 2>&1; then
+    ok "sox/rec found (macOS fallback recording ready)"
+  else
+    warn "sox not found. Install: brew install sox"
+  fi
+fi
+
+if command -v ffmpeg >/dev/null 2>&1; then
+  ok "ffmpeg found"
+else
+  warn "ffmpeg not found (optional fallback utility)."
+fi
+
+# ---- Install scripts ----
+
+mkdir -p "$INSTALL_DIR"
+
+for src in "$SOURCE_SAY" "$SOURCE_LISTEN" "$SOURCE_LISTEN_SERVER" "$SOURCE_DUPLEX"; do
+  if [[ ! -f "$src" ]]; then
+    echo "ERROR: missing script: $src" >&2
+    exit 1
+  fi
+done
+
+cp "$SOURCE_SAY" "$TARGET_SAY"
+cp "$SOURCE_LISTEN" "$TARGET_LISTEN"
+cp "$SOURCE_LISTEN_SERVER" "$TARGET_LISTEN_SERVER"
+cp "$SOURCE_DUPLEX" "$TARGET_DUPLEX"
+
+chmod +x "$TARGET_SAY" "$TARGET_LISTEN" "$TARGET_LISTEN_SERVER" "$TARGET_DUPLEX"
+
+ok "Installed: $TARGET_SAY"
+ok "Installed: $TARGET_LISTEN"
+ok "Installed: $TARGET_LISTEN_SERVER"
+ok "Installed: $TARGET_DUPLEX"
+
+CURRENT_SAY="$(command -v say 2>/dev/null || true)"
+if [[ -n "$CURRENT_SAY" && "$CURRENT_SAY" != "$TARGET_SAY" ]]; then
+  warn "current 'say' resolves to $CURRENT_SAY"
+  warn "To use skill say, ensure ${INSTALL_DIR} is before system paths in PATH."
+fi
+
+if [[ ":${PATH}:" != *":${INSTALL_DIR}:"* ]]; then
+  echo "Add to PATH: export PATH=\"${INSTALL_DIR}:\$PATH\""
+else
+  ok "PATH already includes ${INSTALL_DIR}"
+fi
+
+echo "Ready: use 'say' and 'listen' separately, or run duplex loop (say -> listen)."

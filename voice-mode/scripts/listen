@@ -1,0 +1,359 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# listen — record speech and transcribe to text (real-time streaming)
+#
+# When listen-server is running: streams PCM to server, shows partial
+# transcriptions in real-time, outputs final text to stdout.
+# Otherwise: records WAV, transcribes directly via faster-whisper.
+#
+# Output: transcribed text to stdout. Diagnostics/partials go to stderr.
+
+USAGE="Usage: listen [OPTIONS]
+Record speech and transcribe to text.
+
+Options:
+  -d, --duration SEC   Max recording duration in seconds; 0 = no limit (default: 10)
+  -m, --model MODEL    Whisper model: tiny|base|small|medium (default: small)
+  -l, --lang LANG      Language code hint: en|ru|de|... (default: ~/.pi_voice_lang or auto)
+  -p, --preset NAME    Preset: fast | accurate | noisy (overrides model/silence/interval)
+  -s, --silence SEC    Stop after N seconds of silence (default: 1)
+  -i, --interval SEC   Partial transcription interval (default: 2)
+  -h, --help           Show this help
+
+Examples:
+  listen                          # Record up to 10s, auto-detect language
+  listen -d 30                    # Record up to 30s
+  listen -d 0 -s 1                # No hard timeout, stop by silence
+  listen -m medium -l ru          # Use medium model, hint Russian
+  listen -p fast                  # Low-latency preset
+  listen -d 5 -s 1                # Short recording, 1s silence cutoff
+  listen -i 2                     # Show partials every 2s"
+
+# Defaults
+DURATION=10
+MODEL="small"
+HINT_LANG=""
+PRESET=""
+SILENCE=1
+INTERVAL=2
+LANG_FILE="${HOME}/.pi_voice_lang"
+
+# Parse args
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -d|--duration)  DURATION="$2"; shift 2 ;;
+        -m|--model)     MODEL="$2"; shift 2 ;;
+        -l|--lang)      HINT_LANG="$2"; shift 2 ;;
+        -p|--preset)    PRESET="$2"; shift 2 ;;
+        -s|--silence)   SILENCE="$2"; shift 2 ;;
+        -i|--interval)  INTERVAL="$2"; shift 2 ;;
+        -h|--help)      echo "$USAGE"; exit 0 ;;
+        *)              echo "Unknown option: $1"; echo "$USAGE"; exit 1 ;;
+    esac
+done
+
+case "$PRESET" in
+    "") ;;
+    fast)      MODEL="tiny";   SILENCE=1; INTERVAL=1 ;;
+    accurate)  MODEL="medium"; SILENCE=2; INTERVAL=2 ;;
+    noisy)     MODEL="medium"; SILENCE=1; INTERVAL=1 ;;
+    *)
+        echo "Unknown preset: $PRESET" >&2
+        echo "$USAGE" >&2
+        exit 1
+        ;;
+esac
+
+if [ -z "$HINT_LANG" ] && [ -f "$LANG_FILE" ]; then
+    HINT_LANG="$(tr -d '[:space:]' < "$LANG_FILE")"
+fi
+
+SOCK="/tmp/listen-server.sock"
+
+# --- Streaming mode (server running) ---
+if [ -S "$SOCK" ]; then
+    LANG_PY="None"
+    if [ -n "$HINT_LANG" ]; then
+        LANG_PY="\"$HINT_LANG\""
+    fi
+
+    python3 << 'PYEOF' - "$SOCK" "$DURATION" "$SILENCE" "$INTERVAL" "$LANG_PY" "$LANG_FILE"
+import json
+import socket
+import sys
+import threading
+import time
+import numpy as np
+
+# Suppress noisy ALSA diagnostics (Unknown PCM phoneline, etc.) from PortAudio
+_alsa_handler_ref = None
+
+def _suppress_alsa_errors():
+    global _alsa_handler_ref
+    try:
+        import ctypes
+        ERROR_HANDLER_FUNC = ctypes.CFUNCTYPE(
+            None,
+            ctypes.c_char_p,
+            ctypes.c_int,
+            ctypes.c_char_p,
+            ctypes.c_int,
+            ctypes.c_char_p,
+        )
+
+        def _py_error_handler(filename, line, function, err, fmt):
+            return
+
+        _alsa_handler_ref = ERROR_HANDLER_FUNC(_py_error_handler)
+        ctypes.cdll.LoadLibrary("libasound.so").snd_lib_error_set_handler(_alsa_handler_ref)
+    except Exception:
+        # Best-effort only; continue without hard failure.
+        pass
+
+_suppress_alsa_errors()
+
+try:
+    import pyaudio
+except ImportError:
+    print("✗ pyaudio not available for streaming", file=sys.stderr)
+    sys.exit(2)
+
+SOCK_PATH = sys.argv[1]
+DURATION = int(sys.argv[2])
+SILENCE_SEC = int(sys.argv[3])
+INTERVAL = int(sys.argv[4])
+_lang_arg = sys.argv[5]
+LANG = None if _lang_arg == "None" else _lang_arg.strip('"')
+LANG_FILE = sys.argv[6]
+
+RATE = 16000
+CHUNK = 1024
+SILENCE_THRESHOLD = 300
+
+def rms(data):
+    arr = np.frombuffer(data, dtype=np.int16).astype(np.float64)
+    return np.sqrt(np.mean(arr ** 2)) if len(arr) > 0 else 0.0
+
+# Connect to server
+sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+sock.settimeout(120)
+try:
+    sock.connect(SOCK_PATH)
+except Exception as e:
+    print(f"✗ Cannot connect to listen-server: {e}", file=sys.stderr)
+    sys.exit(2)
+
+# Send STRM header
+sock.sendall(b"STRM")
+
+# Send config
+config = json.dumps({"lang": LANG, "interval": INTERVAL}) + "\n"
+sock.sendall(config.encode())
+
+# Start reading partial results in background
+final_result = [None]
+last_partial = [""]
+is_tty = sys.stderr.isatty()
+
+def read_responses():
+    """Read JSON lines from server (partials + final)."""
+    buf = b""
+    while True:
+        try:
+            data = sock.recv(65536)
+        except Exception:
+            break
+        if not data:
+            break
+        buf += data
+        while b"\n" in buf:
+            line, buf = buf.split(b"\n", 1)
+            try:
+                obj = json.loads(line.decode())
+            except Exception:
+                continue
+            if "partial" in obj:
+                text = obj["partial"].strip()
+                if not text:
+                    continue
+                if text == last_partial[0]:
+                    continue
+                # Ignore brief regressions (shorter prefix of previously shown text).
+                if last_partial[0] and last_partial[0].startswith(text):
+                    continue
+                last_partial[0] = text
+                if is_tty:
+                    print(f"\r\033[K💬 {text}", end="", file=sys.stderr, flush=True)
+            elif "text" in obj:
+                final_result[0] = obj
+                return
+
+reader = threading.Thread(target=read_responses, daemon=True)
+reader.start()
+
+# Record and stream audio
+listen_window = "∞" if DURATION <= 0 else f"{DURATION}s"
+print(f"🎙 Listening... ({listen_window})", file=sys.stderr, flush=True)
+
+pa = pyaudio.PyAudio()
+stream = pa.open(format=pyaudio.paInt16, channels=1, rate=RATE,
+                 input=True, frames_per_buffer=CHUNK)
+
+max_chunks = None if DURATION <= 0 else int(RATE / CHUNK * DURATION)
+silence_chunks = int(RATE / CHUNK * SILENCE_SEC)
+silent_count = 0
+speech_started = False
+chunks_seen = 0
+
+try:
+    while True:
+        if max_chunks is not None and chunks_seen >= max_chunks:
+            break
+
+        data = stream.read(CHUNK, exception_on_overflow=False)
+        chunks_seen += 1
+        try:
+            sock.sendall(data)
+        except BrokenPipeError:
+            break
+
+        energy = rms(data)
+        if energy > SILENCE_THRESHOLD:
+            speech_started = True
+            silent_count = 0
+        elif speech_started:
+            silent_count += 1
+            if silent_count >= silence_chunks:
+                break
+finally:
+    stream.stop_stream()
+    stream.close()
+    pa.terminate()
+
+# Send END marker and wait for final result
+try:
+    sock.sendall(b"END\n")
+except BrokenPipeError:
+    pass
+
+if is_tty:
+    print("\r\033[K📝 Transcribing...", file=sys.stderr, flush=True)
+else:
+    print("📝 Transcribing...", file=sys.stderr, flush=True)
+reader.join(timeout=60)
+
+if final_result[0] is None:
+    print("✗ No response from server", file=sys.stderr)
+    sys.exit(1)
+
+resp = final_result[0]
+if "error" in resp:
+    print(resp["error"], file=sys.stderr)
+    sys.exit(1)
+
+lang_code = (resp.get("lang") or "").strip()
+if lang_code:
+    try:
+        with open(LANG_FILE, "w", encoding="utf-8") as f:
+            f.write(lang_code)
+    except Exception:
+        pass
+
+text = resp.get("text", "").strip()
+if text:
+    if is_tty:
+        print(f"\r\033[K", end="", file=sys.stderr)
+    print(text)
+else:
+    print("(silence)", file=sys.stderr)
+    sys.exit(1)
+PYEOF
+
+    RC=$?
+    if [ "$RC" -eq 2 ]; then
+        echo "⚠ Streaming unavailable, falling back to file mode" >&2
+    else
+        exit "$RC"
+    fi
+fi
+
+# --- File mode (no server, or streaming fallback) ---
+
+TMPWAV="$(mktemp /tmp/listen-XXXXXX.wav)"
+trap 'rm -f "$TMPWAV"' EXIT
+
+OS="$(uname -s)"
+
+DURATION_LABEL="${DURATION}s"
+if [ "$DURATION" -le 0 ]; then
+    DURATION_LABEL="∞"
+fi
+
+echo "🎙 Listening... (${DURATION_LABEL})" >&2
+
+case "$OS" in
+    Linux)
+        if [ "$DURATION" -le 0 ]; then
+            if command -v rec &>/dev/null; then
+                rec -q -r 16000 -c 1 -b 16 "$TMPWAV" \
+                    silence 1 0.3 0.5% 1 "$SILENCE" 0.5% 2>/dev/null || true
+            else
+                echo "✗ No-timeout mode in file fallback requires sox (rec)." >&2
+                echo "  Install sox or run listen-server for streaming mode." >&2
+                exit 1
+            fi
+        else
+            timeout "$DURATION" arecord -q -f S16_LE -r 16000 -c 1 -t wav "$TMPWAV" 2>/dev/null || true
+        fi
+        ;;
+    Darwin)
+        if command -v sox &>/dev/null; then
+            if [ "$DURATION" -le 0 ]; then
+                rec -q -r 16000 -c 1 -b 16 "$TMPWAV" \
+                    silence 1 0.3 0.5% 1 "$SILENCE" 0.5% 2>/dev/null || true
+            else
+                timeout "$DURATION" rec -q -r 16000 -c 1 -b 16 "$TMPWAV" \
+                    silence 1 0.3 0.5% 1 "$SILENCE" 0.5% 2>/dev/null || true
+            fi
+        else
+            echo "✗ sox not found. Install: brew install sox" >&2
+            exit 1
+        fi
+        ;;
+esac
+
+FILESIZE=$(wc -c < "$TMPWAV")
+if [ "$FILESIZE" -lt 1000 ]; then
+    echo "✗ No audio recorded" >&2
+    exit 1
+fi
+
+echo "📝 Transcribing..." >&2
+
+LANG_PY="None"
+if [ -n "$HINT_LANG" ]; then
+    LANG_PY="'$HINT_LANG'"
+fi
+
+# Direct mode — load model fresh
+python3 << PYEOF
+import sys
+from faster_whisper import WhisperModel
+
+model = WhisperModel("$MODEL", device="cpu", compute_type="int8")
+lang = $LANG_PY
+segments, info = model.transcribe("$TMPWAV", language=lang, beam_size=5, vad_filter=True)
+text = " ".join(seg.text.strip() for seg in segments).strip()
+if info.language:
+    try:
+        with open("$LANG_FILE", "w", encoding="utf-8") as f:
+            f.write(info.language)
+    except Exception:
+        pass
+if text:
+    print(text)
+else:
+    print("(silence)", file=sys.stderr)
+    sys.exit(1)
+PYEOF

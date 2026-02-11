@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+# Self-test for voice-mode super-skill
+# Validates: structure, say/listen scripts, unified bootstrap, duplex docs/protocol
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SKILL_DIR="$(dirname "$SCRIPT_DIR")"
+
+SAY_SCRIPT="$SKILL_DIR/scripts/say"
+LISTEN_SCRIPT="$SKILL_DIR/scripts/listen"
+LISTEN_SERVER="$SKILL_DIR/scripts/listen-server"
+DUPLEX_SCRIPT="$SKILL_DIR/scripts/duplex"
+BOOTSTRAP="$SKILL_DIR/scripts/bootstrap"
+
+PASS=0
+FAIL=0
+TOTAL=0
+
+assert() {
+  local desc=$1
+  TOTAL=$((TOTAL + 1))
+  if eval "$2" >/dev/null 2>&1; then
+    echo "  ✓ $desc"
+    PASS=$((PASS + 1))
+  else
+    echo "  ✗ $desc"
+    FAIL=$((FAIL + 1))
+  fi
+}
+
+echo ">>> SELF-TEST: voice-mode super-skill <<<"
+echo
+
+echo "File Structure:"
+assert "SKILL.md exists"                 "[[ -f '$SKILL_DIR/SKILL.md' ]]"
+assert "AGENTS.md exists"                "[[ -f '$SKILL_DIR/AGENTS.md' ]]"
+assert "README.md exists"                "[[ -f '$SKILL_DIR/README.md' ]]"
+assert "scripts/say exists"              "[[ -f '$SAY_SCRIPT' ]]"
+assert "scripts/listen exists"           "[[ -f '$LISTEN_SCRIPT' ]]"
+assert "scripts/listen-server exists"    "[[ -f '$LISTEN_SERVER' ]]"
+assert "scripts/duplex exists"           "[[ -f '$DUPLEX_SCRIPT' ]]"
+assert "scripts/bootstrap exists"        "[[ -f '$BOOTSTRAP' ]]"
+assert "say executable"                  "[[ -x '$SAY_SCRIPT' ]]"
+assert "listen executable"               "[[ -x '$LISTEN_SCRIPT' ]]"
+assert "listen-server executable"        "[[ -x '$LISTEN_SERVER' ]]"
+assert "duplex executable"               "[[ -x '$DUPLEX_SCRIPT' ]]"
+assert "bootstrap executable"            "[[ -x '$BOOTSTRAP' ]]"
+assert "docs/README.md exists"           "[[ -f '$SKILL_DIR/docs/README.md' ]]"
+assert "docs/tts-script.md exists"       "[[ -f '$SKILL_DIR/docs/tts-script.md' ]]"
+assert "docs/stt-script.md exists"       "[[ -f '$SKILL_DIR/docs/stt-script.md' ]]"
+assert "docs/duplex-mode.md exists"      "[[ -f '$SKILL_DIR/docs/duplex-mode.md' ]]"
+echo
+
+echo "Say Script Analysis:"
+assert "Has set -euo pipefail"         "head -8 '$SAY_SCRIPT' | grep -q 'set -euo pipefail'"
+assert "Has MODELS array"              "grep -q 'declare -A MODELS' '$SAY_SCRIPT'"
+assert "Uses mktemp"                   "grep -q 'mktemp' '$SAY_SCRIPT'"
+assert "Has trap cleanup"              "grep -q 'trap.*EXIT' '$SAY_SCRIPT'"
+assert "Uses curl -fSL"                "grep -q 'curl -fSL' '$SAY_SCRIPT'"
+assert "Normalizes locale-like codes"  "grep -q 'CURRENT_LANG=.*%%_\\*' '$SAY_SCRIPT' && grep -q 'CURRENT_LANG=.*%%-\\*' '$SAY_SCRIPT'"
+assert "Checks piper presence"         "grep -q 'command -v piper' '$SAY_SCRIPT'"
+echo
+
+echo "Say Model Registry:"
+EXPECTED_LANGS=(en ru uk de fr es it zh ja)
+for lang in "${EXPECTED_LANGS[@]}"; do
+  assert "Model for '$lang' registered" "grep -q \"MODELS\\[$lang\\]\" '$SAY_SCRIPT'"
+done
+MODEL_COUNT=$(grep -c 'MODELS\[.*\]=' "$SAY_SCRIPT" || true)
+ONNX_COUNT=$(grep 'MODELS\[.*\]=' "$SAY_SCRIPT" | grep -c '\.onnx' || true)
+assert "All models use .onnx format ($ONNX_COUNT/$MODEL_COUNT)" "[[ $MODEL_COUNT -eq $ONNX_COUNT ]]"
+echo
+
+echo "Listen Script Analysis:"
+assert "Has set -euo pipefail"              "head -8 '$LISTEN_SCRIPT' | grep -q 'set -euo pipefail'"
+assert "Supports --interval flag"           "grep -q '\\-\\-interval' '$LISTEN_SCRIPT'"
+assert "Supports --silence flag"            "grep -q '\\-\\-silence' '$LISTEN_SCRIPT'"
+assert "Uses streaming socket path"         "grep -q 'listen-server.sock' '$LISTEN_SCRIPT'"
+assert "Streaming protocol header STRM"     "grep -q 'sock.sendall(b\"STRM\")' '$LISTEN_SCRIPT'"
+assert "Streaming protocol end marker END"  "grep -q 'sock.sendall(b\"END' '$LISTEN_SCRIPT'"
+assert "Has pyaudio import path"            "grep -q 'import pyaudio' '$LISTEN_SCRIPT'"
+assert "Has Linux fallback arecord"         "grep -q 'arecord' '$LISTEN_SCRIPT'"
+assert "Has macOS fallback sox/rec"         "grep -q 'rec -q' '$LISTEN_SCRIPT'"
+assert "Uses faster-whisper in file mode"   "grep -q 'from faster_whisper import WhisperModel' '$LISTEN_SCRIPT'"
+echo
+
+echo "Listen-Server Analysis:"
+assert "Has STREAM_HEADER constant"         "grep -q 'STREAM_HEADER = b\"STRM\"' '$LISTEN_SERVER'"
+assert "Has STREAM_END constant"            "grep -q 'STREAM_END = b\"END\\\\n\"' '$LISTEN_SERVER'"
+assert "Uses transcribe lock"               "grep -q 'transcribe_lock' '$LISTEN_SERVER'"
+assert "Has stream handler"                 "grep -q '_handle_stream' '$LISTEN_SERVER'"
+assert "Has file handler"                   "grep -q '_handle_file' '$LISTEN_SERVER'"
+assert "Uses faster-whisper model"          "grep -q 'from faster_whisper import WhisperModel' '$LISTEN_SERVER'"
+echo
+
+echo "Duplex Script Analysis:"
+assert "Calls say"                          "grep -q '^  say \|^say ' '$DUPLEX_SCRIPT'"
+assert "Calls listen"                       "grep -q 'exec listen' '$DUPLEX_SCRIPT'"
+assert "Has --say-lang option"              "grep -q '\\-\\-say-lang' '$DUPLEX_SCRIPT'"
+echo
+
+echo "Unified Bootstrap Analysis:"
+assert "Bootstrap has set -euo pipefail"    "head -8 '$BOOTSTRAP' | grep -q 'set -euo pipefail'"
+assert "Installs say"                       "grep -q 'TARGET_SAY=' '$BOOTSTRAP' && grep -q 'cp .*TARGET_SAY' '$BOOTSTRAP'"
+assert "Installs listen"                    "grep -q 'TARGET_LISTEN=' '$BOOTSTRAP' && grep -q 'cp .*TARGET_LISTEN' '$BOOTSTRAP'"
+assert "Installs listen-server"             "grep -q 'TARGET_LISTEN_SERVER=' '$BOOTSTRAP' && grep -q 'cp .*TARGET_LISTEN_SERVER' '$BOOTSTRAP'"
+assert "Installs duplex"                    "grep -q 'TARGET_DUPLEX=' '$BOOTSTRAP' && grep -q 'cp .*TARGET_DUPLEX' '$BOOTSTRAP'"
+assert "Checks piper"                       "grep -q 'command -v piper' '$BOOTSTRAP'"
+assert "Checks python3"                     "grep -q 'command -v python3' '$BOOTSTRAP'"
+assert "Checks faster-whisper"              "grep -q 'faster_whisper' '$BOOTSTRAP'"
+assert "Checks pyaudio"                     "grep -q 'import pyaudio' '$BOOTSTRAP'"
+echo
+
+echo "CLI Smoke Checks:"
+set +e
+EMPTY_OUT=$(echo "" | bash "$SAY_SCRIPT" 2>&1)
+EMPTY_EXIT=$?
+LISTEN_HELP_OUT=$(bash "$LISTEN_SCRIPT" -h 2>&1)
+LISTEN_HELP_EXIT=$?
+DUPLEX_HELP_OUT=$(bash "$DUPLEX_SCRIPT" -h 2>&1)
+DUPLEX_HELP_EXIT=$?
+set -e
+
+assert "say handles empty input (exit 0)"   "[[ $EMPTY_EXIT -eq 0 ]]"
+assert "say empty input does not download"   "! grep -q 'Downloading voice model' <<< '$EMPTY_OUT'"
+assert "listen -h exits 0"                   "[[ $LISTEN_HELP_EXIT -eq 0 ]]"
+assert "listen -h shows usage"               "grep -q 'Usage: listen' <<< '$LISTEN_HELP_OUT'"
+assert "duplex -h exits 0"                   "[[ $DUPLEX_HELP_EXIT -eq 0 ]]"
+assert "duplex -h shows usage"               "grep -q 'Usage: duplex' <<< '$DUPLEX_HELP_OUT'"
+echo
+
+echo "SKILL.md Structure:"
+assert "Mentions atomic say"                 "grep -q 'say' '$SKILL_DIR/SKILL.md'"
+assert "Mentions atomic listen"              "grep -q 'listen' '$SKILL_DIR/SKILL.md'"
+assert "Mentions duplex mode"                "grep -qi 'duplex' '$SKILL_DIR/SKILL.md'"
+assert "Documents common bootstrap"          "grep -q 'scripts/bootstrap' '$SKILL_DIR/SKILL.md'"
+assert "Mentions stop phrases"               "grep -qi 'стоп\|stop listening' '$SKILL_DIR/SKILL.md'"
+echo
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Results: $PASS/$TOTAL passed, $FAIL failed"
+if [[ $FAIL -eq 0 ]]; then
+  echo "✅ All tests passed"
+  exit 0
+else
+  echo "❌ $FAIL test(s) failed"
+  exit 1
+fi

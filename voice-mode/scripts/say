@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# Unified Piper TTS script for voice-mode super-skill with auto-download and multi-lang support.
+# Supported platforms: Linux, macOS.
+set -euo pipefail
+
+LANG_FILE="$HOME/.pi_voice_lang"
+VOICE_DIR="$HOME/piper-voices"
+
+DEFAULT_LANG="en"
+if [[ -f "$LANG_FILE" ]]; then
+  DEFAULT_LANG="$(cat "$LANG_FILE")"
+fi
+CURRENT_LANG="$DEFAULT_LANG"
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --lang)
+      CURRENT_LANG="$2"
+      shift 2
+      ;;
+    -v)
+      shift 2
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+if [[ -p /dev/stdin ]]; then
+  INPUT_TEXT="$(tr -d '\n' < /dev/stdin)"
+else
+  INPUT_TEXT="${1:-}"
+fi
+
+# Short-circuit before any network or model setup.
+[[ -z "${INPUT_TEXT}" ]] && exit 0
+
+declare -A MODELS
+MODELS[en]="en/en_US/amy/medium/en_US-amy-medium.onnx"
+MODELS[ru]="ru/ru_RU/irina/medium/ru_RU-irina-medium.onnx"
+MODELS[uk]="uk/uk_UA/lada/x_low/uk_UA-lada-x_low.onnx"
+MODELS[de]="de/de_DE/kerstin/low/de_DE-kerstin-low.onnx"
+MODELS[fr]="fr/fr_FR/siwis/low/fr_FR-siwis-low.onnx"
+MODELS[es]="es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx"
+MODELS[it]="it/it_IT/paola/medium/it_IT-paola-medium.onnx"
+MODELS[zh]="zh/zh_CN/huayan/medium/zh_CN-huayan-medium.onnx"
+MODELS[ja]="ja/ja_JP/amitaro/medium/ja_JP-amitaro-medium.onnx"
+
+# Normalize locale-like values to short language code (ru_RU -> ru, en-US -> en).
+CURRENT_LANG="${CURRENT_LANG%%_*}"
+CURRENT_LANG="${CURRENT_LANG%%-*}"
+
+OS_TYPE="$(uname -s)"
+
+play_audio() {
+  local file=$1
+  if [[ "$OS_TYPE" == "Darwin" ]]; then
+    afplay "$file" >/dev/null 2>&1
+  else
+    aplay "$file" >/dev/null 2>&1
+  fi
+  rm -f "$file"
+}
+
+if ! command -v piper >/dev/null 2>&1; then
+  echo "ERROR: 'piper' is not installed or not in PATH." >&2
+  exit 1
+fi
+
+mkdir -p "$VOICE_DIR"
+
+RELATIVE_PATH="${MODELS[$CURRENT_LANG]:-${MODELS[en]}}"
+MODEL_NAME="$(basename "$RELATIVE_PATH")"
+MODEL_PATH="$VOICE_DIR/$MODEL_NAME"
+
+if [[ ! -f "$MODEL_PATH" ]]; then
+  echo "Downloading voice model for $CURRENT_LANG..." >&2
+  BASE_URL="https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0"
+  if ! curl -fSL "$BASE_URL/$RELATIVE_PATH" -o "$MODEL_PATH" 2>/dev/null; then
+    echo "ERROR: Failed to download voice model for $CURRENT_LANG. Check internet connection." >&2
+    rm -f "$MODEL_PATH"
+    exit 1
+  fi
+  curl -fSL "$BASE_URL/$RELATIVE_PATH.json" -o "$MODEL_PATH.json" 2>/dev/null || true
+fi
+
+TMP_BASE="${TMPDIR:-$HOME/.cache/tts}"
+mkdir -p "$TMP_BASE"
+OUT_FILE="$(mktemp "${TMP_BASE%/}/piper_speak_XXXXXX.wav")"
+trap 'rm -f "$OUT_FILE"' EXIT
+
+printf '%s' "${INPUT_TEXT}" | piper --model "$MODEL_PATH" --length_scale 0.75 --output_file "$OUT_FILE" >/dev/null 2>&1
+play_audio "$OUT_FILE"
