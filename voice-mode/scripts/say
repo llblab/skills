@@ -3,8 +3,17 @@
 # Supported platforms: Linux, macOS.
 set -euo pipefail
 
+_load_install_deps() {
+  local d
+  for d in "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)" "$HOME/.local/bin"; do
+    [[ -f "$d/_install-deps" ]] && { . "$d/_install-deps"; return 0; }
+  done
+  return 1
+}
+_load_install_deps || true
+
 LANG_FILE="$HOME/.pi_voice_lang"
-VOICE_DIR="$HOME/piper-voices"
+VOICE_DIR="${PIPER_VOICE_DIR:-$HOME/.piper-voices}"
 
 DEFAULT_LANG="en"
 if [[ -f "$LANG_FILE" ]]; then
@@ -14,7 +23,7 @@ CURRENT_LANG="$DEFAULT_LANG"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --lang)
+    -l|--lang)
       CURRENT_LANG="$2"
       shift 2
       ;;
@@ -56,16 +65,29 @@ OS_TYPE="$(uname -s)"
 play_audio() {
   local file=$1
   if [[ "$OS_TYPE" == "Darwin" ]]; then
-    afplay "$file" >/dev/null 2>&1
+    if command -v afplay >/dev/null 2>&1; then
+      afplay "$file" >/dev/null 2>&1
+    else
+      echo "⚠ afplay not found, skipping playback" >&2
+    fi
   else
-    aplay "$file" >/dev/null 2>&1
+    if command -v aplay >/dev/null 2>&1; then
+      aplay "$file" >/dev/null 2>&1
+    else
+      echo "⚠ aplay not found, skipping playback. Install: sudo apt install alsa-utils" >&2
+    fi
   fi
   rm -f "$file"
 }
 
+# Auto-install dependencies
+type _ensure_piper &>/dev/null && _ensure_piper || true
+type _ensure_playback &>/dev/null && _ensure_playback || true
+
 if ! command -v piper >/dev/null 2>&1; then
-  echo "ERROR: 'piper' is not installed or not in PATH." >&2
-  exit 1
+  echo "⚠ piper unavailable — printing text instead of speaking." >&2
+  printf '%s\n' "$INPUT_TEXT" >&2
+  exit 0
 fi
 
 mkdir -p "$VOICE_DIR"

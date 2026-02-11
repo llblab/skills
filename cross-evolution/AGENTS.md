@@ -12,7 +12,9 @@
 ### Operating Principles
 
 - Use `scripts/audit-genes` for Mode 1 (Scan & Audit).
-- Use `scripts/self-test` (37 assertions) to verify skill integrity after changes.
+- `audit-genes` now auto-selects the first real skills root among `$SKILLS_HOME`, `~/.agents/skills`, the current working directory, and the local sibling directory.
+- Set `NO_COLOR=1` when audit output is consumed by CI or other log processors.
+- Use `scripts/_self-test` to verify skill integrity after changes.
 - Gene registry lives in `docs/genes.md` — single source of truth (markdown table, machine-parseable).
 - Recommendations are pragmatic: only suggest genes that make sense for the skill's domain.
 - Discovery phase must search for repeated patterns and sync valuable candidates into "Proposed Genes".

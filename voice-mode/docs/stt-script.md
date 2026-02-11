@@ -80,6 +80,6 @@ listen -i 2
 
 ## Related
 
-- [duplex-script.md](./duplex-script.md) — automatic `say` → `listen` loop
+- [duplex-mode.md](./duplex-mode.md) — agent-orchestrated `say` → `listen` loop
 - [tts-script.md](./tts-script.md) — speech output side
 - [SKILL.md](../SKILL.md) — full operating modes

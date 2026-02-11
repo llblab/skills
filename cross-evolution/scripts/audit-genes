@@ -12,10 +12,29 @@ GENES_FILE="$SKILL_DIR/docs/genes.md"
 OS_TYPE="$(uname -s)"
 
 DEFAULT_SKILLS_DIR="${SKILLS_HOME:-$HOME/.skills}"
+AGENTS_SKILLS_DIR="$HOME/.agents/skills"
 LOCAL_SKILLS_DIR="$(dirname "$SKILL_DIR")"
+PWD_SKILLS_DIR="$(pwd)"
 SKILLS_DIR=""
 DISCOVER_NEW_GENES=true
 SYNC_DISCOVERED=true
+
+has_skill_definitions() {
+  local root=$1
+  [[ -d "$root" ]] || return 1
+  find "$root" -type f -name "SKILL.md" ! -path "*/.git/*" -print -quit 2>/dev/null | grep -q .
+}
+
+select_default_skills_dir() {
+  local candidate
+  for candidate in "$DEFAULT_SKILLS_DIR" "$AGENTS_SKILLS_DIR" "$PWD_SKILLS_DIR" "$LOCAL_SKILLS_DIR"; do
+    if has_skill_definitions "$candidate"; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  printf '%s\n' "$LOCAL_SKILLS_DIR"
+}
 
 usage() {
   cat <<'EOF'
@@ -28,7 +47,11 @@ Options:
   -h, --help           Show this help.
 
 Defaults:
-  skills_dir = $SKILLS_HOME (or ~/.skills) if it exists, else sibling skills directory next to cross-evolution.
+  skills_dir = first directory with SKILL.md files among $SKILLS_HOME (or ~/.skills), ~/.agents/skills,
+               current working directory, then sibling skills directory next to cross-evolution.
+
+Environment:
+  NO_COLOR=1            Disable ANSI colors for CI/log processing.
 EOF
 }
 
@@ -58,19 +81,24 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$SKILLS_DIR" ]]; then
-  if [[ -d "$DEFAULT_SKILLS_DIR" ]]; then
-    SKILLS_DIR="$DEFAULT_SKILLS_DIR"
-  else
-    SKILLS_DIR="$LOCAL_SKILLS_DIR"
-  fi
+  SKILLS_DIR="$(select_default_skills_dir)"
 fi
 
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
-NC='\033[0m'
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  GREEN='\033[0;32m'
+  RED='\033[0;31m'
+  YELLOW='\033[1;33m'
+  CYAN='\033[0;36m'
+  BOLD='\033[1m'
+  NC='\033[0m'
+else
+  GREEN=''
+  RED=''
+  YELLOW=''
+  CYAN=''
+  BOLD=''
+  NC=''
+fi
 
 if [[ ! -f "$GENES_FILE" ]]; then
   echo "ERROR: docs/genes.md not found at $GENES_FILE" >&2

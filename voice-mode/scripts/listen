@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+_load_install_deps() {
+  local d
+  for d in "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)" "$HOME/.local/bin"; do
+    [[ -f "$d/_install-deps" ]] && { . "$d/_install-deps"; return 0; }
+  done
+  return 1
+}
+_load_install_deps || true
+
 # listen — record speech and transcribe to text (real-time streaming)
 #
-# When listen-server is running: streams PCM to server, shows partial
-# transcriptions in real-time, outputs final text to stdout.
-# Otherwise: records WAV, transcribes directly via faster-whisper.
+# Streams PCM to listen-server, shows partial transcriptions in real-time,
+# and prints the final text to stdout.
 #
 # Output: transcribed text to stdout. Diagnostics/partials go to stderr.
 
@@ -13,8 +21,8 @@ USAGE="Usage: listen [OPTIONS]
 Record speech and transcribe to text.
 
 Options:
-  -d, --duration SEC   Max recording duration in seconds; 0 = no limit (default: 10)
-  -m, --model MODEL    Whisper model: tiny|base|small|medium (default: small)
+  -d, --duration SEC   Max recording duration in seconds; 0 = no limit (default: 0)
+  -m, --model MODEL    Whisper model: small|medium (default: small)
   -l, --lang LANG      Language code hint: en|ru|de|... (default: ~/.pi_voice_lang or auto)
   -p, --preset NAME    Preset: fast | accurate | noisy (overrides model/silence/interval)
   -s, --silence SEC    Stop after N seconds of silence (default: 1)
@@ -22,16 +30,15 @@ Options:
   -h, --help           Show this help
 
 Examples:
-  listen                          # Record up to 10s, auto-detect language
-  listen -d 30                    # Record up to 30s
+  listen                          # Stream until silence, auto-detect language
   listen -d 0 -s 1                # No hard timeout, stop by silence
   listen -m medium -l ru          # Use medium model, hint Russian
   listen -p fast                  # Low-latency preset
-  listen -d 5 -s 1                # Short recording, 1s silence cutoff
+  listen -d 20 -s 1               # Cap the session at 20s if needed
   listen -i 2                     # Show partials every 2s"
 
 # Defaults
-DURATION=10
+DURATION=0
 MODEL="small"
 HINT_LANG=""
 PRESET=""
@@ -55,7 +62,7 @@ done
 
 case "$PRESET" in
     "") ;;
-    fast)      MODEL="tiny";   SILENCE=1; INTERVAL=1 ;;
+    fast)      MODEL="small";  SILENCE=1; INTERVAL=1 ;;
     accurate)  MODEL="medium"; SILENCE=2; INTERVAL=2 ;;
     noisy)     MODEL="medium"; SILENCE=1; INTERVAL=1 ;;
     *)
@@ -69,9 +76,43 @@ if [ -z "$HINT_LANG" ] && [ -f "$LANG_FILE" ]; then
     HINT_LANG="$(tr -d '[:space:]' < "$LANG_FILE")"
 fi
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SOCK="/tmp/listen-server.sock"
 
-# --- Streaming mode (server running) ---
+# Auto-start listen-server for streaming mode
+if [ ! -S "$SOCK" ]; then
+    _server_cmd=""
+    for _d in "$SCRIPT_DIR" "$HOME/.local/bin"; do
+        [[ -x "$_d/listen-server" ]] && { _server_cmd="$_d/listen-server"; break; }
+    done
+    [[ -z "$_server_cmd" ]] && command -v listen-server >/dev/null 2>&1 && _server_cmd="listen-server"
+
+    if [[ -n "${_server_cmd:-}" ]]; then
+        type _ensure_python3 &>/dev/null && _ensure_python3 || true
+        type _ensure_faster_whisper &>/dev/null && _ensure_faster_whisper || true
+        type _ensure_numpy &>/dev/null && _ensure_numpy || true
+        type _ensure_pyaudio &>/dev/null && _ensure_pyaudio || true
+
+        echo "⚙ Starting listen-server (model: $MODEL)..." >&2
+        PYTHONUNBUFFERED=1 "$_server_cmd" start --model "$MODEL" </dev/null >/dev/null 2>&1 &
+        _spid=$!
+        _waited=0
+        while [ ! -S "$SOCK" ] && [ $_waited -lt 180 ]; do
+            sleep 1
+            _waited=$((_waited + 1))
+            [ $((_waited % 15)) -eq 0 ] && echo "  ... loading model (${_waited}s)" >&2
+            kill -0 $_spid 2>/dev/null || { echo "✗ listen-server crashed" >&2; break; }
+        done
+        [ -S "$SOCK" ] && echo "✓ listen-server ready" >&2
+    fi
+fi
+
+if [ ! -S "$SOCK" ]; then
+    echo "✗ Streaming unavailable: listen-server is required and did not become ready" >&2
+    exit 1
+fi
+
+# --- Streaming mode ---
 if [ -S "$SOCK" ]; then
     LANG_PY="None"
     if [ -n "$HINT_LANG" ]; then
@@ -84,7 +125,12 @@ import socket
 import sys
 import threading
 import time
-import numpy as np
+
+try:
+    import numpy as np
+except ImportError:
+    print("✗ numpy not available for streaming. Install: pip install numpy", file=sys.stderr)
+    sys.exit(2)
 
 # Suppress noisy ALSA diagnostics (Unknown PCM phoneline, etc.) from PortAudio
 _alsa_handler_ref = None
@@ -272,88 +318,8 @@ PYEOF
 
     RC=$?
     if [ "$RC" -eq 2 ]; then
-        echo "⚠ Streaming unavailable, falling back to file mode" >&2
-    else
-        exit "$RC"
+        echo "✗ Streaming unavailable: listen requires live stream mode" >&2
+        exit 1
     fi
+    exit "$RC"
 fi
-
-# --- File mode (no server, or streaming fallback) ---
-
-TMPWAV="$(mktemp /tmp/listen-XXXXXX.wav)"
-trap 'rm -f "$TMPWAV"' EXIT
-
-OS="$(uname -s)"
-
-DURATION_LABEL="${DURATION}s"
-if [ "$DURATION" -le 0 ]; then
-    DURATION_LABEL="∞"
-fi
-
-echo "🎙 Listening... (${DURATION_LABEL})" >&2
-
-case "$OS" in
-    Linux)
-        if [ "$DURATION" -le 0 ]; then
-            if command -v rec &>/dev/null; then
-                rec -q -r 16000 -c 1 -b 16 "$TMPWAV" \
-                    silence 1 0.3 0.5% 1 "$SILENCE" 0.5% 2>/dev/null || true
-            else
-                echo "✗ No-timeout mode in file fallback requires sox (rec)." >&2
-                echo "  Install sox or run listen-server for streaming mode." >&2
-                exit 1
-            fi
-        else
-            timeout "$DURATION" arecord -q -f S16_LE -r 16000 -c 1 -t wav "$TMPWAV" 2>/dev/null || true
-        fi
-        ;;
-    Darwin)
-        if command -v sox &>/dev/null; then
-            if [ "$DURATION" -le 0 ]; then
-                rec -q -r 16000 -c 1 -b 16 "$TMPWAV" \
-                    silence 1 0.3 0.5% 1 "$SILENCE" 0.5% 2>/dev/null || true
-            else
-                timeout "$DURATION" rec -q -r 16000 -c 1 -b 16 "$TMPWAV" \
-                    silence 1 0.3 0.5% 1 "$SILENCE" 0.5% 2>/dev/null || true
-            fi
-        else
-            echo "✗ sox not found. Install: brew install sox" >&2
-            exit 1
-        fi
-        ;;
-esac
-
-FILESIZE=$(wc -c < "$TMPWAV")
-if [ "$FILESIZE" -lt 1000 ]; then
-    echo "✗ No audio recorded" >&2
-    exit 1
-fi
-
-echo "📝 Transcribing..." >&2
-
-LANG_PY="None"
-if [ -n "$HINT_LANG" ]; then
-    LANG_PY="'$HINT_LANG'"
-fi
-
-# Direct mode — load model fresh
-python3 << PYEOF
-import sys
-from faster_whisper import WhisperModel
-
-model = WhisperModel("$MODEL", device="cpu", compute_type="int8")
-lang = $LANG_PY
-segments, info = model.transcribe("$TMPWAV", language=lang, beam_size=5, vad_filter=True)
-text = " ".join(seg.text.strip() for seg in segments).strip()
-if info.language:
-    try:
-        with open("$LANG_FILE", "w", encoding="utf-8") as f:
-            f.write(info.language)
-    except Exception:
-        pass
-if text:
-    print(text)
-else:
-    print("(silence)", file=sys.stderr)
-    sys.exit(1)
-PYEOF

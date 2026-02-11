@@ -39,7 +39,7 @@ Missing models are auto-downloaded from Hugging Face on first use.
 
 ## Configuration
 
-- `VOICE_DIR`: `~/piper-voices`
+- `VOICE_DIR`: `~/.piper-voices` by default (`PIPER_VOICE_DIR` overrides it)
 - `LANG_FILE`: `~/.pi_voice_lang`
 - `TMP_BASE`: `${TMPDIR:-$HOME/.cache/tts}`
 - temp WAV: generated via `mktemp` for race-safe parallel usage
@@ -48,12 +48,12 @@ Missing models are auto-downloaded from Hugging Face on first use.
 
 ```bash
 say "Hello, world"
-echo "Привет" | say
+echo "Hello" | say
 say --lang de "Hallo Welt"
 ```
 
 ## Related
 
 - [stt-script.md](./stt-script.md) — speech input
-- [duplex-script.md](./duplex-script.md) — duplex loop protocol
+- [duplex-mode.md](./duplex-mode.md) — agent duplex protocol
 - [SKILL.md](../SKILL.md) — full operating modes
