@@ -20,7 +20,7 @@ Detection: scan project root for the first match. If none found, create `AGENTS.
 
 ## Canonical Plan File Resolution
 
-Use exactly one canonical open-work file: `TODO.md`, `PLAN.md`, or `ROADMAP.md`.
+Use exactly one canonical open-work file: `BACKLOG.md`, `TODO.md`, `PLAN.md`, or `ROADMAP.md`.
 
 Rules:
 

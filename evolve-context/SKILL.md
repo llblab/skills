@@ -2,7 +2,7 @@
 name: evolve-context
 description: Self-evolving context protocol that captures insights, prevents repeated mistakes, and evolves project documentation through structured feedback loops.
 metadata:
-  version: 1.1.0
+  version: 1.1.1
 ---
 
 # Self-Evolving Context Protocol
@@ -25,7 +25,7 @@ metadata:
 
 - 'Root README': `README.md` — human entry point
 - 'Index File': `AGENTS.md` (alternatives: `CLAUDE.md`, `CODEX.md`, `GEMINI.md`, `CONTEXT.md`)
-- 'Canonical Plan File': `TODO.md` / `PLAN.md` / `ROADMAP.md` — open work, epics, blocked items, next slices
+- 'Canonical Plan File': `BACKLOG.md` / `TODO.md` / `PLAN.md` / `ROADMAP.md` — open work, epics, blocked items, next slices
 - 'Docs Index': `/docs/README.md` — living index of `/docs`
 - 'Project Docs': `/docs/'` — documentation files
 

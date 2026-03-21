@@ -2,7 +2,7 @@
 name: while-true
 description: Continuous execution-loop protocol — assess reality, refine the plan, execute the next task, repeat until a real stop condition is reached.
 metadata:
-  version: 1.1.0
+  version: 1.1.1
 ---
 
 # While True
@@ -56,7 +56,7 @@ When the user explicitly activates `while-true` (`keep going`, `non-stop`, etc.)
 
 ## Plan File Selection
 
-Use exactly one canonical file: `ROADMAP.md`, `PLAN.md`, or `TODO.md`.
+Use exactly one canonical file: `BACKLOG.md`, `ROADMAP.md`, `PLAN.md`, or `TODO.md`.
 
 - If exactly one exists — use it
 - If multiple exist — use the one actively maintained for open work; do not duplicate across files
@@ -132,7 +132,7 @@ Deduplication:
 
 Only when the iteration closed a real white spot in a design/spec doc still under active refinement. Skip stable reference docs, cosmetic edits, and insights that belong in the plan file rather than documentation.
 
-Decompose insights into actionable new tasks and fixate them in the most appropriate documentation, prioritizing existing files (like `ROADMAP.md` or active specs) over creating new ones. Ensure that discovered nuances map directly to updated or new specific tasks rather than vague observations.
+Decompose insights into actionable new tasks and fixate them in the most appropriate documentation, prioritizing existing files (like `BACKLOG.md`, `ROADMAP.md`, or active specs) over creating new ones. Ensure that discovered nuances map directly to updated or new specific tasks rather than vague observations.
 
 Do not use docs as a substitute for backlog state: if an insight changes what remains to be built, the plan file must still be updated even when the same nuance is also recorded in a spec or architecture doc.
 
