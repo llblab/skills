@@ -18,6 +18,19 @@ Default: `AGENTS.md`. The validator also recognizes `CLAUDE.md`, `CODEX.md`, `GE
 
 Detection: scan project root for the first match. If none found, create `AGENTS.md`.
 
+## Canonical Plan File Resolution
+
+Use exactly one canonical open-work file: `TODO.md`, `PLAN.md`, or `ROADMAP.md`.
+
+Rules:
+
+- If exactly one exists, use it
+- If multiple exist, use the one actively maintained for open work
+- Do not duplicate backlog state across multiple plan files
+- If no plan file exists, do not invent one unless project conventions permit it
+
+This file is the source of truth for what remains open. Code, docs, and changelog updates do not implicitly close plan items.
+
 ## Context Lifecycle Management
 
 ### Growth Control Pipeline
@@ -25,6 +38,30 @@ Detection: scan project root for the first match. If none found, create `AGENTS.
 ```
 Discovery → Active Entry → Consolidation → Strategic Pattern → Archive
 ```
+
+## Backlog Coherence Protocol
+
+When post-task review reveals that implementation reality and the canonical plan disagree, repair the plan in the same pass.
+
+### Allowed backlog transitions
+
+| Transition        | Use when                                                                  |
+| ----------------- | ------------------------------------------------------------------------- |
+| `Close`           | The item's exit criteria are satisfied in reality                         |
+| `Narrow`          | Part landed; the item should now describe only the remaining work         |
+| `Split`           | One vague item turned into multiple concrete executable slices            |
+| `Retarget`        | The original wording no longer matches the actual remaining work          |
+| `Defer`           | The item remains valid but is no longer the best next slice               |
+| `Move to gated`   | The remaining work now depends on an external condition or approval       |
+| `Move to blocked` | The work is still desired but currently blocked by another unresolved gap |
+
+### Rules
+
+- Epics may remain in the plan, but active execution should be represented by at least one concrete next slice
+- If a completed slice was not explicitly listed before work began, add or retarget the relevant item before finishing the pass
+- If a docs/architecture update changes the true exit criteria of an item, update the item — do not leave stale wording
+- Evergreen maintenance disciplines belong in durable instructions or docs, not as perpetually open checkboxes
+- Prefer refining existing items over creating near-duplicates
 
 ### Garbage Collection
 
@@ -82,6 +119,9 @@ Manual-only items the script cannot verify:
 - [ ] General → specific structure maintained
 - [ ] No stale entries (unreferenced for 10+ tasks)
 - [ ] No repeated mistakes without escalation
+- [ ] Canonical plan file reflects reality for touched work
+- [ ] No completed slice still appears open with stale pre-iteration wording
+- [ ] Open epics still expose a concrete next slice where active execution is expected
 
 ## Related
 

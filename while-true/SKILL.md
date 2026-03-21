@@ -2,7 +2,7 @@
 name: while-true
 description: Continuous execution-loop protocol — assess reality, refine the plan, execute the next task, repeat until a real stop condition is reached.
 metadata:
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # While True
@@ -73,6 +73,10 @@ The single operation performed at every loop boundary.
 - Prefer targeted updates over wholesale plan rewrites
 - Do not reorganize the plan cosmetically or split tasks unless it improves execution clarity
 - If an existing plan item already captures the issue, refine it instead of creating a near-duplicate
+- Every checkpoint must reconcile the just-executed slice back into the plan with an explicit state transition: `done` | `narrowed` | `split` | `blocked` | `deferred`
+- If a task stays open after meaningful progress, rewrite it to describe the remaining work instead of leaving stale pre-iteration wording untouched
+- Epics are allowed, but the currently active next slice must be represented concretely under the epic before continuing execution
+- Do not leave evergreen maintenance disciplines as unchecked backlog items; move those into durable instructions or architecture/spec docs instead
 - Do not re-enter planning repeatedly without execution progress — a checkpoint should be smaller than the next execution phase
 
 ### Step 1: Assess current reality
@@ -83,9 +87,14 @@ Build a snapshot: what is done, in progress, broken, missing, blocked, and what 
 
 ### Step 2: Extract and classify insights
 
-Capture only material items: new tasks, missing validation/regression coverage, clarified acceptance criteria, broken surfaces, assumptions/risks, deferred follow-ups.
+Capture only material items: newly discovered tasks, missing validation/regression coverage, clarified acceptance criteria, broken surfaces, assumptions/risks, deferred follow-ups, and stale plan entries exposed by reality.
 
-Classify each as: `done` | `follow-up required` | `future research` | `assumption/risk`.
+For each material item, decide both:
+
+1. **Insight class** — `done` | `follow-up required` | `future research` | `assumption/risk`
+2. **Plan effect** — `close existing` | `narrow existing` | `split existing` | `add sibling` | `defer existing` | `move to blocked/gated`
+
+If the iteration changed the true exit criteria of the current task, that is not a note — it is a required plan edit.
 
 ### Step 3: Update the plan file
 
@@ -98,6 +107,19 @@ Rules:
 - Write concise but specific tasks with discovered nuance
 - Mark completed items done; add new tasks immediately
 - Keep research items visible but separated from implementation work
+- Update the status of the item that drove the iteration before selecting the next task
+- If work completed indirectly or opportunistically, still close the corresponding stale item immediately
+- If an epic remains open, record the next concrete executable slice under it before continuing
+- If a task was too vague to execute cleanly, decompose it now rather than carrying the same vague wording forward
+
+Backlog sync operations:
+
+- **Close** when the exit criteria are satisfied in reality
+- **Narrow** when part of the task is done and the remainder is smaller/clearer than before
+- **Split** when one vague item turned into multiple independently executable tasks
+- **Retarget** when reality showed the original wording was aimed at the wrong remaining work
+- **Defer** when the work remains valid but is no longer the best next slice
+- **Move to blocked/gated** when the remaining work now depends on an external condition
 
 Deduplication:
 
@@ -112,12 +134,16 @@ Only when the iteration closed a real white spot in a design/spec doc still unde
 
 Decompose insights into actionable new tasks and fixate them in the most appropriate documentation, prioritizing existing files (like `ROADMAP.md` or active specs) over creating new ones. Ensure that discovered nuances map directly to updated or new specific tasks rather than vague observations.
 
+Do not use docs as a substitute for backlog state: if an insight changes what remains to be built, the plan file must still be updated even when the same nuance is also recorded in a spec or architecture doc.
+
 ### Step 5: Select and start the next task
 
 1. Re-read the updated plan
 2. Pick the highest-priority actionable task (see Priority Rules)
 3. **Start executing before emitting any checkpoint report** — read relevant files, run validation, make the first edit
 4. Only then emit a concise progress update if needed
+
+If a checkpoint update is emitted, summarize the plan delta explicitly in one short line when useful: which item was closed, narrowed, split, or added.
 
 If the highest-priority item is not actionable, skip to the next one.
 If a full item is ambiguous but a safe subset is clear, execute the subset and keep the item open.
@@ -148,6 +174,7 @@ When multiple tasks share the same type-priority level:
 - Prefer higher effort-to-impact ratio — small effort, large impact first
 - A quick fix that unblocks other work outranks a large standalone task at the same level
 - If a large task can be split into an immediately valuable slice and deferred remainder, execute the slice
+- If an epic has no concrete next slice yet, creating that slice in the plan is part of the checkpoint and should happen before execution continues
 
 ## Decomposition Rules
 
@@ -157,10 +184,13 @@ Decompose when the next work is clearly larger than one step, the plan is too va
 - Prefer a small number of concrete siblings over one vague umbrella task
 - Do not create speculative subtrees for work that is not yet real
 - If only the first slice is clear, plan it and record remaining uncertainty explicitly
+- When decomposing an epic, preserve the epic if useful, but always materialize the immediately executable child slice
+- After decomposition, retarget the parent so it reflects the remaining umbrella scope rather than duplicating the new children verbatim
 
 ### Task quality
 
 Good: `Add runtime regression for dust assignment when delegator split leaves operator remainder`
+Good epic + slice: epic `Governance productization in /web-client` + child `Add typed proposal-status query adapter used by proposal list/detail pages`
 Bad: `Fix rewards`
 
 ## Stop Conditions
@@ -182,7 +212,8 @@ If a safe subset exists, continue with that subset.
 2. **Continue by default** — checkpoints are not stopping points; the loop ends only on a real stop condition
 3. **Execute, don't just plan** — start work before reporting; never terminate on a planning or reporting step alone
 4. **No hidden debt** — every discovered limitation, compromise, or follow-up becomes visible in the plan immediately
-5. **Compress, don't bloat** — capture insight in the shortest form that preserves future usefulness; prefer the smallest plan edit that preserves truth
+5. **Backlog state must move** — each meaningful iteration must leave the canonical plan more truthful: close, narrow, split, retarget, or gate something
+6. **Compress, don't bloat** — capture insight in the shortest form that preserves future usefulness; prefer the smallest plan edit that preserves truth
 
 ## Loop Invariant
 
