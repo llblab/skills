@@ -30,9 +30,13 @@ NC='\033[0m'
 
 # Configuration
 PROJECT_ROOT="${VALIDATE_CONTEXT_ROOT:-$(pwd)}"
+PROJECT_ROOT="$(cd "$PROJECT_ROOT" && pwd -P)"
 OUTPUT_JSON=false
 [[ "${1:-}" == "--json" ]] && OUTPUT_JSON=true
 INDEX_CANDIDATES=("AGENTS.md" "CLAUDE.md" "CODEX.md" "GEMINI.md" "CONTEXT.md")
+PLAN_CANDIDATES=("BACKLOG.md" "TODO.md" "PLAN.md" "ROADMAP.md")
+LINK_TARGETS_FILE="$(mktemp)"
+trap 'rm -f "$LINK_TARGETS_FILE"' EXIT
 
 ERRORS=0
 WARNINGS=0
@@ -79,7 +83,15 @@ echo_progress() {
     [[ "$OUTPUT_JSON" == "false" ]] && echo "$@" || true
 }
 
-echo_progress "<CONTEXT EVOLUTION PROTOCOL BASED VALIDATOR>"
+normalize_existing_path() {
+    local path=$1
+    local dir base
+    dir="$(dirname "$path")"
+    base="$(basename "$path")"
+    printf '%s/%s\n' "$(cd "$dir" && pwd -P)" "$base"
+}
+
+echo_progress "--- CONTEXT EVOLUTION PROTOCOL BASED VALIDATOR ---"
 
 # --- Check 1: Index file detection (AGENTS.md | CLAUDE.md | CONTEXT.md) ---
 CONTEXT_FILE=""
@@ -98,6 +110,17 @@ else
     log_fail "No index file found (checked: ${INDEX_CANDIDATES[*]})"
 fi
 
+PLAN_FILE=""
+PLAN_NAME=""
+for candidate in "${PLAN_CANDIDATES[@]}"; do
+    if [[ -f "$PROJECT_ROOT/$candidate" ]]; then
+        PLAN_FILE="$PROJECT_ROOT/$candidate"
+        PLAN_NAME="$candidate"
+        break
+    fi
+done
+CHANGELOG_FILE="$PROJECT_ROOT/CHANGELOG.md"
+
 # --- Check 1b: Root README connectivity ---
 README_FILE="$PROJECT_ROOT/README.md"
 if [[ -f "$README_FILE" ]]; then
@@ -112,6 +135,22 @@ if [[ -f "$README_FILE" ]]; then
     else
         log_warn "README missing reference to index file ($CONTEXT_NAME)"
     fi
+
+    if [[ -n "$PLAN_NAME" ]]; then
+        if grep -q "$PLAN_NAME" "$README_FILE" 2>/dev/null; then
+            log_pass "README references open-work file ($PLAN_NAME)"
+        else
+            log_warn "README missing reference to open-work file ($PLAN_NAME)"
+        fi
+    fi
+
+    if [[ -f "$CHANGELOG_FILE" ]]; then
+        if grep -q "CHANGELOG.md" "$README_FILE" 2>/dev/null; then
+            log_pass "README references CHANGELOG.md"
+        else
+            log_warn "README missing reference to CHANGELOG.md"
+        fi
+    fi
 else
     log_warn "README.md missing"
 fi
@@ -122,21 +161,34 @@ if [[ -n "$CONTEXT_FILE" ]]; then
     if grep -q "## 1\." "$CONTEXT_FILE" 2>/dev/null; then
         log_pass "Core structure sections present"
     elif grep -q "Meta-Protocol Principles" "$CONTEXT_FILE" 2>/dev/null \
-         && grep -q "Discovered Constraints\|Operating Principles" "$CONTEXT_FILE" 2>/dev/null \
-         && grep -q "Change History" "$CONTEXT_FILE" 2>/dev/null; then
+         && grep -q "Discovered Constraints\|Operating Principles" "$CONTEXT_FILE" 2>/dev/null; then
         log_pass "Core structure sections present"
     else
         log_warn "Core structure sections missing"
     fi
 fi
 
-# --- Check 3: Change History ---
-if [[ -n "$CONTEXT_FILE" ]]; then
-    if grep -q "Change History" "$CONTEXT_FILE" 2>/dev/null; then
-        log_pass "Change History section found"
+# --- Check 3: Root state split ---
+if [[ -n "$PLAN_NAME" ]]; then
+    if [[ "$PLAN_NAME" == "BACKLOG.md" ]]; then
+        log_pass "Canonical open-work file detected: BACKLOG.md"
     else
-        log_warn "Change History section missing"
+        log_warn "Canonical open-work file uses fallback alias: $PLAN_NAME (BACKLOG.md preferred)"
     fi
+else
+    log_warn "No canonical open-work file found (checked: ${PLAN_CANDIDATES[*]})"
+fi
+
+if [[ -f "$CHANGELOG_FILE" ]]; then
+    log_pass "CHANGELOG.md detected"
+else
+    log_warn "CHANGELOG.md missing"
+fi
+
+if [[ -n "$CONTEXT_FILE" && -f "$CHANGELOG_FILE" ]] && grep -q "Change History" "$CONTEXT_FILE" 2>/dev/null; then
+    log_warn "Index file contains Change History while CHANGELOG.md exists — consider separating durable rules from delivery history"
+else
+    log_pass "Root state split looks coherent"
 fi
 
 # Check 4: Link validation with specific reporting
@@ -155,6 +207,7 @@ heading_to_anchor() {
 # Check links in all markdown files
 while IFS= read -r -d '' file; do
     [[ -f "$file" ]] || continue
+    source_file="$(normalize_existing_path "$file")"
 
     # Find relative links using grep for better extraction
     while IFS= read -r link_match; do
@@ -191,6 +244,11 @@ while IFS= read -r -d '' file; do
                 HAS_BROKEN_LINKS=true
                 continue
             fi
+        fi
+
+        target_file="$(normalize_existing_path "$target_file")"
+        if [[ "$target_file" != "$source_file" ]]; then
+            printf '%s\n' "$target_file" >> "$LINK_TARGETS_FILE"
         fi
 
         # Validate anchor if present
@@ -264,7 +322,49 @@ if [[ "$HAS_BROKEN_LINKS" == "false" ]]; then
     log_pass "Documentation links validated"
 fi
 
-# --- Check 5: Meta-Protocol Principles ---
+# --- Check 5: README reachability ---
+README_ORPHANS=0
+while IFS= read -r -d '' readme_file; do
+    normalized_readme="$(normalize_existing_path "$readme_file")"
+    if ! grep -Fxq "$normalized_readme" "$LINK_TARGETS_FILE" 2>/dev/null; then
+        log_warn "Unreachable README entrypoint: ${normalized_readme#$PROJECT_ROOT/} (no inbound markdown links)"
+        README_ORPHANS=$((README_ORPHANS + 1))
+    fi
+done < <(
+    find "$PROJECT_ROOT" \
+        \( \
+            -name "node_modules" -o \
+            -name "target" -o \
+            -name "build" -o \
+            -name "dist" -o \
+            -name "vendor" -o \
+            -name "obj" -o \
+            -name "out" -o \
+            -name "bin" -o \
+            -name "bower_components" -o \
+            -name "site-packages" -o \
+            -name "coverage" -o \
+            -name "Pods" -o \
+            -name ".git" -o \
+            -name ".cache" -o \
+            -name ".github" -o \
+            -name ".idea" -o \
+            -name ".next" -o \
+            -name ".pytest_cache" -o \
+            -name ".tox" -o \
+            -name ".venv" -o \
+            -name ".vscode" -o \
+            -name "venv" -o \
+            -name "temp" -o \
+            -name "tmp" -o \
+            -path "*/docs/_build" \
+        \) -prune -o -type f -name "README.md" ! -path "$PROJECT_ROOT/README.md" -print0
+)
+if [[ $README_ORPHANS -eq 0 ]]; then
+    log_pass "README entrypoints are reachable"
+fi
+
+# --- Check 6: Meta-Protocol Principles ---
 if [[ -n "$CONTEXT_FILE" ]]; then
     if grep -q "Meta-Protocol Principles" "$CONTEXT_FILE" 2>/dev/null; then
         log_pass "Meta-Protocol Principles found"
@@ -273,7 +373,7 @@ if [[ -n "$CONTEXT_FILE" ]]; then
     fi
 fi
 
-# --- Check 6: Bloat Analysis (replaces hardcoded line limit) ---
+# --- Check 7: Bloat Analysis (replaces hardcoded line limit) ---
 if [[ -n "$CONTEXT_FILE" && -f "$CONTEXT_FILE" ]]; then
     TOTAL_LINES=$(wc -l < "$CONTEXT_FILE")
 
@@ -341,9 +441,6 @@ if [[ -n "$CONTEXT_FILE" && -f "$CONTEXT_FILE" ]]; then
         done
     fi
 
-    # Change History entry count
-    CH_ENTRIES=$(grep -cE '^\s*-\s*`\[[0-9]{4}-[0-9]{2}-[0-9]{2}\]`' "$CONTEXT_FILE" || true)
-
     # Report metrics
     log_info "Index metrics: ${TOTAL_LINES} lines, ${HEADING_COUNT} headings, density ${DENSITY}%"
 
@@ -364,13 +461,7 @@ if [[ -n "$CONTEXT_FILE" && -f "$CONTEXT_FILE" ]]; then
         BLOAT_SIGNALS=$((BLOAT_SIGNALS + ${#BLOAT_SECTIONS[@]}))
     fi
 
-    # Signal 3: Change History overflow (>5 entries)
-    if [[ $CH_ENTRIES -gt 5 ]]; then
-        log_warn "Change History has ${CH_ENTRIES} entries (max 5) — rotation needed"
-        BLOAT_SIGNALS=$((BLOAT_SIGNALS + 1))
-    fi
-
-    # Signal 4: Extreme file size (adaptive: >15 lines per heading = sparse structure)
+    # Signal 3: Extreme file size (adaptive: >15 lines per heading = sparse structure)
     if [[ $HEADING_COUNT -gt 0 ]]; then
         LINES_PER_HEADING=$((TOTAL_LINES / HEADING_COUNT))
         if [[ $LINES_PER_HEADING -gt 15 ]]; then
@@ -390,7 +481,7 @@ if [[ -n "$CONTEXT_FILE" && -f "$CONTEXT_FILE" ]]; then
     fi # end bloat analysis (>10 lines guard)
 fi
 
-# --- Check 7: No LaTeX in markdown (GitHub doesn't render it) ---
+# --- Check 8: No LaTeX in markdown (GitHub doesn't render it) ---
 echo_progress "Checking for LaTeX syntax..."
 HAS_LATEX=false
 # LaTeX-specific commands that wouldn't appear in normal markdown or shell
@@ -410,7 +501,7 @@ if [[ "$HAS_LATEX" == "false" ]]; then
     log_pass "No LaTeX syntax (GitHub compatible)"
 fi
 
-# --- Check 8: Recent activity (freshness) ---
+# --- Check 9: Recent activity (freshness) ---
 if [[ -n "$CONTEXT_FILE" && -f "$CONTEXT_FILE" ]]; then
     AGE_DAYS=$(( ($(date +%s) - $(stat -c %Y "$CONTEXT_FILE" 2>/dev/null || stat -f %m "$CONTEXT_FILE" 2>/dev/null || echo "0")) / 86400 ))
     if [[ $AGE_DAYS -lt 30 ]]; then
@@ -420,14 +511,14 @@ if [[ -n "$CONTEXT_FILE" && -f "$CONTEXT_FILE" ]]; then
     fi
 fi
 
-# --- Check 9: Documentation directory exists ---
+# --- Check 10: Documentation directory exists ---
 if [[ -d "$PROJECT_ROOT/docs" ]]; then
     log_pass "Documentation directory exists"
 else
     log_warn "Documentation directory missing"
 fi
 
-# --- Check 10: Docs index coverage (orphans/phantoms) ---
+# --- Check 11: Docs index coverage (orphans/phantoms) ---
 DOCS_INDEX="$PROJECT_ROOT/docs/README.md"
 if [[ -d "$PROJECT_ROOT/docs" && -f "$DOCS_INDEX" ]]; then
     ORPHAN_COUNT=0
@@ -477,7 +568,7 @@ if [[ "$OUTPUT_JSON" == "true" ]]; then
     echo "}"
 else
     echo
-    echo "<VALIDATION SUMMARY>"
+    echo "--- VALIDATION SUMMARY ---"
     echo "Warnings: $WARNINGS"
     echo "Errors: $ERRORS"
     echo

@@ -1,99 +1,100 @@
 ---
 name: evolve-context
-description: Self-evolving context protocol that captures insights, prevents repeated mistakes, and evolves project documentation through structured feedback loops.
+description: Self-evolving context protocol across ABC-split root files (AGENTS.md, BACKLOG.md, CHANGELOG.md), human entrypoint README.md files tree, and /docs. Use after meaningful project changes, backlog drift, documentation refactors, or when you want a forced context reconciliation pass.
 metadata:
-  version: 1.1.1
+  version: 1.2.0
 ---
 
-# Self-Evolving Context Protocol
+# Evolve Context
 
 ## Basics
 
 ### Activation
 
-- 'POST_TASK' (default) — execute post-task protocol when task warrants it
+- 'POST_TASK' (default) — run the post-task protocol when reality changed enough to justify context sync
 - 'ALWAYS_ON' (opt-in) — monitor every interaction; use only when explicitly requested
-- 'ON_REQUEST' — full context lifecycle audit when user asks
+- 'ON_REQUEST' — full context lifecycle audit when the user asks
 
 ### Paths
 
-- '`SKILL_DIR`' — the directory containing this `SKILL.md` file (resolved by the agent at runtime)
-- 'Scripts': `${SKILL_DIR}/scripts/` — skill automation scripts
-- 'Detailed docs': [`${SKILL_DIR}/docs/protocols.md`](./docs/protocols.md) — adaptation rules, lifecycle management, validation checklist
+- '`SKILL_DIR`' — the directory containing this `SKILL.md` file
+- 'Scripts': `${SKILL_DIR}/scripts/`
+- 'Detailed docs': [`${SKILL_DIR}/docs/protocols.md`](./docs/protocols.md)
 
 ### Managed Targets
 
-- 'Root README': `README.md` — human entry point
-- 'Index File': `AGENTS.md` (alternatives: `CLAUDE.md`, `CODEX.md`, `GEMINI.md`, `CONTEXT.md`)
-- 'Canonical Plan File': `BACKLOG.md` / `TODO.md` / `PLAN.md` / `ROADMAP.md` — open work, epics, blocked items, next slices
-- 'Docs Index': `/docs/README.md` — living index of `/docs`
-- 'Project Docs': `/docs/'` — documentation files
-
----
+- 'Root README': `README.md` — top-level human entry point and root navigation
+- 'Subtree README files': `**/README.md` — local human entry points for subsystems, workspaces, packages, and tools
+- 'Durable protocol': `AGENTS.md` (fallbacks: `CLAUDE.md`, `CODEX.md`, `GEMINI.md`, `CONTEXT.md`)
+- 'Canonical open-work file': `BACKLOG.md` (fallbacks: `TODO.md`, `PLAN.md`, `ROADMAP.md`)
+- 'Completed delivery history': `CHANGELOG.md`
+- 'Docs index': `/docs/README.md`
+- 'Project docs': `/docs/`
 
 ## Purpose
 
-Maintain a living knowledge system that captures insights, prevents repeated mistakes,
-and evolves project documentation through structured feedback loops.
+Maintain a living knowledge system with a truthful split between durable protocol, open work, completed delivery, human entrypoint README files, and subsystem documentation.
 
-'Target format': GitHub-Flavored Markdown.
-'Sweet spot': Projects with extensive documentation.
-'Core guarantee': No insight is lost. No mistake is repeated. No documentation goes stale. No completed slice stays falsely open in the canonical backlog.
-
----
+'Core guarantee': Durable rules stay durable. Open work stays open. Completed work moves to history. README entrypoints stay trustworthy. Docs stay discoverable.
 
 ## Axioms
 
 ### A1: Reflexive Integrity
 
-The protocol applies its own rules to itself. Process context (index file) ≠ project docs (`/docs`).
+The protocol applies its own rules to itself. Process context (`AGENTS.md`) ≠ open work (`BACKLOG.md`) ≠ completed delivery (`CHANGELOG.md`) ≠ subsystem docs (`/docs`).
 
 ### A2: Constraint-Driven Evolution
 
-Complexity is earned through discovered constraints, not invented upfront.
+Complexity is earned through discovered constraints, not invented upfront. But once those constraints are real, the protocol should actively restructure flat or drifting context into a more truthful hierarchy instead of preserving accidental shape forever.
 
 ### A3: Single Source of Truth
 
-Every piece of knowledge lives in exactly one place. Navigate via hierarchy, never duplicate.
+Every fact lives in exactly one authoritative place. Navigate by hierarchy; do not duplicate state across root files.
 
-### A4: Backlog State Truth
+### A4: Root State Separation
 
-Documentation, changelog, and code history do not substitute for canonical open-work state. If an iteration changes what remains to be built, the plan file must be updated in the same pass.
+Preferred organic standard: `AGENTS.md` + `BACKLOG.md` + `CHANGELOG.md`.
 
----
+- `AGENTS.md` — durable protocol, conventions, naming, architectural memory
+- `BACKLOG.md` — what remains open, blocked, gated, or next
+- `CHANGELOG.md` — what has landed
 
-## Three-Layer Architecture
+### A5: Backlog State Truth
 
-```
-Layer 0: README.md            ← "what is this & where to go"
-Layer 1: AGENTS.md (index)    ← "how we work" (conventions, insights, mistakes)
-Layer 2: /docs/README.md      ← "what docs exist"
-Layer 3: /docs/'              ← "what we build"
-```
+Docs, code, and changelog updates do not implicitly close plan items. If reality changed, the canonical open-work file must change in the same pass.
 
-Orthogonal control plane:
+### A6: Human Entrypoint Continuity
+
+`README.md` files are not decorative. Root and subtree README files are the human navigation plane and must be kept honest when topology, setup, ownership, or usage reality changes.
+
+## Root Memory Architecture
 
 ```text
-Canonical plan file          ← "what remains open / blocked / next"
+README.md        ← root human entry point
+*/README.md      ← subtree human entry points
+AGENTS.md        ← durable protocol / context / conventions
+BACKLOG.md       ← canonical open work / next slices / gates
+CHANGELOG.md     ← completed delivery history
+docs/README.md   ← documentation index
+docs/*           ← subsystem contracts and architecture
 ```
 
 ### Routing Decision Tree
 
-```
-About how we work?         → Layer 1 (index file)
-About what we build?       → Layer 3 (/docs), then update Layer 2
-About project identity?    → Layer 0 (README.md)
-About what remains open?   → Canonical plan file
+```text
+About project identity / top-level entry?   → README.md
+About a subsystem starting point?           → nearest relevant subtree README.md
+About how we work?                          → AGENTS.md
+About what remains open?                    → BACKLOG.md
+About what landed already?                  → CHANGELOG.md
+About what we build or ship?                → /docs/*, then sync docs/README.md
 ```
 
 ### Connectivity Invariant
 
-README.md → /docs/README.md → /docs/'.
-README.md → AGENTS.md.
-
-Every doc reachable within 2 clicks from root. No dead ends.
-
----
+- Root `README.md` should expose the full root control plane: `AGENTS.md`, `BACKLOG.md`, `CHANGELOG.md`, and `docs/README.md`
+- Subtree `README.md` files should remain reachable from some parent/root/docs navigation path
+- When a subtree becomes a real human entry point, its local `README.md` should be updated alongside the corresponding ABC and `/docs` truth
 
 ## Activation Modes
 
@@ -101,96 +102,91 @@ Every doc reachable within 2 clicks from root. No dead ends.
 
 'Trigger decision tree':
 
-```
+```text
 Task touched any *.md file?              → YES → run POST_TASK
                                           NO  → Changed public APIs/architecture? → YES → run POST_TASK
                                                                                    NO  → Changed canonical backlog state? → YES → run POST_TASK
-                                                                                                                         NO  → skip
+                                                                                                                         NO  → Completed a meaningful slice? → YES → run POST_TASK
+                                                                                                                                                              NO  → skip
 ```
 
-'Farmville guard': Before writing any update, ask: "Does this prevent a future mistake, capture
-a non-obvious constraint, or correct stale backlog state?" If no → skip. Silence is a valid output.
-Measuring documentation activity instead of prevented errors is the Farmville trap.
+'Farmville guard': Before writing any update, ask: "Does this preserve durable wisdom, correct open-work truth, record completed delivery, or repair README/docs discoverability?" If no → skip. Silence is a valid output.
 
-'Light post-task' (default — ≤3 files changed, no architectural impact):
+'Light post-task' (small scoped task, no architecture shift):
 
-1. EVALUATE — anything worth capturing? If no → skip
-2. BACKLOG SYNC — update canonical plan state if the task changed what remains open
-3. ROUTE & WRITE — update appropriate layer
-4. SYNC — ensure /docs/README.md is current
+1. EVALUATE — anything worth capturing?
+2. BACKLOG SYNC — close, narrow, split, retarget, or gate open work if reality changed
+3. README SYNC — update the touched root/subtree README entrypoints when setup, ownership, layout, usage truth, or same-domain insights changed
+4. DOCS SYNC — update the appropriate contract/architecture doc when implementation or public behavior changed
+5. CHANGELOG SYNC — record the delivered slice if something materially landed
+6. AGENTS SYNC — update durable protocol only if a reusable pattern or constraint emerged
+7. CONNECTIVITY SYNC — keep README reachability and `docs/README.md` honest when touched scope changed navigation
 
-'Full post-task' (>3 files changed OR architectural impact detected):
+'Full post-task' (broad diff, architectural impact, or context refactor):
 
-1. EVALUATE — anything worth capturing? If no → skip
-2. BACKLOG SYNC — close, narrow, split, retarget, or gate plan items affected by the iteration
-3. ROUTE & WRITE — update appropriate layer
-4. CONSOLIDATE — deduplicate, merge overlapping content
-5. SYNC — ensure /docs/README.md is current
-6. EVOLVE — update index file sections, add Change History entry
-7. VALIDATE — `bash "${SKILL_DIR}/scripts/validate-context"`
+1. EVALUATE — anything worth capturing?
+2. BACKLOG SYNC — repair open-work truth first
+3. README SYNC — reconcile root and subtree README entrypoints with the shipped state and same-domain lessons from the work
+4. DOCS SYNC — update the relevant subsystem docs
+5. CHANGELOG SYNC — add the completed delivery entry
+6. AGENTS SYNC — promote reusable insight into durable protocol
+7. CONSOLIDATE — merge duplicates and remove stale context
+8. CONNECTIVITY SYNC — ensure root/docs/README navigation still matches reality
+9. VALIDATE — `bash "${SKILL_DIR}/scripts/validate-context"`
 
 ### Mode 2: ALWAYS_ON (Opt-in)
 
-Only when explicitly requested by the user. Silently track during any task: surprises,
-wrong assumptions, recurring patterns, stale/missing/duplicated docs, stale open backlog items,
-and newly discovered next-slice tasks. Flag for post-task capture.
-
-Cost: agent attention on every turn. Use only when task density justifies it.
+Only when explicitly requested. Track surprises, stale docs, stale README entrypoints, backlog drift, repeated mistakes, and root-state confusion during any task, then capture them in POST_TASK.
 
 ### Mode 3: ON_REQUEST (Explicit)
 
-Full context lifecycle audit + validation. See [protocols.md](./docs/protocols.md#validation-checklist-on_request-mode).
-
----
+Full forced reconciliation pass across ABC + README tree + `/docs`, followed by validation. See [protocols.md](./docs/protocols.md#validation-checklist-on_request-mode).
 
 ## Pre-Task Protocol
 
-```
-1. READ index file — scan for relevant conventions and insights
-2. READ canonical plan file if one exists — understand current open work / epic framing / blocked state
-3. READ /docs/README.md — understand documentation landscape
-4. CHECK if similar task was done before → review past decisions
-5. SCAN relevant /docs/' files
-6. PROCEED with task execution
-```
-
----
+1. READ `AGENTS.md` — align with durable conventions
+2. READ `BACKLOG.md` or the canonical plan file — understand open work and current framing
+3. READ the nearest relevant `README.md` files — root first, then touched subtree entrypoints
+4. READ `docs/README.md` — understand documentation topology
+5. REVIEW the relevant `/docs` files for the touched subsystem
+6. MARK which README entrypoints sit in the same work domain and may need insight refresh after the task
+7. REVIEW recent `CHANGELOG.md` entries when recent shipped baseline matters
+8. PROCEED with task execution
 
 ## Entry Templates
 
-Defaults for new files. If a file already has a format — match THAT format.
+Defaults for new files and restructuring targets for existing ones. If a file already has a format, match that format unless the current structure is clearly flatter, drifted, or less truthful than the template hierarchy — in that case, evolve it toward the template rather than preserving accidental shape.
 Full templates: [`docs/templates.md`](./docs/templates.md)
 
 ### Quick Reference
 
-'Index file entry':
+'AGENTS entry':
 
 ```markdown
-- '[label]': [description] | Trigger: [cause] | Action: [what to do]
+- '[label]': [description of insight or rule] | Trigger: [cause] | Action: [what to do]
 ```
 
-'Change History entry':
+'BACKLOG item':
 
 ```markdown
-- `[Current]` [Task]. Impact: [what changed]. Insight: [lesson learned].
+- [ ] `[Slice]` [Concrete remaining work with truthful exit criteria]
 ```
 
-'Change History rotation': `[Current]` → `[Previous]` → `[Legacy-0]` → `[Legacy-1]` → `[Legacy-2]` → CHANGELOG.md
+'CHANGELOG entry':
 
----
+```markdown
+- `[Area]` [Delivered slice]. Impact: [what changed].
+```
 
 ## Tooling: `validate-context`
 
-Automated documentation health checker. Detects index file, validates links (skipping code blocks),
-analyzes bloat heuristically, checks docs index coverage.
+Automated documentation health checker for the ABC root-memory split, README entrypoint graph, and docs plane.
 
 - 'Bootstrap': `"${SKILL_DIR}/scripts/_bootstrap"` installs `validate-context` into `~/.local/bin`
 - 'Design': [`docs/validation-design.md`](./docs/validation-design.md)
-- 'Usage': `bash "${SKILL_DIR}/scripts/validate-context"` from project working directory
+- 'Usage': `bash "${SKILL_DIR}/scripts/validate-context"` from project root
 - 'Override root': `VALIDATE_CONTEXT_ROOT=/path/to/project bash ...`
 - 'Exit 0' = passed, 'Exit 1' = errors found
-
----
 
 ## Backlog Sync Rules
 
@@ -199,22 +195,24 @@ When a task changes the true state of open work, update the canonical plan file 
 Allowed plan-state operations:
 
 - 'Close' — exit criteria now satisfied in reality
-- 'Narrow' — part of the item landed; rewrite it to describe the remaining work only
-- 'Split' — one vague item became multiple concrete executable slices
-- 'Retarget' — the original wording no longer matches the actual remaining task
-- 'Defer' — still valid, but not the best next slice anymore
-- 'Gate/Block' — remaining work now depends on an external condition
+- 'Narrow' — part landed; describe only the remaining work
+- 'Split' — one vague item became multiple concrete slices
+- 'Retarget' — wording no longer matches the real remaining task
+- 'Defer' — still valid, but not the best next slice
+- 'Gate/Block' — remaining work depends on another condition
 
 Rules:
 
-- Epics are allowed, but keep the active next slice concrete
-- Do not let docs/changelog silently carry work that still appears open in the plan
-- Do not keep evergreen maintenance disciplines as unchecked backlog items; move them into the index file or docs instead
+- Keep at least one concrete next slice when an epic stays open
+- Do not let docs or changelog silently carry work that still appears open in the plan
+- Do not keep evergreen maintenance disciplines as unchecked backlog items; move them into `AGENTS.md` or `/docs`
 
 ## Lifecycle & Maintenance
 
-- 'Growth control': Discovery → Active → Consolidation → Strategic Pattern → Archive
+- 'Growth control': discovery → durable rule / open slice / completed delivery / entrypoint sync
 - 'GC triggers': 3+ bloat signals from validator → mandatory garbage collection
-- 'Change History': Max 5 entries, rotate older to `CHANGELOG.md`
-- 'Mistake escalation': Insight → Convention → Hard rule → Structural change
+- 'Root split discipline': completed delivery belongs in `CHANGELOG.md`, not rolling `AGENTS.md` history
+- 'Hybrid context discipline': serve the full context graph (`ABC + README tree + /docs`), not one layer in isolation
+- 'Template-as-restructuring-target': templates are not only for greenfield bootstrapping; they are the target shape for reorganizing existing context when the current structure is flatter, drifted, or harder to navigate
+- 'README domain discipline': if meaningful work happened inside a domain that has its own `README.md`, refresh that local entrypoint with the resulting insight when the README is the honest human starting point for that area
 - 'Details': [protocols.md](./docs/protocols.md#context-lifecycle-management)

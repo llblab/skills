@@ -5,6 +5,8 @@
 ### Meta-Protocol Principles
 
 - 'Self-Reference': This skill must validate its own documentation using its own scripts.
+- 'Root State Separation': Durable protocol belongs in `AGENTS.md`, open work belongs in `BACKLOG.md`, and completed delivery belongs in `CHANGELOG.md`.
+- 'Hybrid Context Coverage': The protocol serves ABC + README entrypoints + `/docs` as one coordinated context graph.
 - 'Cross-Platform': Scripts must support both Linux and MacOS.
 - 'Self-Enhancement': Protocols anticipate and facilitate their own evolution.
 - 'Workflow Stratification': Preparation → execution → reflection → documentation.
@@ -13,35 +15,31 @@
 
 - Use `validate-context` for all documentation audits.
 - Use `scripts/_self-test` to verify skill integrity after changes.
-- Maintain the three-layer architecture: Root README → Docs Index → Project Docs.
-- SKILL.md stays compact; protocols.md contains only what SKILL.md does not (adaptation rules, lifecycle, validation checklist). No duplication between them.
-- Full post-task steps are inline in SKILL.md, not behind a link to protocols.md.
-- CHANGELOG.md tracks version history; keep in sync with SKILL.md frontmatter version.
+- Prefer the ABC root control plane: `README.md` + `AGENTS.md` + `BACKLOG.md` + `CHANGELOG.md`, with subtree `README.md` files as human entrypoints and `docs/README.md` + `/docs` as the knowledge plane.
+- SKILL.md stays compact; `docs/protocols.md` contains only what SKILL.md does not.
+- `BACKLOG.md` keeps only remaining open, gated, or blocked work; close or narrow items in the same pass that changed reality.
+- `CHANGELOG.md` tracks completed delivery history; `AGENTS.md` should not accumulate per-iteration delivery logs when `CHANGELOG.md` exists.
+- Keep root `README.md` connected to `AGENTS.md`, `BACKLOG.md`, `CHANGELOG.md`, and `docs/README.md`.
+- Keep subtree `README.md` files reachable from parent/root/docs navigation once they become real human entrypoints.
 
 ### Discovered Constraints
 
 - 'Farmville Trap': If the protocol generates more documentation updates than actually prevented mistakes, it has become a Tool Shaped Object. Measure value by errors avoided, not files touched. | Trigger: Post-task protocol fires but produces no actionable insight | Action: Skip the update. Silence is a valid output.
 - 'Progressive Disclosure over Always-On': ALWAYS_ON mode costs agent attention on every turn even when irrelevant. Prefer POST_TASK as default. | Trigger: Agent tracking overhead exceeds insight value | Action: Default to POST_TASK; use ALWAYS_ON only when explicitly requested.
-- 'A2 applies to templates': Context templates must start minimal — imposing principles and ceremony on a new project violates Axiom A2 (earned complexity). Template is a skeleton that grows with the project, not a manifesto.
+- 'A2 applies to templates': Context templates must start minimal — imposing principles and ceremony on a new project violates Axiom A2. Template is a skeleton that grows with the project, not a manifesto.
 - 'Self-contradiction kills trust': Absolute rules must survive contact with every other rule in the system. "Mandatory" + "skip if empty" is a contradiction — use conditional language.
+- 'Durable/open/completed state must not collapse': If the same reality is tracked simultaneously in `AGENTS.md`, `BACKLOG.md`, and `CHANGELOG.md`, the protocol loses truthfulness. Route each fact to exactly one root file.
+- 'README tree is part of context, not decoration': Root and subtree `README.md` files are human-facing entrypoints and must be updated when setup, usage, topology, or same-domain insight truth changes.
+- 'Per-iteration delivery history belongs in CHANGELOG': Once a project keeps `CHANGELOG.md`, `AGENTS.md` should store reusable constraints, not rolling delivery bullets.
+- 'Minimal starter != permanent ceiling': Minimal AGENTS templates are acceptable for early projects, but mature repositories should grow a layered hierarchy when constraints justify it.
 - 'LLM YAML tracking is fictional': LLMs reason in natural language, not structured YAML. Tracking schemas in prompts create illusion of process. Post-task evaluation does the actual work.
-- 'Ceremonial formalization': If pseudocode describes what an experienced developer would do by default (read a file, check state), the formalization adds no value. Formalize only non-obvious protocols.
+- 'Ceremonial formalization': If pseudocode describes what an experienced developer would do by default, the formalization adds no value. Formalize only non-obvious protocols.
 - `stat` command differs between Linux (`-c %Y`) and MacOS (`-f %m`).
-- `grep -P` (Perl regex) is unavailable on macOS BSD grep — use `grep -oE` + `sed` instead.
+- `grep -P` is unavailable on macOS BSD grep — use `grep -oE` + `sed` instead.
 - `heading_to_anchor` must preserve underscores `_` to match GitHub's anchor generation.
 - `[[ cond ]] && action` in a function with `set -e` exits on false — use `if/fi` or `|| true`.
 - `\$[^$]+\$` regex false-positives on shell variables — check for LaTeX commands specifically.
-- "Core structure" check now accepts both `## 1.` (project) and key sections (skill AGENTS.md).
-- Change History date regex `^\s*-\s*\`\[YYYY-MM-DD\]`must not match`[[]]` bash syntax.
-- `awk '/^## X/,/^## /'` range includes start line — use `{f=1;next}` to exclude it.
+- "Core structure" check now accepts both `## 1.` project sections and skill-style key sections.
 - Scripts use no file extension — shebangs (`#!/usr/bin/env bash`) define the interpreter.
 - `realpath --relative-to` is GNU-specific — prefer path-prefix stripping for docs-relative paths.
 - UTF-8 locales differ by platform (`en_US.UTF-8`, `C.UTF-8`, `C.utf8`) — include safe `C` fallback.
-
-### Change History
-
-- `[Current]` Structural cleanup: protocols.md 261→90 lines (removed ceremony, duplication), templates.md minimal Context Template (A2-aligned), full post-task inline in SKILL.md, version bump to 1.0.0. Impact: −50% token cost for supplementary docs; template no longer contradicts axioms. Insight: supplementary docs must contain only delta beyond the primary doc; templates must follow the same axioms as the protocol.
-- `[Previous]` Applied article insights: Farmville Trap guard (skip empty updates), Progressive Disclosure default (POST_TASK over ALWAYS_ON), Tool Shaped Object awareness. Impact: SKILL.md activation modes reordered, POST_TASK becomes default. Insight: protocols that measure activity instead of prevented errors become Farmville.
-- `[Legacy-0]` Added self-test (32 assertions). Impact: full validation pipeline for skill integrity.
-- `[Legacy-1]` Fixed "Core structure" check: accepts skill-style AGENTS.md sections. Impact: validator no longer false-positives on skill repos.
-- `[Legacy-2]` Major refactor: SKILL.md 573→161 lines, protocols extracted to docs/protocols.md. Impact: reduced token cost of skill loading by 70%.

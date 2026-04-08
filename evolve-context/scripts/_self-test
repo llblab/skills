@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Self-test for evolve-context skill
-# Validates: validate-context, three-layer architecture, protocols, templates
+# Validates: validator, hybrid context graph, docs routing, protocol integrity
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
@@ -27,30 +27,29 @@ assert() {
 echo ">>> SELF-TEST: evolve-context <<<"
 echo
 
-# --- File structure (three-layer architecture) ---
-echo "Three-Layer Architecture:"
-assert "Layer 0: README.md exists"           "[[ -f '$SKILL_DIR/README.md' ]]"
-assert "Layer 1: AGENTS.md (index) exists"   "[[ -f '$SKILL_DIR/AGENTS.md' ]]"
-assert "Layer 2: docs/README.md exists"      "[[ -f '$SKILL_DIR/docs/README.md' ]]"
-assert "Layer 3: docs/ directory exists"     "[[ -d '$SKILL_DIR/docs' ]]"
-assert "SKILL.md exists"                     "[[ -f '$SKILL_DIR/SKILL.md' ]]"
-assert "CHANGELOG.md exists"                 "[[ -f '$SKILL_DIR/CHANGELOG.md' ]]"
-assert "scripts/_bootstrap exists"           "[[ -f '$BOOTSTRAP' ]]"
-assert "_bootstrap executable"               "[[ -x '$BOOTSTRAP' ]]"
+echo "Root Control Plane:"
+assert "README.md exists" "[[ -f '$SKILL_DIR/README.md' ]]"
+assert "AGENTS.md exists" "[[ -f '$SKILL_DIR/AGENTS.md' ]]"
+assert "BACKLOG.md exists" "[[ -f '$SKILL_DIR/BACKLOG.md' ]]"
+assert "CHANGELOG.md exists" "[[ -f '$SKILL_DIR/CHANGELOG.md' ]]"
+assert "docs/README.md exists" "[[ -f '$SKILL_DIR/docs/README.md' ]]"
+assert "docs/ directory exists" "[[ -d '$SKILL_DIR/docs' ]]"
+assert "SKILL.md exists" "[[ -f '$SKILL_DIR/SKILL.md' ]]"
+assert "scripts/_bootstrap exists" "[[ -f '$BOOTSTRAP' ]]"
+assert "_bootstrap executable" "[[ -x '$BOOTSTRAP' ]]"
 echo
 
-# --- Connectivity invariant ---
 echo "Connectivity Invariant:"
-assert "README → docs/README.md link"  "grep -q 'docs/README.md' '$SKILL_DIR/README.md'"
-assert "README → AGENTS.md link"       "grep -q 'AGENTS.md' '$SKILL_DIR/README.md'"
-assert "SKILL.md → protocols.md link"  "grep -q 'protocols.md' '$SKILL_DIR/SKILL.md'"
-assert "SKILL.md → templates.md link"  "grep -q 'templates.md' '$SKILL_DIR/SKILL.md'"
+assert "README → AGENTS.md link" "grep -q 'AGENTS.md' '$SKILL_DIR/README.md'"
+assert "README → BACKLOG.md link" "grep -q 'BACKLOG.md' '$SKILL_DIR/README.md'"
+assert "README → CHANGELOG.md link" "grep -q 'CHANGELOG.md' '$SKILL_DIR/README.md'"
+assert "README → docs/README.md link" "grep -q 'docs/README.md' '$SKILL_DIR/README.md'"
+assert "SKILL.md → protocols.md link" "grep -q 'protocols.md' '$SKILL_DIR/SKILL.md'"
+assert "SKILL.md → templates.md link" "grep -q 'templates.md' '$SKILL_DIR/SKILL.md'"
 echo
 
-# --- Docs index coverage ---
 echo "Docs Index Coverage:"
 ORPHANS=0
-PHANTOMS=0
 while IFS= read -r -d '' doc_file; do
   doc_name=$(basename "$doc_file")
   if ! grep -qF "$doc_name" "$SKILL_DIR/docs/README.md" 2>/dev/null; then
@@ -61,41 +60,35 @@ done < <(find "$SKILL_DIR/docs" -name '*.md' ! -name 'README.md' -print0)
 assert "No orphaned docs" "[[ $ORPHANS -eq 0 ]]"
 echo
 
-# --- validate-context ---
 echo "Validator (validate-context):"
 assert "Validator script exists" "[[ -f '$VALIDATOR' ]]"
 assert "Bootstrap has set -euo pipefail" "head -8 '$BOOTSTRAP' | grep -q 'set -euo pipefail'"
 assert "Bootstrap installs validate-context" "grep -q 'TARGET_VALIDATOR=' '$BOOTSTRAP' && grep -q 'cp .*TARGET_VALIDATOR' '$BOOTSTRAP'"
 assert "Bootstrap does NOT install self-test" "! grep -q 'self-test\|SELF_TEST' '$BOOTSTRAP'"
 
-# Test on self (the skill itself should pass)
 SELF_OUT=$(cd "$SKILL_DIR" && VALIDATE_CONTEXT_ROOT=. bash "$VALIDATOR" 2>&1)
 SELF_EXIT=$?
 assert "Self-validation passes (exit 0)" "[[ $SELF_EXIT -eq 0 ]]"
 assert "No errors in self-validation" "grep -q 'Errors: 0' <<< '$SELF_OUT'"
 
-# Test JSON mode
 JSON_OUT=$(cd "$SKILL_DIR" && VALIDATE_CONTEXT_ROOT=. bash "$VALIDATOR" --json 2>&1)
 assert "JSON mode produces valid structure" "grep -q '\"passed\"' <<< '$JSON_OUT'"
 assert "JSON has items array" "grep -q '\"items\"' <<< '$JSON_OUT'"
 echo
 
-# --- Validator detection capabilities ---
 echo "Validator Detection Tests:"
-
-# Create a temp project with known issues
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 
-# Test 1: No index file → should fail
 NOINDEX_OUT=$(cd "$TMPDIR" && VALIDATE_CONTEXT_ROOT=. bash "$VALIDATOR" 2>&1 || true)
 assert "Detects missing index file" "grep -qi 'no index file found\|FAIL' <<< '$NOINDEX_OUT'"
 
-# Test 2: Minimal valid project
 mkdir -p "$TMPDIR/docs"
 cat > "$TMPDIR/README.md" << 'EOF'
 # Test Project
 - [Project Index](AGENTS.md)
+- [Open Backlog](BACKLOG.md)
+- [Delivery History](CHANGELOG.md)
 - [Docs](docs/README.md)
 EOF
 cat > "$TMPDIR/AGENTS.md" << 'EOF'
@@ -104,8 +97,16 @@ cat > "$TMPDIR/AGENTS.md" << 'EOF'
 Test project.
 ## Meta-Protocol Principles
 - Test
-## Change History
-- `[2025-01-01]` Initial
+EOF
+cat > "$TMPDIR/BACKLOG.md" << 'EOF'
+# Backlog
+## Open Backlog
+- [ ] `[Slice]` Example remaining work
+EOF
+cat > "$TMPDIR/CHANGELOG.md" << 'EOF'
+# Changelog
+## Current
+- `[Test]` Example delivery.
 EOF
 cat > "$TMPDIR/docs/README.md" << 'EOF'
 # Docs Index
@@ -113,47 +114,53 @@ EOF
 
 VALID_OUT=$(cd "$TMPDIR" && VALIDATE_CONTEXT_ROOT=. bash "$VALIDATOR" 2>&1)
 VALID_EXIT=$?
-assert "Minimal valid project passes" "[[ $VALID_EXIT -eq 0 ]]"
+assert "Minimal ABC project passes" "[[ $VALID_EXIT -eq 0 ]]"
 
-# Test 3: Broken link detection
-cat > "$TMPDIR/docs/broken.md" << 'EOF'
-[missing link](./nonexistent.md)
+cat > "$TMPDIR/AGENTS.md" << 'EOF'
+# AGENTS.md
+## 1. Overall Concept
+Test project.
+## Meta-Protocol Principles
+- Test
+## Change History
+- old embedded history
 EOF
-cat >> "$TMPDIR/docs/README.md" << 'EOF'
-- [broken](./broken.md)
+DUPLICATE_OUT=$(cd "$TMPDIR" && VALIDATE_CONTEXT_ROOT=. bash "$VALIDATOR" 2>&1 || true)
+assert "Warns on AGENTS Change History when CHANGELOG exists" "grep -qi 'Change History while CHANGELOG.md exists' <<< '$DUPLICATE_OUT'"
+
+mkdir -p "$TMPDIR/tools"
+cat > "$TMPDIR/tools/README.md" << 'EOF'
+# Tools
+Local tool entrypoint.
 EOF
-BROKEN_OUT=$(cd "$TMPDIR" && VALIDATE_CONTEXT_ROOT=. bash "$VALIDATOR" 2>&1 || true)
-assert "Detects broken links" "grep -qi 'broken link\|FAIL' <<< '$BROKEN_OUT'"
+README_ORPHAN_OUT=$(cd "$TMPDIR" && VALIDATE_CONTEXT_ROOT=. bash "$VALIDATOR" 2>&1 || true)
+assert "Warns on unreachable subtree README" "printf '%s\n' \"\$README_ORPHAN_OUT\" | grep -q 'Unreachable README entrypoint: tools/README.md'"
 echo
 
-# --- SKILL.md structure ---
 echo "SKILL.md Structure:"
-assert "Has version in frontmatter"  "grep -q 'version:' '$SKILL_DIR/SKILL.md'"
-assert "Has Purpose section"         "grep -q '## Purpose' '$SKILL_DIR/SKILL.md'"
-assert "Has Axioms section"          "grep -q '## Axioms' '$SKILL_DIR/SKILL.md'"
-assert "Has Activation Modes"        "grep -q '## Activation Modes\|### Mode' '$SKILL_DIR/SKILL.md'"
-assert "Has Tooling section"         "grep -q '## Tooling\|validate-context' '$SKILL_DIR/SKILL.md'"
+assert "Has version in frontmatter" "grep -q 'version:' '$SKILL_DIR/SKILL.md'"
+assert "Has Purpose section" "grep -q '## Purpose' '$SKILL_DIR/SKILL.md'"
+assert "Has Axioms section" "grep -q '## Axioms' '$SKILL_DIR/SKILL.md'"
+assert "Has Root Memory Architecture section" "grep -q '## Root Memory Architecture' '$SKILL_DIR/SKILL.md'"
+assert "Mentions subtree README files" "grep -q 'Subtree README files' '$SKILL_DIR/SKILL.md'"
+assert "Has Activation Modes" "grep -q '## Activation Modes\|### Mode' '$SKILL_DIR/SKILL.md'"
+assert "Has Tooling section" "grep -q '## Tooling\|validate-context' '$SKILL_DIR/SKILL.md'"
 echo
 
-# --- AGENTS.md sections ---
 echo "AGENTS.md Sections:"
 assert "Has Meta-Protocol Principles" "grep -q 'Meta-Protocol Principles' '$SKILL_DIR/AGENTS.md'"
-assert "Has Discovered Constraints"   "grep -q 'Discovered Constraints' '$SKILL_DIR/AGENTS.md'"
-assert "Has Change History"           "grep -q 'Change History' '$SKILL_DIR/AGENTS.md'"
-CH_ENTRIES=$(grep -cE '^\s*-\s*`\[[0-9]{4}-[0-9]{2}-[0-9]{2}\]`' "$SKILL_DIR/AGENTS.md" || true)
-assert "Change History ≤ 5 entries ($CH_ENTRIES)" "[[ $CH_ENTRIES -le 5 ]]"
+assert "Has Discovered Constraints" "grep -q 'Discovered Constraints' '$SKILL_DIR/AGENTS.md'"
+assert "Has no Change History section" "! grep -q '^### Change History\|^## Change History' '$SKILL_DIR/AGENTS.md'"
 echo
 
-# --- Platform compatibility ---
 echo "Platform Compatibility:"
 assert "Uses stat with macOS fallback" "grep -q 'stat -f' '$VALIDATOR'"
-assert "No grep -P usage"             "! grep -q 'grep -P' '$VALIDATOR'"
+assert "No grep -P usage" "! grep -q 'grep -P' '$VALIDATOR'"
 assert "No GNU realpath --relative-to invocation" "! grep -qE '(^|[^#].*)realpath --relative-to=' '$VALIDATOR'"
-assert "Has set -euo pipefail"        "head -10 '$VALIDATOR' | grep -q 'set -euo pipefail'"
-assert "Has ERR trap"                 "grep -q 'trap.*ERR' '$VALIDATOR'"
+assert "Has set -euo pipefail" "head -10 '$VALIDATOR' | grep -q 'set -euo pipefail'"
+assert "Has ERR trap" "grep -q 'trap.*ERR' '$VALIDATOR'"
 echo
 
-# --- Summary ---
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "Results: $PASS/$TOTAL passed, $FAIL failed"
 if [[ $FAIL -eq 0 ]]; then
