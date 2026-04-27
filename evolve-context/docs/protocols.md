@@ -121,7 +121,7 @@ Rules:
 
 ## Garbage Collection
 
-Triggered by heuristic signals from `validate-context`, not hardcoded line limits.
+Triggered by heuristic signals from `validate-context.sh`, not hardcoded line limits.
 3+ bloat signals → mandatory GC. 1–2 signals → consolidation at agent discretion.
 
 ## Consolidation Triggers
@@ -161,7 +161,7 @@ When duplicate documentation is detected:
 
 ## Validation Checklist (ON_REQUEST mode)
 
-Run `validate-context` first — it automates link, structural, root-memory, and README-entrypoint checks.
+Run `validate-context.sh` first — it automates link, structural, root-memory, and README-entrypoint checks.
 Manual-only items the script cannot verify:
 
 - [ ] No information duplicated across `AGENTS.md`, `BACKLOG.md`, `CHANGELOG.md`, README entrypoints, and `/docs`

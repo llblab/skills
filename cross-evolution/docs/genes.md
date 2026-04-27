@@ -1,7 +1,7 @@
 # Gene Registry
 
 Living registry of all genes in the cross-evolution ecosystem.
-Parsed by `scripts/audit-genes` — the markdown tables below are the single source of truth.
+Parsed by `scripts/audit-genes.sh` — the markdown tables below are the single source of truth.
 
 ## Gene Lifecycle
 
@@ -20,7 +20,7 @@ the agent should propose deprecation. After one more audit cycle with no adoptio
 
 ## Proposed Genes
 
-Genes discovered automatically by `scripts/audit-genes` during discovery phase.
+Genes discovered automatically by `scripts/audit-genes.sh` during discovery phase.
 Promotion rule: a candidate must be present in at least 2 skills and absent from Active/Deprecated/Extinct.
 
 | Gene ID        | Name           | Detect       | Args                   | Recommend   | Weight | Description                              | Proposed Since |
@@ -33,25 +33,24 @@ Detect types: `file`, `file_any` (comma-separated), `dir`, `grep_scripts` (ERE),
 
 Recommend scopes: `all`, `has_scripts`, `none` (domain-specific)
 
-| Gene ID        | Name               | Detect       | Args                                                                  | Recommend   | Weight | Description                                 |
-| -------------- | ------------------ | ------------ | --------------------------------------------------------------------- | ----------- | ------ | ------------------------------------------- |
-| self-docs      | Self-documentation | file         | AGENTS.md                                                             | all         | 2      | Structured self-knowledge for agent context |
-| cross-platform | Cross-platform     | grep_scripts | Darwin\|uname\|stat -f\|platform.system\|sys.platform                 | has_scripts | 2      | Scripts work on both Linux and macOS        |
-| self-test      | Self-test          | file_any     | scripts/_self-test,scripts/self-test,scripts/test,tests/              | has_scripts | 3      | Automated validation of skill functionality |
-| error-handling | Error handling     | grep_scripts | trap\|set -e\|try:\|except\|raise                                     | has_scripts | 1      | Graceful failure and diagnostics in scripts |
-| docs-dir       | Documentation      | dir          | docs                                                                  | none        | 1      | Dedicated documentation directory           |
-| changelog      | Changelog          | file         | CHANGELOG.md                                                          | none        | 1      | Versioned change history                    |
-| voice          | Voice integration  | file         | scripts/say                                                           | none        | 1      | TTS output via voice-mode                   |
-| lang-memory    | Language memory    | grep_scripts | pi_voice_lang\|LANG_FILE                                              | none        | 1      | Persistent language preference detection    |
-| auto-bootstrap | Auto-bootstrap     | file_any     | scripts/_bootstrap,scripts/bootstrap,scripts/install,scripts/setup    | none        | 2      | Self-installation of dependencies           |
+| Gene ID        | Name               | Detect       | Args                                                         | Recommend   | Weight | Description                                 |
+| -------------- | ------------------ | ------------ | ------------------------------------------------------------ | ----------- | ------ | ------------------------------------------- |
+| self-docs      | Self-documentation | file         | AGENTS.md                                                    | all         | 2      | Structured self-knowledge for agent context |
+| cross-platform | Cross-platform     | grep_scripts | Darwin\|macOS\|uname\|stat -f\|platform.system\|sys.platform | has_scripts | 2      | Scripts work on both Linux and macOS        |
+| error-handling | Error handling     | grep_scripts | trap\|set -e\|try:\|except\|raise                            | has_scripts | 1      | Graceful failure and diagnostics in scripts |
+| docs-dir       | Documentation      | dir          | docs                                                         | none        | 1      | Dedicated documentation directory           |
+| changelog      | Changelog          | file         | CHANGELOG.md                                                 | none        | 1      | Versioned change history                    |
+| voice          | Voice integration  | file_any     | scripts/say,scripts/say.sh                                   | none        | 1      | TTS output via voice-mode                   |
 
 ## Deprecated Genes
 
 Genes in twilight — still detected but weight = 0. Will go extinct if not reactivated.
 
-| Gene ID     | Name        | Reason                                     | Deprecated Since |
-| ----------- | ----------- | ------------------------------------------ | ---------------- |
-| ui-metadata | UI metadata | No skills adopted; UI integration unneeded | 2026-02-12       |
+| Gene ID        | Name            | Reason                                                     | Deprecated Since |
+| -------------- | --------------- | ---------------------------------------------------------- | ---------------- |
+| ui-metadata    | UI metadata     | No skills adopted; UI integration unneeded                 | 2026-02-12       |
+| lang-memory    | Language memory | No current carriers; voice language persistence not needed | 2026-04-29       |
+| auto-bootstrap | Auto-bootstrap  | No current carriers; bootstrap scripts are not standard    | 2026-04-29       |
 
 ## Extinct Genes
 
@@ -102,7 +101,7 @@ Two paths:
 1. Automatic: discovery phase inserts candidate into 'Proposed Genes' table when thresholds are met.
 2. Manual: add a row directly to 'Active Genes' if immediate activation is needed.
 
-No code changes needed — `audit-genes` parses this file.
+No code changes needed — `audit-genes.sh` parses this file.
 
 ## Removing a Gene
 

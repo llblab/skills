@@ -2,7 +2,7 @@
 name: evolve-context
 description: Self-evolving context protocol across ABC-split root files (AGENTS.md, BACKLOG.md, CHANGELOG.md), human entrypoint README.md files tree, and /docs. Use after meaningful project changes, backlog drift, documentation refactors, or when you want a forced context reconciliation pass.
 metadata:
-  version: 1.2.0
+  version: 2.0.0
 ---
 
 # Evolve Context
@@ -103,11 +103,11 @@ About what we build or ship?                → /docs/*, then sync docs/README.m
 'Trigger decision tree':
 
 ```text
-Task touched any *.md file?              → YES → run POST_TASK
-                                          NO  → Changed public APIs/architecture? → YES → run POST_TASK
-                                                                                   NO  → Changed canonical backlog state? → YES → run POST_TASK
-                                                                                                                         NO  → Completed a meaningful slice? → YES → run POST_TASK
-                                                                                                                                                              NO  → skip
+Task touched any *.md file? → YES → run POST_TASK
+                              NO  → Changed public APIs/architecture? → YES → run POST_TASK
+                                                                        NO  → Changed canonical backlog state? → YES → run POST_TASK
+                                                                                                                 NO  → Completed a meaningful slice? → YES → run POST_TASK
+                                                                                                                                                       NO  → skip
 ```
 
 'Farmville guard': Before writing any update, ask: "Does this preserve durable wisdom, correct open-work truth, record completed delivery, or repair README/docs discoverability?" If no → skip. Silence is a valid output.
@@ -132,7 +132,7 @@ Task touched any *.md file?              → YES → run POST_TASK
 6. AGENTS SYNC — promote reusable insight into durable protocol
 7. CONSOLIDATE — merge duplicates and remove stale context
 8. CONNECTIVITY SYNC — ensure root/docs/README navigation still matches reality
-9. VALIDATE — `bash "${SKILL_DIR}/scripts/validate-context"`
+9. VALIDATE — `bash "${SKILL_DIR}/scripts/validate-context.sh"`
 
 ### Mode 2: ALWAYS_ON (Opt-in)
 
@@ -178,13 +178,12 @@ Full templates: [`docs/templates.md`](./docs/templates.md)
 - `[Area]` [Delivered slice]. Impact: [what changed].
 ```
 
-## Tooling: `validate-context`
+## Tooling: `validate-context.sh`
 
 Automated documentation health checker for the ABC root-memory split, README entrypoint graph, and docs plane.
 
-- 'Bootstrap': `"${SKILL_DIR}/scripts/_bootstrap"` installs `validate-context` into `~/.local/bin`
 - 'Design': [`docs/validation-design.md`](./docs/validation-design.md)
-- 'Usage': `bash "${SKILL_DIR}/scripts/validate-context"` from project root
+- 'Usage': `bash "${SKILL_DIR}/scripts/validate-context.sh"` from project root
 - 'Override root': `VALIDATE_CONTEXT_ROOT=/path/to/project bash ...`
 - 'Exit 0' = passed, 'Exit 1' = errors found
 

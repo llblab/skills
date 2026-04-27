@@ -7,20 +7,20 @@ It validates root-memory integrity, README entrypoint reachability, link health,
 
 ## Checks Performed
 
-| #  | Check                 | Type    | Description                                                                 |
-| -- | --------------------- | ------- | --------------------------------------------------------------------------- |
-| 1  | Index file detection  | Error   | Scans for `AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `GEMINI.md`, or `CONTEXT.md` |
-| 2  | README connectivity   | Warning | Verifies root `README.md` links to the control plane and `docs/README.md`   |
-| 3  | Core structure        | Warning | Verifies numbered project sections or skill-style key sections in `AGENTS.md` |
-| 4  | Root state split      | Warning | Detects canonical open-work file, `CHANGELOG.md`, and duplicate delivery history in `AGENTS.md` |
-| 5  | Link validation       | Error   | Validates all relative links in all `.md` files, skipping code blocks       |
-| 6  | README reachability   | Warning | Detects subtree `README.md` files with no inbound markdown links            |
-| 7  | Meta-Protocol         | Warning | Checks for Meta-Protocol Principles in the durable protocol file            |
-| 8  | Bloat analysis        | Mixed   | Heuristic analysis of index-file health                                     |
-| 9  | LaTeX detection       | Error   | Flags LaTeX syntax in `/docs/` (GitHub doesn't render it)                   |
-| 10 | Freshness             | Warning | Checks durable protocol file modification age (>30 days = stale)            |
-| 11 | Docs directory        | Warning | Verifies `/docs` directory exists                                           |
-| 12 | Docs index coverage   | Warning | Detects orphans and phantoms in `docs/README.md`                            |
+| #   | Check                | Type    | Description                                                                                     |
+| --- | -------------------- | ------- | ----------------------------------------------------------------------------------------------- |
+| 1   | Index file detection | Error   | Scans for `AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `GEMINI.md`, or `CONTEXT.md`                    |
+| 2   | README connectivity  | Warning | Verifies root `README.md` links to the control plane and `docs/README.md`                       |
+| 3   | Core structure       | Warning | Verifies numbered project sections or skill-style key sections in `AGENTS.md`                   |
+| 4   | Root state split     | Warning | Detects canonical open-work file, `CHANGELOG.md`, and duplicate delivery history in `AGENTS.md` |
+| 5   | Link validation      | Error   | Validates all relative links in all `.md` files, skipping code blocks                           |
+| 6   | README reachability  | Warning | Detects subtree `README.md` files with no inbound markdown links                                |
+| 7   | Meta-Protocol        | Warning | Checks for Meta-Protocol Principles in the durable protocol file                                |
+| 8   | Bloat analysis       | Mixed   | Heuristic analysis of index-file health                                                         |
+| 9   | LaTeX detection      | Error   | Flags LaTeX syntax in `/docs/` (GitHub doesn't render it)                                       |
+| 10  | Freshness            | Warning | Checks durable protocol file modification age (>30 days = stale)                                |
+| 11  | Docs directory       | Warning | Verifies `/docs` directory exists                                                               |
+| 12  | Docs index coverage  | Warning | Detects orphans and phantoms in `docs/README.md`                                                |
 
 ## Bloat Heuristics
 
@@ -68,13 +68,13 @@ The validator treats subtree `README.md` files as human entrypoints, not decorat
 
 ```bash
 # From project root (human-readable)
-bash /path/to/skill/scripts/validate-context
+bash /path/to/skill/scripts/validate-context.sh
 
 # Machine-readable JSON output
-bash /path/to/skill/scripts/validate-context --json
+bash /path/to/skill/scripts/validate-context.sh --json
 
 # With custom project root
-VALIDATE_CONTEXT_ROOT=/path/to/project bash /path/to/skill/scripts/validate-context
+VALIDATE_CONTEXT_ROOT=/path/to/project bash /path/to/skill/scripts/validate-context.sh
 ```
 
 ## Exit Codes

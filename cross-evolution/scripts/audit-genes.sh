@@ -39,7 +39,7 @@ select_default_skills_dir() {
 usage() {
   cat <<'EOF'
 Usage:
-  audit-genes [skills_dir] [--no-discovery] [--no-sync-discovery]
+  audit-genes.sh [skills_dir] [--no-discovery] [--no-sync-discovery]
 
 Options:
   --no-discovery       Skip candidate gene discovery phase.

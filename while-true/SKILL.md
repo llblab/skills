@@ -2,7 +2,7 @@
 name: while-true
 description: Continuous execution-loop protocol — assess reality, refine the plan, execute the next task, repeat until a real stop condition is reached.
 metadata:
-  version: 1.1.1
+  version: 2.0.0
 ---
 
 # While True
@@ -35,24 +35,24 @@ There is no separate "pre-iteration" vs "post-iteration" protocol. Between any t
 
 Activate when at least one of:
 
-- a meaningful iteration just finished and follow-up insight exists
-- no trustworthy plan exists yet and work is expected
-- the plan is materially out of sync with reality
-- a task is actionable and the user expects continued autonomous execution
+- A meaningful iteration just finished and follow-up insight exists
+- No trustworthy plan exists yet and work is expected
+- The plan is materially out of sync with reality
+- A task is actionable and the user expects continued autonomous execution
 
 ### Session mode
 
 When the user explicitly activates `while-true` (`keep going`, `non-stop`, etc.), the mode persists across checkpoint summaries, progress updates, and clarification answers until:
 
-- the user explicitly says `stop` or `pause`
-- no actionable backlog items remain
-- only blocked, destructive, or externally gated work remains
+- The user explicitly says `stop` or `pause`
+- No actionable backlog items remain
+- Only blocked, destructive, or externally gated work remains
 
 ### Do not activate when
 
-- the interaction is purely informational with no new tasks
-- the user explicitly asks to stop
-- continuing would require approval for destructive or externally sensitive actions
+- The interaction is purely informational with no new tasks
+- The user explicitly asks to stop
+- Continuing would require approval for destructive or externally sensitive actions
 
 ## Plan File Selection
 
@@ -180,12 +180,29 @@ When multiple tasks share the same type-priority level:
 
 Decompose when the next work is clearly larger than one step, the plan is too vague for immediate execution, or a failure implies 2–5 concrete follow-ups.
 
+### Convergence decomposition
+
+For open-ended improvement work, use a convergence task instead of a premature checklist. The goal is to make the task progress fractally through validated iterations and prevent early closure after one successful slice.
+
+A convergence task must include:
+
+- **Goal**: The durable direction of travel and the quality boundary being protected
+- **Iteration loop**: A repeatable sequence such as observe → classify → execute/extract → guard invariants → validate → reconcile context → reassess
+- **Candidate slices**: Concrete near-term areas to inspect, phrased as candidates rather than mandatory one-shot subtasks
+- **Stop conditions**: Objective closure criteria that require reassessment, validation, and context truth, not just a completed edit
+- **Non-goals**: Explicit traps to avoid, such as cosmetic churn, speculative subtrees, broad facades, hidden state, or line-count-only work
+
+Use this pattern when the work should narrow through reality checks over multiple cycles, especially architecture convergence, refactoring, cleanup, reliability hardening, and documentation/context reconciliation. Do not mark the parent complete until its stop conditions hold in the same pass.
+
+### General rules
+
 - Decompose only to the depth needed for immediate clarity
 - Prefer a small number of concrete siblings over one vague umbrella task
 - Do not create speculative subtrees for work that is not yet real
 - If only the first slice is clear, plan it and record remaining uncertainty explicitly
 - When decomposing an epic, preserve the epic if useful, but always materialize the immediately executable child slice
 - After decomposition, retarget the parent so it reflects the remaining umbrella scope rather than duplicating the new children verbatim
+- For convergence tasks, keep the parent open and rewrite candidate slices/stop conditions as reality changes rather than carrying stale wording forward
 
 ### Task quality
 
@@ -197,12 +214,12 @@ Bad: `Fix rewards`
 
 Stop only when:
 
-- the next step is destructive or irreversible
-- the next step requires secrets, credentials, or external accounts
-- the user explicitly asks to stop
-- remaining ambiguity blocks even a safe subset
-- no actionable backlog items remain
-- only blocked or externally gated work remains
+- The next step is destructive or irreversible
+- The next step requires secrets, credentials, or external accounts
+- The user explicitly asks to stop
+- Remaining ambiguity blocks even a safe subset
+- No actionable backlog items remain
+- Only blocked or externally gated work remains
 
 If a safe subset exists, continue with that subset.
 

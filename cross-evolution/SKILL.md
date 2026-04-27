@@ -2,7 +2,7 @@
 name: cross-evolution
 description: Horizontal Gene Transfer protocol for skills. Synchronizes best practices and architectural patterns across the skill library.
 metadata:
-  version: 1.0.0
+  version: 2.0.0
 ---
 
 # Cross-Evolution
@@ -64,7 +64,7 @@ When two genes conflict in the same skill, selective pressure creates a new hybr
 
 ### Mode 1: Scan & Audit
 
-'Automated': `bash "${SKILL_DIR}/scripts/audit-genes"`
+'Automated': `bash "${SKILL_DIR}/scripts/audit-genes.sh"`
 
 Produces: Gene × Skill matrix, fitness scores, genetic drift warnings, conflict alerts, recommendations, and discovered gene candidates (with registry sync).
 

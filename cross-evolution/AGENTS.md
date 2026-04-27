@@ -11,10 +11,9 @@
 
 ### Operating Principles
 
-- Use `scripts/audit-genes` for Mode 1 (Scan & Audit).
+- Use `scripts/audit-genes.sh` for Mode 1 (Scan & Audit).
 - `audit-genes` now auto-selects the first real skills root among `$SKILLS_HOME`, `~/.agents/skills`, the current working directory, and the local sibling directory.
 - Set `NO_COLOR=1` when audit output is consumed by CI or other log processors.
-- Use `scripts/_self-test` to verify skill integrity after changes.
 - Gene registry lives in `docs/genes.md` — single source of truth (markdown table, machine-parseable).
 - Recommendations are pragmatic: only suggest genes that make sense for the skill's domain.
 - Discovery phase must search for repeated patterns and sync valuable candidates into "Proposed Genes".
@@ -32,11 +31,3 @@
 - `awk '/^## Section/,/^## /'` range includes the start line — use `{f=1;next}` pattern instead.
 - `head -5` may miss `set -euo pipefail` if comments precede it — use `head -10`.
 - Registry sync must be idempotent — candidate genes cannot be appended twice.
-
-### Change History
-
-- `[Current]` Applied article insights: Complexity≠Value guard, Registry Hygiene constraint. Fixed broken genes.md tables (Deprecated/Extinct/Conflicts had malformed rows). Impact: gene registry now structurally valid; audit-genes won't choke on corrupt rows. Insight: when audit produces recommendations nobody acts on, the system is a Tool Shaped Object.
-- `[Previous]` Added self-test (30 assertions). Impact: full validation pipeline for audit-genes and registry integrity.
-- `[Legacy-0]` Added cross-platform (uname) + error-handling (trap ERR) to audit-genes. Impact: scripts work reliably on macOS.
-- `[Legacy-1]` Full redesign: genes.conf → docs/genes.md with lifecycle, fitness, drift, conflicts. Impact: single source of truth in markdown, machine-parseable.
-- `[Legacy-2]` Fixed markdown table parsing: strip leading/trailing pipes before awk split. Impact: eliminated field misalignment in audit output.

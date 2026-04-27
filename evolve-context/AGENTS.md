@@ -13,8 +13,7 @@
 
 ### Operating Principles
 
-- Use `validate-context` for all documentation audits.
-- Use `scripts/_self-test` to verify skill integrity after changes.
+- Use `validate-context.sh` for all documentation audits.
 - Prefer the ABC root control plane: `README.md` + `AGENTS.md` + `BACKLOG.md` + `CHANGELOG.md`, with subtree `README.md` files as human entrypoints and `docs/README.md` + `/docs` as the knowledge plane.
 - SKILL.md stays compact; `docs/protocols.md` contains only what SKILL.md does not.
 - `BACKLOG.md` keeps only remaining open, gated, or blocked work; close or narrow items in the same pass that changed reality.
@@ -43,3 +42,4 @@
 - Scripts use no file extension — shebangs (`#!/usr/bin/env bash`) define the interpreter.
 - `realpath --relative-to` is GNU-specific — prefer path-prefix stripping for docs-relative paths.
 - UTF-8 locales differ by platform (`en_US.UTF-8`, `C.UTF-8`, `C.utf8`) — include safe `C` fallback.
+- Validation logs may be consumed by CI or other agents — honor `NO_COLOR` whenever output is not meant for a terminal.

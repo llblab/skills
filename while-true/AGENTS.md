@@ -21,7 +21,3 @@
 - If neither `PLAN.md` nor `TODO.md` exists, do not invent project structure unless conventions clearly allow it.
 - Validation regressions outrank roadmap work in the next-step selection.
 - Duplicate follow-up items should be consolidated into one stronger canonical task.
-
-### Change History
-
-- `[Current]` Added structured agent context for whil. Impact: the skill now carries explicit conventions, continuation rules, and planning constraints for cross-skill audits.

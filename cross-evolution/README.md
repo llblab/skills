@@ -18,4 +18,5 @@ Horizontal Gene Transfer protocol for autonomous agent skills with automatic dis
 - [Skill Definition](SKILL.md)
 - [Gene Registry](docs/genes.md)
 - [Project Index](AGENTS.md)
+- [Changelog](CHANGELOG.md)
 - [Documentation](docs/README.md)
