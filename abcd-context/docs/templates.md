@@ -1,6 +1,6 @@
 # Entry Templates
 
-Default templates for new or empty files managed by the Context Evolution Protocol.
+Default templates for new or empty files managed by the ABCd Context protocol.
 If a file already has an established format, use **that** format instead.
 
 ## Root Starter (`README.md` + `AGENTS.md` + `BACKLOG.md` + `CHANGELOG.md`)

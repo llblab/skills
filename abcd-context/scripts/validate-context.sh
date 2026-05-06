@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Context Evolution Protocol Validator
+# ABCd Context Protocol Validator
 # Multi-index, bloat-aware validation for project documentation health
 
 set -euo pipefail
@@ -99,7 +99,7 @@ normalize_existing_path() {
     printf '%s/%s\n' "$(cd "$dir" && pwd -P)" "$base"
 }
 
-echo_progress "--- CONTEXT EVOLUTION PROTOCOL BASED VALIDATOR ---"
+echo_progress "--- ABCd CONTEXT PROTOCOL VALIDATOR ---"
 
 # --- Check 1: Index file detection (AGENTS.md | CLAUDE.md | CONTEXT.md) ---
 CONTEXT_FILE=""

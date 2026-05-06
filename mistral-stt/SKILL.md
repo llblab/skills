@@ -2,7 +2,7 @@
 name: mistral-stt
 description: Transcribe audio files using Mistral AI Voxtral.
 metadata:
-  version: 1.0.3
+  version: 1.0.4
 ---
 
 # Mistral STT Skill

@@ -2,7 +2,7 @@
 
 ## Overview
 
-`validate-context` is the automated documentation health checker for the Context Evolution Protocol.
+`validate-context` is the automated documentation health checker for the ABCd Context protocol.
 It validates root-memory integrity, README entrypoint reachability, link health, and documentation quality.
 
 ## Checks Performed

@@ -1,6 +1,6 @@
-# Documentation Index (evolve-context)
+# Documentation Index (abcd-context)
 
-Living index of all documentation in the `/docs` directory for the hybrid context protocol (`ABC + README tree + /docs`).
+Living index of all documentation in the `/docs` directory for the ABCd context protocol (`ABC + README tree + /docs`).
 
 ## Documents
 

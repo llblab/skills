@@ -1,6 +1,6 @@
-# Evolve Context Skill
+# ABCd Context Skill
 
-Self-evolving context protocol for agent projects.
+ABCd context protocol for agent projects.
 
 ## Platform Support
 

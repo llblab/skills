@@ -1,6 +1,6 @@
 # Protocols Reference
 
-Supplementary protocols for the Context Evolution Protocol.
+Supplementary protocols for the ABCd Context protocol.
 For the compact version, see [SKILL.md](../SKILL.md).
 
 ## Adaptation Rules
@@ -61,7 +61,7 @@ Rules:
 
 ## Context Restructuring Protocol
 
-When `evolve-context` is invoked on an existing project, it should not behave like a passive note appender.
+When `abcd-context` is invoked on an existing project, it should not behave like a passive note appender.
 
 Preferred order:
 
