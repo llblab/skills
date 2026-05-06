@@ -1,6 +1,6 @@
 {
   "name": "@llblab/skills",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Dreem Skills",
   "keywords": [
     "skills",
@@ -19,6 +19,7 @@
     "url": "git+https://github.com/llblab/skills.git"
   },
   "files": [
+    "coder-contract/",
     "cross-evolution/",
     "domain-dag/",
     "edge-tts/",
