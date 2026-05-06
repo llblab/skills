@@ -2,7 +2,7 @@
 name: domain-dag
 description: Validates and guides Domain DAG architecture for domain ownership, acyclic local dependency graphs, composition roots, boundary direction, and shared-bucket drift. Use when auditing, refactoring, or extending modular codebases.
 metadata:
-  version: 1.0.1
+  version: 1.0.2
 ---
 
 # Domain DAG

@@ -2,7 +2,7 @@
 name: evolve-context
 description: Self-evolving context protocol across ABC-split root files (AGENTS.md, BACKLOG.md, CHANGELOG.md), human entrypoint README.md files tree, and /docs. Use after meaningful project changes, backlog drift, documentation refactors, or when you want a forced context reconciliation pass.
 metadata:
-  version: 1.0.1
+  version: 1.0.2
 ---
 
 # Evolve Context
