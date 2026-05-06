@@ -1,0 +1,38 @@
+{
+  "name": "@llblab/skills",
+  "version": "1.0.0",
+  "description": "Dreem Skills",
+  "keywords": [
+    "skills",
+    "ai",
+    "agent",
+    "tts",
+    "stt"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/llblab/skills#readme",
+  "bugs": {
+    "url": "https://github.com/llblab/skills/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/llblab/skills.git"
+  },
+  "files": [
+    "cross-evolution/",
+    "domain-dag/",
+    "edge-tts/",
+    "evolve-context/",
+    "groq-stt/",
+    "mistral-stt/",
+    "while-true/"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "pi": {
+    "skills": [
+      "./"
+    ]
+  }
+}
