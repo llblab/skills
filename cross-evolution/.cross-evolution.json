@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "skill": "cross-evolution",
+  "declaredGenes": [
+    "atomic-independence",
+    "portability-lens",
+    "observation-over-score",
+    "progressive-disclosure",
+    "graceful-degradation"
+  ],
+  "ignoredRecommendations": [],
+  "observations": [
+    {
+      "kind": "concept",
+      "text": "Genes are deep transportable meme-atoms, not shallow file/script/documentation presence checks."
+    },
+    {
+      "kind": "architecture",
+      "text": "Machine-readable registry and skill-local research artifacts should live in JSON; markdown should explain meanings and protocol."
+    },
+    {
+      "kind": "ux",
+      "text": "Agent observation needs decomposed coverage/profiles instead of wide Gene x Skill matrices."
+    }
+  ],
+  "lastReviewed": "2026-05-07"
+}

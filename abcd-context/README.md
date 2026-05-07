@@ -9,6 +9,7 @@ ABCd context protocol for agent projects.
 
 ## Features
 
+- 'Project-Neutral Context Protocol': The skill is independent of any specific repository, project stack, or local overlay; it preserves the universal memory split and lets stricter local protocols add their own gates.
 - 'ABC Root Control Plane': `AGENTS.md` for durable protocol, `BACKLOG.md` for open work, `CHANGELOG.md` for completed delivery.
 - 'README Entrypoint Graph': Root and subtree `README.md` files are treated as human navigation surfaces that must stay current.
 - 'Adaptive AGENTS Templates': The skill now provides both lean and layered mature-project `AGENTS.md` starters, both with concrete meta-protocol principles instead of placeholder headings.

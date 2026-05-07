@@ -1,114 +1,84 @@
-# Gene Registry
+# Gene Registry Notes
 
-Living registry of all genes in the cross-evolution ecosystem.
-Parsed by `scripts/audit-genes.sh` — the markdown tables below are the single source of truth.
+The machine-readable registry lives in [`../genes.json`](../genes.json).
 
-## Gene Lifecycle
+This document explains the gene model for humans. It is no longer a wide machine-parsed table.
 
-```
-  Proposed → Active → Deprecated → Extinct
-                ↑          │
-                └──────────┘  (reactivation if needed)
-```
+## What Counts As A Gene
 
-- 'active' — gene is detected and scored during audits
-- 'deprecated' — gene still detected but flagged for removal; fitness weight = 0
-- 'extinct' — gene is ignored completely; kept in registry for historical record
+A gene is a deep, transportable, emergent meme-atom that changes a skill's cognition, operation, composition, or graceful degradation.
 
-Genes go extinct through 'genetic drift': if no skill carries a gene for 3+ consecutive audits,
-the agent should propose deprecation. After one more audit cycle with no adoption, it goes extinct.
+A valid gene should satisfy most of these checks:
 
-## Proposed Genes
+- It changes behavior, not only file layout.
+- It transfers across domains without naming a concrete project.
+- It has a recognizable failure mode when absent.
+- A skill can adopt it partially without losing its own purpose.
+- It makes the skill more valuable, not merely more compliant.
+- If deprecated, it leaves clearer boundaries rather than dead ceremony.
 
-Genes discovered automatically by `scripts/audit-genes.sh` during discovery phase.
-Promotion rule: a candidate must be present in at least 2 skills and absent from Active/Deprecated/Extinct.
+Superficial affordances such as `has docs`, `has changelog`, `has script`, or `has test command` are observations or evidence fields. They are not genes by themselves.
 
-| Gene ID        | Name           | Detect       | Args                   | Recommend   | Weight | Description                              | Proposed Since |
-| -------------- | -------------- | ------------ | ---------------------- | ----------- | ------ | ---------------------------------------- | -------------- |
-| python-tooling | Python tooling | grep_scripts | #!/usr/bin/env python3 | has_scripts | 1      | Skill provides Python automation scripts | 2026-03-10     |
+## Active Deep Genes
 
-## Active Genes
+### `atomic-independence`
 
-Detect types: `file`, `file_any` (comma-separated), `dir`, `grep_scripts` (ERE), `grep_docs` (ERE)
+Reusable skill instructions stay self-contained and avoid hard-coded sibling skills, concrete projects, private repositories, or stack mirrors.
 
-Recommend scopes: `all`, `has_scripts`, `none` (domain-specific)
+Absent failure mode: the skill becomes brittle glue for one local stack and cannot travel cleanly to another context.
 
-| Gene ID        | Name               | Detect       | Args                                                         | Recommend   | Weight | Description                                 |
-| -------------- | ------------------ | ------------ | ------------------------------------------------------------ | ----------- | ------ | ------------------------------------------- |
-| self-docs      | Self-documentation | file         | AGENTS.md                                                    | all         | 2      | Structured self-knowledge for agent context |
-| cross-platform | Cross-platform     | grep_scripts | Darwin\|macOS\|uname\|stat -f\|platform.system\|sys.platform | has_scripts | 2      | Scripts work on both Linux and macOS        |
-| error-handling | Error handling     | grep_scripts | trap\|set -e\|try:\|except\|raise                            | has_scripts | 1      | Graceful failure and diagnostics in scripts |
-| docs-dir       | Documentation      | dir          | docs                                                         | none        | 1      | Dedicated documentation directory           |
-| changelog      | Changelog          | file         | CHANGELOG.md                                                 | none        | 1      | Versioned change history                    |
-| voice          | Voice integration  | file_any     | scripts/say,scripts/say.sh                                   | none        | 1      | TTS output via voice-mode                   |
+### `portability-lens`
 
-## Deprecated Genes
+The skill separates transportable mechanism from local product, project, or stack-specific context before evolving instructions.
 
-Genes in twilight — still detected but weight = 0. Will go extinct if not reactivated.
+Absent failure mode: local lessons are mirrored into reusable text and silently narrow the skill's audience.
 
-| Gene ID        | Name            | Reason                                                     | Deprecated Since |
-| -------------- | --------------- | ---------------------------------------------------------- | ---------------- |
-| ui-metadata    | UI metadata     | No skills adopted; UI integration unneeded                 | 2026-02-12       |
-| lang-memory    | Language memory | No current carriers; voice language persistence not needed | 2026-04-29       |
-| auto-bootstrap | Auto-bootstrap  | No current carriers; bootstrap scripts are not standard    | 2026-04-29       |
+### `observation-over-score`
 
-## Extinct Genes
+Metrics and recommendations are treated as signals for agent judgment, not targets to maximize.
 
-Historical record. Not detected, not scored.
+Absent failure mode: the ecosystem optimizes dashboards and checklists instead of meaningful skill evolution.
 
-| Gene ID | Name | Cause of Extinction | Extinct Since |
-| ------- | ---- | ------------------- | ------------- |
+### `progressive-disclosure`
 
-## Gene Conflicts
+The skill starts with the smallest useful contract and adds ceremony only when discovered constraints earn it.
 
-When two genes are incompatible in the same skill, they produce 'selective pressure'
-for a new hybrid gene (recombination).
+Absent failure mode: the skill becomes overdesigned, hard to activate, and slower than the work it was meant to improve.
 
-| Gene A | Gene B | Conflict | Resolution |
-| ------ | ------ | -------- | ---------- |
+### `graceful-degradation`
 
-'Conflict resolution protocol:'
+The skill defines how to narrow, defer, stop, or degrade without leaving dead ceremony or false success.
 
-1. Detect both genes present in same skill
-2. Check conflict table — if conflict exists:
-   - Log warning: "Conflicting genes: {A} × {B} in {skill}"
-   - Suggest resolution from table
-   - If resolution = `recombine:{new_gene}` → propose new gene creation
-3. If no conflict registered → genes coexist peacefully
+Absent failure mode: when constraints appear, the skill either keeps pretending to work or collapses without preserving useful boundaries.
 
-## Fitness Scoring
+## Skill-Local Research Artifacts
 
-Each skill gets a 'fitness score' based on its gene expression:
+Each skill may carry `.cross-evolution.json`.
 
-```
-fitness = (Σ weight of present genes) / (Σ weight of applicable genes) × 100
+Use it for meaningful local research artifacts:
+
+- Declared genes that are intentionally present even if auto-detection is weak
+- Ignored recommendations with reasons
+- Observations and local constraints
+- Known conflicts or intentional absences
+- Last reviewed / observed timestamps
+
+Do not store transient dashboard noise just because it was measured once.
+
+## Observation Scripts
+
+```bash
+scripts/audit-cross-evolution.sh --root ~/.agents/skills
+scripts/inspect-skill.sh brainstorming --root ~/.agents/skills
+scripts/inspect-gene.sh atomic-independence --root ~/.agents/skills
 ```
 
-- 'Applicable' = genes where recommend ≠ `none`, OR gene is already present
-- A gene with recommend = `none` only counts if the skill already has it (reward, not penalty)
-- Deprecated genes (weight = 0) don't affect fitness
+Legacy `scripts/audit-genes.sh` now delegates to the JSON-first observer.
 
-| Fitness | Rating       | Action                   |
-| ------- | ------------ | ------------------------ |
-| 80–100% | 🟢 Excellent | Maintain                 |
-| 50–79%  | 🟡 Moderate  | Targeted HGT recommended |
-| 0–49%   | 🔴 Low       | Audit required           |
+## Lifecycle
 
-## Adding a Gene
+```text
+Proposed → Active → Deprecated → Extinct
+```
 
-Two paths:
-
-1. Automatic: discovery phase inserts candidate into 'Proposed Genes' table when thresholds are met.
-2. Manual: add a row directly to 'Active Genes' if immediate activation is needed.
-
-No code changes needed — `audit-genes.sh` parses this file.
-
-## Removing a Gene
-
-1. Move row from 'Active' to 'Deprecated' with reason and date
-2. After 1 audit cycle with no adoption → move to 'Extinct'
-
-## Related
-
-- [SKILL.md](../SKILL.md) — cross-evolution protocol
-- [AGENTS.md](../AGENTS.md) — operational knowledge
+Lifecycle is a human decision assisted by observation scripts. The agent should not promote shallow repeated features just because they are easy to detect.

@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "genes": [
+    {
+      "id": "atomic-independence",
+      "name": "Atomic independence",
+      "lifecycle": "active",
+      "weight": 3,
+      "recommend": "all",
+      "meaning": "Reusable skill instructions stay self-contained and avoid hard-coded sibling skills, concrete projects, private repositories, or stack mirrors.",
+      "failureMode": "The skill becomes brittle glue for one local stack and cannot travel cleanly to another context.",
+      "detect": [
+        {
+          "type": "grep_docs",
+          "args": "Atomic Independence|No Hard Coupling|independent|self-contained|standalone"
+        }
+      ]
+    },
+    {
+      "id": "portability-lens",
+      "name": "Portability lens",
+      "lifecycle": "active",
+      "weight": 3,
+      "recommend": "all",
+      "meaning": "The skill separates transportable mechanism from local product, project, or stack-specific context before evolving instructions.",
+      "failureMode": "Local lessons are mirrored into reusable text and silently narrow the skill's audience.",
+      "detect": [
+        {
+          "type": "grep_docs",
+          "args": "portable|portability|transportable|project-neutral|reusable"
+        }
+      ]
+    },
+    {
+      "id": "observation-over-score",
+      "name": "Observation over score",
+      "lifecycle": "active",
+      "weight": 2,
+      "recommend": "all",
+      "meaning": "Metrics and recommendations are treated as signals for agent judgment, not targets to maximize.",
+      "failureMode": "The ecosystem optimizes dashboards and checklists instead of meaningful skill evolution.",
+      "detect": [
+        {
+          "type": "grep_docs",
+          "args": "Fitness as Signal|observation|not optimization|not an optimization target|score.*signal"
+        }
+      ]
+    },
+    {
+      "id": "progressive-disclosure",
+      "name": "Progressive disclosure",
+      "lifecycle": "active",
+      "weight": 2,
+      "recommend": "all",
+      "meaning": "The skill starts with the smallest useful contract and adds ceremony only when discovered constraints earn it.",
+      "failureMode": "The skill becomes overdesigned, hard to activate, and slower than the work it was meant to improve.",
+      "detect": [
+        {
+          "type": "grep_docs",
+          "args": "Progressive Disclosure|smallest.*useful|smallest.*artifact|Add complexity only|earned"
+        }
+      ]
+    },
+    {
+      "id": "graceful-degradation",
+      "name": "Graceful degradation",
+      "lifecycle": "active",
+      "weight": 2,
+      "recommend": "all",
+      "meaning": "The skill defines how to narrow, defer, stop, or degrade without leaving dead ceremony or false success.",
+      "failureMode": "When constraints appear, the skill either keeps pretending to work or collapses without preserving useful boundaries.",
+      "detect": [
+        {
+          "type": "grep_docs",
+          "args": "graceful degradation|degrade|defer|stop conditions|Stop Conditions|fallback|non-goals"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "skill": "brainstorming",
+  "declaredGenes": [
+    "atomic-independence",
+    "portability-lens",
+    "progressive-disclosure",
+    "graceful-degradation"
+  ],
+  "ignoredRecommendations": [
+    {
+      "gene": "observation-over-score",
+      "reason": "Current skill has no metrics or audit surface; adding score-specific language would be artificial until such pressure appears."
+    }
+  ],
+  "observations": [
+    {
+      "kind": "boundary",
+      "text": "The skill composes by producing clean design truth and must not name local project or sibling-skill systems."
+    },
+    {
+      "kind": "portability",
+      "text": "Adaptation should be expressed as generic lenses such as context, portability, modularity, ownership, validation, and handoff."
+    }
+  ],
+  "lastReviewed": "2026-05-07"
+}
