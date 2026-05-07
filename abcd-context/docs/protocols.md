@@ -13,6 +13,9 @@ When writing to any managed file:
 - **If a file is empty or new**: use templates from [`templates.md`](./templates.md)
 - For `AGENTS.md`, choose between the lean and layered starters based on actual project maturity; do not force the layered version onto tiny projects or the lean version onto mature multi-surface repos
 - Do not leave the meta-protocol section as an empty heading: instantiate it with real governing principles, then evolve the list as constraints become explicit
+- Do not use Markdown tables for definition-list content such as `term → meaning`; use label/bullet definitions instead
+- When a real table is needed, keep source rows short: target 76 characters and hard max 80 characters for rows that contain the pipe delimiter.
+- Prefer compact tables plus expanding bullets below them when details would make table rows wide
 
 ## Root File Resolution
 
@@ -91,15 +94,13 @@ When post-task review reveals that implementation reality and the canonical plan
 
 ### Allowed backlog transitions
 
-| Transition        | Use when                                                                  |
-| ----------------- | ------------------------------------------------------------------------- |
-| `Close`           | The item's exit criteria are satisfied in reality                         |
-| `Narrow`          | Part landed; the item should now describe only the remaining work         |
-| `Split`           | One vague item turned into multiple concrete executable slices            |
-| `Retarget`        | The original wording no longer matches the actual remaining work          |
-| `Defer`           | The item remains valid but is no longer the best next slice               |
-| `Move to gated`   | The remaining work now depends on an external condition or approval       |
-| `Move to blocked` | The work is still desired but currently blocked by another unresolved gap |
+- `Close`: The item's exit criteria are satisfied in reality.
+- `Narrow`: Part landed; the item should now describe only the remaining work.
+- `Split`: One vague item turned into multiple concrete executable slices.
+- `Retarget`: The original wording no longer matches the actual remaining work.
+- `Defer`: The item remains valid but is no longer the best next slice.
+- `Move to gated`: Remaining work now depends on an external condition or approval.
+- `Move to blocked`: Work is still desired but blocked by another unresolved gap.
 
 ### Rules
 
@@ -158,6 +159,33 @@ When duplicate documentation is detected:
 3. Merge content: preserve unique info, resolve contradictions with implementation truth
 4. Delete or deprecate the weaker document
 5. Update `docs/README.md` and cross-references
+
+## Project-Local Overlay Coexistence
+
+`abcd-context` owns generic context hygiene, not every repository-specific gate.
+It should cooperate with stricter local overlays without duplicating their rules.
+
+`ABCd responsibility`:
+
+- Root state split: durable protocol, open work, completed delivery.
+- README entrypoint reachability and docs index coverage.
+- Link health, context freshness, bloat signals, and Markdown shape warnings.
+- Generic backlog/changelog drift detection.
+
+`Local overlay responsibility`:
+
+- Product-specific release gates.
+- Architecture or domain ownership rules.
+- Stack-specific validation, tests, deployment, and security checks.
+- Organization-specific style rules stricter than ABCd defaults.
+
+`Handoff rule`: If a local overlay exists, run ABCd first to verify the context
+surface, then run the stricter overlay for project-specific gates. Do not copy
+local overlay rules into ABCd unless they become portable across projects.
+
+`Override rule`: ABCd style warnings may be disabled or tuned when a project has
+a deliberate local convention. Prefer environment/config knobs over editing the
+portable validator for one repository.
 
 ## Validation Checklist (ON_REQUEST mode)
 

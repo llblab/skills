@@ -2,7 +2,7 @@
 name: cross-evolution
 description: Horizontal Gene Transfer protocol for skills. Synchronizes best practices and architectural patterns across the skill library.
 metadata:
-  version: 1.0.8
+  version: 1.0.9
 ---
 
 # Cross-Evolution
@@ -31,6 +31,7 @@ Skills and their scripts must be 'atomic'.
 - 'Fitness as Signal': Fitness scores are observation hints, never goals.
 - 'Portability Guard': Before adding project-specific adaptation to a skill, lift it into a project-neutral lens or keep it in external context instead.
 - 'Depth Gate': Reject shallow genes that only detect files, scripts, or documentation furniture unless they express a deeper reusable operating pattern.
+- 'Execution/Envelope Separation': When a skill discovers async jobs, process managers, UI status, queues, or cancellation, first ask whether those belong in a local runtime envelope while the skill keeps only portable domain semantics.
 
 ### 3. Gene-Meme Equivalence
 
@@ -99,18 +100,18 @@ Recombination is preferred over checklist accumulation when two good patterns cr
 Move the ecosystem from wide markdown tables toward observable local state:
 
 ```text
-registry JSON          → machine-readable gene definitions
-skill-local JSON       → research artifacts and local decisions
-markdown docs          → protocol explanation and human-readable meanings
-observation scripts    → audit, inspect skill, inspect gene
-agent                  → final evolutionary decision-maker
+registry JSON        → machine-readable gene definitions
+skill-local JSON     → research artifacts and local decisions
+markdown docs        → protocol explanation and human-readable meanings
+observation scripts  → audit, inspect skill, inspect gene
+agent                → final evolutionary decision-maker
 ```
 
 Suggested files:
 
 ```text
-genes.json                    # local machine-readable registry
-.cross-evolution.json          # per skill
+genes.json                         # local machine-readable registry
+.cross-evolution.json              # per skill
 scripts/audit-cross-evolution.sh
 scripts/audit-cross-evolution.mjs
 scripts/inspect-skill.sh
@@ -153,10 +154,7 @@ Useful JSON-first flags:
 
 Inject missing/extra genes into a target skill. Prioritize by weight × fitness impact.
 
-'Value guard': Before transferring a gene, ask: "Does this gene solve a real problem
-the skill has encountered, or are we just making the fitness number go up?" If the latter —
-skip the transfer. Fitness score is a heuristic, not a goal. Optimizing the score
-instead of skill quality is the Farmville trap.
+'Value guard': Before transferring a gene, ask: "Does this gene solve a real problem the skill has encountered, or are we just making the fitness number go up?" If the latter — skip the transfer. Fitness score is a heuristic, not a goal. Optimizing the score instead of skill quality is the Farmville trap.
 
 ### Mode 3: Speciation (Creation)
 

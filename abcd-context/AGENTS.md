@@ -23,8 +23,12 @@
 
 ### Discovered Constraints
 
-- 'Farmville Trap': If the protocol generates more documentation updates than actually prevented mistakes, it has become a Tool Shaped Object. Measure value by errors avoided, not files touched. | Trigger: Post-task protocol fires but produces no actionable insight | Action: Skip the update. Silence is a valid output.
-- 'Progressive Disclosure over Always-On': ALWAYS_ON mode costs agent attention on every turn even when irrelevant. Prefer POST_TASK as default. | Trigger: Agent tracking overhead exceeds insight value | Action: Default to POST_TASK; use ALWAYS_ON only when explicitly requested.
+- 'Farmville Trap': If the protocol generates more documentation updates than actually prevented mistakes, it has become a Tool Shaped Object. Measure value by errors avoided, not files touched.
+  - Trigger: Post-task protocol fires but produces no actionable insight.
+  - Action: Skip the update. Silence is a valid output.
+- 'Progressive Disclosure over Always-On': ALWAYS_ON mode costs agent attention on every turn even when irrelevant. Prefer POST_TASK as default.
+  - Trigger: Agent tracking overhead exceeds insight value.
+  - Action: Default to POST_TASK; use ALWAYS_ON only when explicitly requested.
 - 'A2 applies to templates': Context templates must start minimal — imposing principles and ceremony on a new project violates Axiom A2. Template is a skeleton that grows with the project, not a manifesto.
 - 'Self-contradiction kills trust': Absolute rules must survive contact with every other rule in the system. "Mandatory" + "skip if empty" is a contradiction — use conditional language.
 - 'Durable/open/completed state must not collapse': If the same reality is tracked simultaneously in `AGENTS.md`, `BACKLOG.md`, and `CHANGELOG.md`, the protocol loses truthfulness. Route each fact to exactly one root file.

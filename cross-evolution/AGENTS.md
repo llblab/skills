@@ -17,6 +17,7 @@
 - 'Portable Standards': Promote repeated practices into transportable standards when they can serve multiple projects or skills; skills count as projects when they own protocols, docs, artifacts, or release discipline.
 - 'Meta-Protocoling': Preserve the process behind the process through explicit meta-comments and meta-protocols when a rule needs intent, scope, evolution, or degradation guidance.
 - 'Skill Root Cleanliness': The skills root must not contain Markdown control files such as `AGENTS.md`, `BACKLOG.md`, `CHANGELOG.md`, or `README.md`; pi treats root Markdown files as candidate skills and reports `description is required` conflicts.
+- 'Execution/Envelope Separation': Skills should keep domain execution semantics separate from local lifecycle envelopes such as background jobs, status views, cancellation, and observability adapters.
 
 ### Operating Principles
 
@@ -29,12 +30,17 @@
 
 ### Discovered Constraints
 
-- 'Complexity ≠ Value': Gene weights, fitness scores, drift detection, and conflict checks are powerful — but only if they produce real improvements in skills. If the audit runs and generates recommendations nobody acts on, the system is a Tool Shaped Object. Ask: does this gene transfer actually prevent a bug or improve UX? | Trigger: Audit produces recommendations with no follow-up | Action: Prune genes with zero adoption. Fewer high-impact genes beat many theoretical ones.
-- 'Registry Hygiene': Markdown table rows must match their header column count exactly. When moving genes between lifecycle stages (Active → Deprecated → Extinct), copy only the relevant columns for the target table, not the full Active row. | Trigger: Malformed tables in genes.md | Action: Validate table structure after any registry mutation.
+- 'Complexity ≠ Value': Gene weights, fitness scores, drift detection, and conflict checks are powerful — but only if they produce real improvements in skills. If the audit runs and generates recommendations nobody acts on, the system is a Tool Shaped Object. Ask whether this gene transfer prevents a bug or improves UX.
+  - Trigger: Audit produces recommendations with no follow-up.
+  - Action: Prune genes with zero adoption. Fewer high-impact genes beat many theoretical ones.
+- 'Registry Hygiene': Markdown table rows must match their header column count exactly. When moving genes between lifecycle stages, copy only the relevant columns for the target table, not the full Active row.
+  - Trigger: Malformed tables in genes.md.
+  - Action: Validate table structure after any registry mutation.
 - KISS: Not every skill needs every gene.
 - Atomic Independence: Logic like `if command -v say` inside a script is a violation.
-- Markdown table `|` conflicts with regex `|` — use `\|` in Args column, script converts via `s/\\|/|/g`.
-- `awk -F ' \\| '` splits by `|` (with spaces), preserving `\|` inside regex args.
+- Markdown table pipes conflict with regex alternation pipes in registry rows.
+  Use escaped regex pipes in Args; the script converts them back.
+- `awk -F ' \\| '` splits by spaced table pipes, preserving escaped regex pipes.
 - Leading/trailing `|` in markdown rows must be stripped before field splitting.
 - `xargs` eats backslashes — use `sed 's/^ *//;s/ *$//'` for trimming instead.
 - `awk '/^## Section/,/^## /'` range includes the start line — use `{f=1;next}` pattern instead.

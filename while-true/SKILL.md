@@ -2,7 +2,7 @@
 name: while-true
 description: Continuous execution-loop protocol — assess reality, refine the plan, execute the next task, repeat until a real stop condition is reached.
 metadata:
-  version: 1.0.8
+  version: 1.0.9
 ---
 
 # While True
@@ -73,7 +73,7 @@ The single operation performed at every loop boundary.
 - Prefer targeted updates over wholesale plan rewrites
 - Do not reorganize the plan cosmetically or split tasks unless it improves execution clarity
 - If an existing plan item already captures the issue, refine it instead of creating a near-duplicate
-- Every checkpoint must reconcile the just-executed slice back into the plan with an explicit state transition: `done` | `narrowed` | `split` | `blocked` | `deferred`
+- Every checkpoint must reconcile the just-executed slice back into the plan with an explicit state transition: `done`, `narrowed`, `split`, `blocked`, or `deferred`.
 - If a task stays open after meaningful progress, rewrite it to describe the remaining work instead of leaving stale pre-iteration wording untouched
 - Epics are allowed, but the currently active next slice must be represented concretely under the epic before continuing execution
 - Do not leave evergreen maintenance disciplines as unchecked backlog items; move those into durable instructions or architecture/spec docs instead
@@ -91,8 +91,8 @@ Capture only material items: newly discovered tasks, missing validation/regressi
 
 For each material item, decide both:
 
-1. **Insight class** — `done` | `follow-up required` | `future research` | `assumption/risk`
-2. **Plan effect** — `close existing` | `narrow existing` | `split existing` | `add sibling` | `defer existing` | `move to blocked/gated`
+1. **Insight class** — `done`, `follow-up required`, `future research`, or `assumption/risk`.
+2. **Plan effect** — `close existing`, `narrow existing`, `split existing`, `add sibling`, `defer existing`, or `move to blocked/gated`.
 
 If the iteration changed the true exit criteria of the current task, that is not a note — it is a required plan edit.
 

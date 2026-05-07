@@ -17,7 +17,9 @@
 
 ### Discovered Constraints
 
-- 'Checkpoint Without Continuation Is Cosmetic': A perfect TODO update that does not drive the next action is just plan theater. | Trigger: iteration ends after plan sync despite a safe next task | Action: select the highest-priority actionable item and continue.
+- 'Checkpoint Without Continuation Is Cosmetic': A perfect TODO update that does not drive the next action is just plan theater.
+  - Trigger: Iteration ends after plan sync despite a safe next task.
+  - Action: Select the highest-priority actionable item and continue.
 - If neither `PLAN.md` nor `TODO.md` exists, do not invent project structure unless conventions clearly allow it.
 - Validation regressions outrank roadmap work in the next-step selection.
 - Duplicate follow-up items should be consolidated into one stronger canonical task.

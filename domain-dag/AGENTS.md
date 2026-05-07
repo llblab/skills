@@ -19,6 +19,12 @@
 
 ### Discovered Constraints
 
-- Shared-bucket names are heuristic, not proof of bad architecture. | Trigger — `utils`, `types`, `shared`, or similar names appear | Action — audit ownership and either move content to an owner or allow the exception.
-- Header labels are a navigation aid, not the graph itself. | Trigger — a project lacks module headers but has clean boundaries | Action — warn by default; use strict or config only when headers are part of the adopted standard.
-- Layer checks must be opt-in. | Trigger — generic validation across unknown projects | Action — validate universal graph invariants by default and enforce project-specific direction only from config.
+- Shared-bucket names are heuristic, not proof of bad architecture.
+  - Trigger: `utils`, `types`, `shared`, or similar names appear.
+  - Action: Audit ownership and either move content to an owner or allow the exception.
+- Header labels are a navigation aid, not the graph itself.
+  - Trigger: A project lacks module headers but has clean boundaries.
+  - Action: Warn by default; use strict/config only when headers are adopted standard.
+- Layer checks must be opt-in.
+  - Trigger: Generic validation across unknown projects.
+  - Action: Validate universal graph invariants by default; enforce local direction only from config.

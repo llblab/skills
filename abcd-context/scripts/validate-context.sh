@@ -41,6 +41,9 @@ PROJECT_ROOT="${VALIDATE_CONTEXT_ROOT:-$(pwd)}"
 PROJECT_ROOT="$(cd "$PROJECT_ROOT" && pwd -P)"
 OUTPUT_JSON=false
 [[ "${1:-}" == "--json" ]] && OUTPUT_JSON=true
+MARKDOWN_SHAPE_CHECKS="${ABCD_MARKDOWN_SHAPE_CHECKS:-1}"
+TABLE_TARGET_WIDTH="${ABCD_TABLE_TARGET_WIDTH:-76}"
+TABLE_HARD_MAX_WIDTH="${ABCD_TABLE_HARD_MAX_WIDTH:-80}"
 INDEX_CANDIDATES=("AGENTS.md" "CLAUDE.md" "CODEX.md" "GEMINI.md" "CONTEXT.md")
 PLAN_CANDIDATES=("BACKLOG.md" "TODO.md" "PLAN.md" "ROADMAP.md")
 LINK_TARGETS_FILE="$(mktemp)"
@@ -197,6 +200,22 @@ if [[ -n "$CONTEXT_FILE" && -f "$CHANGELOG_FILE" ]] && grep -q "Change History" 
     log_warn "Index file contains Change History while CHANGELOG.md exists — consider separating durable rules from delivery history"
 else
     log_pass "Root state split looks coherent"
+fi
+
+if [[ -n "$PLAN_FILE" && -f "$PLAN_FILE" && -f "$CHANGELOG_FILE" ]]; then
+    ROOT_DRIFT_COUNT=0
+    while IFS= read -r label; do
+        [[ -n "$label" ]] || continue
+        search_label="${label%:}"
+        if grep -qiF "$search_label" "$CHANGELOG_FILE" 2>/dev/null; then
+            log_warn "Possible root-state drift: open backlog slice also appears in CHANGELOG.md: $label"
+            ROOT_DRIFT_COUNT=$((ROOT_DRIFT_COUNT + 1))
+        fi
+    done < <(grep -E '^- \[ \] `[^`]+`' "$PLAN_FILE" 2>/dev/null | sed -E 's/^- \[ \] `([^`]+)`.*/\1/')
+
+    if [[ $ROOT_DRIFT_COUNT -eq 0 ]]; then
+        log_pass "No obvious BACKLOG/CHANGELOG drift detected"
+    fi
 fi
 
 # Check 4: Link validation with specific reporting
@@ -507,6 +526,89 @@ done < <(find "$PROJECT_ROOT/docs" -type f -name "*.md" -print0 2>/dev/null)
 
 if [[ "$HAS_LATEX" == "false" ]]; then
     log_pass "No LaTeX syntax (GitHub compatible)"
+fi
+
+# --- Check 8b: Markdown shape checks ---
+if [[ "$MARKDOWN_SHAPE_CHECKS" != "0" ]]; then
+    echo_progress "Checking Markdown shape..."
+    HAS_MARKDOWN_SHAPE_WARNINGS=false
+
+    while IFS= read -r -d '' file; do
+        [[ -f "$file" ]] || continue
+        rel_file="${file#$PROJECT_ROOT/}"
+
+        while IFS=: read -r line_num line_len line_text; do
+            [[ -n "$line_num" ]] || continue
+            if [[ "$line_len" -gt "$TABLE_HARD_MAX_WIDTH" ]]; then
+                log_warn "Wide Markdown table row: $rel_file:$line_num (${line_len} chars, max ${TABLE_HARD_MAX_WIDTH})"
+                HAS_MARKDOWN_SHAPE_WARNINGS=true
+            elif [[ "$line_len" -gt "$TABLE_TARGET_WIDTH" ]]; then
+                log_info "Near-wide Markdown table row: $rel_file:$line_num (${line_len} chars, target ${TABLE_TARGET_WIDTH})"
+            fi
+        done < <(
+            awk '/^```/{f=!f; next} !f && /^ *\|/ {print FNR ":" length($0) ":" $0}' "$file"
+        )
+
+        if awk '
+            /^```/ {f=!f; next}
+            f {next}
+            /^ *\|/ {
+                row=$0
+                gsub(/^ *\|/, "", row)
+                gsub(/\| *$/, "", row)
+                n=split(row, cells, "|")
+                if (n == 2) {
+                    left=tolower(cells[1])
+                    right=tolower(cells[2])
+                    gsub(/[^a-z]/, "", left)
+                    gsub(/[^a-z]/, "", right)
+                    if ((left ~ /^(term|field|parameter|document|check|decision|error|layer)$/) &&
+                        (right ~ /^(meaning|description|purpose|default|question|handling|status)$/)) {
+                        found=1
+                    }
+                }
+            }
+            END {exit found ? 0 : 1}
+        ' "$file"; then
+            log_warn "Definition-list style table: $rel_file (prefer label/bullet definitions)"
+            HAS_MARKDOWN_SHAPE_WARNINGS=true
+        fi
+    done < <(
+        find "$PROJECT_ROOT" \
+            \( \
+                -name "node_modules" -o \
+                -name "target" -o \
+                -name "build" -o \
+                -name "dist" -o \
+                -name "vendor" -o \
+                -name "obj" -o \
+                -name "out" -o \
+                -name "bin" -o \
+                -name "bower_components" -o \
+                -name "site-packages" -o \
+                -name "coverage" -o \
+                -name "Pods" -o \
+                -name ".git" -o \
+                -name ".cache" -o \
+                -name ".github" -o \
+                -name ".idea" -o \
+                -name ".next" -o \
+                -name ".pytest_cache" -o \
+                -name ".tox" -o \
+                -name ".venv" -o \
+                -name ".vscode" -o \
+                -name "venv" -o \
+                -name "temp" -o \
+                -name "tmp" -o \
+                -path "*/docs/_build" \
+            \) -prune -o -type f -name "*.md" -print0
+    )
+
+    if [[ "$HAS_MARKDOWN_SHAPE_WARNINGS" == "false" ]]; then
+        log_pass "Markdown shape checks passed"
+    fi
+else
+    log_info "Markdown shape checks disabled"
 fi
 
 # --- Check 9: Recent activity (freshness) ---

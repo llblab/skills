@@ -50,7 +50,9 @@ Even the lean starter should include a minimal meta-protocol layer so the file c
 
 ## Durable Conventions
 
-- '[label]': [Constraint or rule] | Trigger: [cause] | Action: [what to do]
+- '[label]': [Constraint or rule]
+  - Trigger: [cause]
+  - Action: [what to do]
 ```
 
 ### `AGENTS.md` — Layered Mature Project
@@ -177,9 +179,8 @@ Living index of all documentation in the `/docs` directory.
 
 ## Documents
 
-| Document                     | Description                                    |
-| ---------------------------- | ---------------------------------------------- |
-| [filename.md](./filename.md) | Brief description of what this document covers |
+- [`filename.md`](./filename.md): Brief description of what this document
+  covers.
 ```
 
 ## Project Document Template

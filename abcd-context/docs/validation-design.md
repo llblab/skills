@@ -7,20 +7,31 @@ It validates root-memory integrity, README entrypoint reachability, link health,
 
 ## Checks Performed
 
-| #   | Check                | Type    | Description                                                                                     |
-| --- | -------------------- | ------- | ----------------------------------------------------------------------------------------------- |
-| 1   | Index file detection | Error   | Scans for `AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `GEMINI.md`, or `CONTEXT.md`                    |
-| 2   | README connectivity  | Warning | Verifies root `README.md` links to the control plane and `docs/README.md`                       |
-| 3   | Core structure       | Warning | Verifies numbered project sections or skill-style key sections in `AGENTS.md`                   |
-| 4   | Root state split     | Warning | Detects canonical open-work file, `CHANGELOG.md`, and duplicate delivery history in `AGENTS.md` |
-| 5   | Link validation      | Error   | Validates all relative links in all `.md` files, skipping code blocks                           |
-| 6   | README reachability  | Warning | Detects subtree `README.md` files with no inbound markdown links                                |
-| 7   | Meta-Protocol        | Warning | Checks for Meta-Protocol Principles in the durable protocol file                                |
-| 8   | Bloat analysis       | Mixed   | Heuristic analysis of index-file health                                                         |
-| 9   | LaTeX detection      | Error   | Flags LaTeX syntax in `/docs/` (GitHub doesn't render it)                                       |
-| 10  | Freshness            | Warning | Checks durable protocol file modification age (>30 days = stale)                                |
-| 11  | Docs directory       | Warning | Verifies `/docs` directory exists                                                               |
-| 12  | Docs index coverage  | Warning | Detects orphans and phantoms in `docs/README.md`                                                |
+1. `Index file detection`: Error. Scans for `AGENTS.md`, `CLAUDE.md`,
+   `CODEX.md`, `GEMINI.md`, or `CONTEXT.md`.
+2. `README connectivity`: Warning. Verifies root `README.md` links to the
+   control plane and `docs/README.md`.
+3. `Core structure`: Warning. Verifies numbered project sections or skill-style
+   key sections in `AGENTS.md`.
+4. `Root state split`: Warning. Detects canonical open-work file,
+   `CHANGELOG.md`, duplicate delivery history in `AGENTS.md`, and open backlog
+   slice labels that also appear in `CHANGELOG.md`.
+5. `Link validation`: Error. Validates relative links in `.md` files, skipping
+   code blocks.
+6. `README reachability`: Warning. Detects subtree `README.md` files with no
+   inbound markdown links.
+7. `Meta-Protocol`: Warning. Checks for Meta-Protocol Principles in the durable
+   protocol file.
+8. `Bloat analysis`: Mixed. Heuristic analysis of index-file health.
+9. `LaTeX detection`: Error. Flags LaTeX syntax in `/docs` because GitHub does
+   not render it.
+10. `Freshness`: Warning. Checks durable protocol file modification age.
+    More than 30 days is stale.
+11. `Docs directory`: Warning. Verifies `/docs` directory exists.
+12. `Docs index coverage`: Warning. Detects orphans and phantoms in
+    `docs/README.md`.
+13. `Markdown shape`: Warning. Detects wide Markdown table source rows and
+    definition-list style tables that should usually be label/bullet definitions.
 
 ## Bloat Heuristics
 
@@ -43,7 +54,10 @@ The validator prefers the organic ABC standard but stays compatible with inherit
 - `BACKLOG.md` passes as the preferred canonical open-work file
 - `TODO.md`, `PLAN.md`, and `ROADMAP.md` are accepted as fallback aliases with a warning
 - `CHANGELOG.md` is expected for completed delivery history
-- If `AGENTS.md` still contains a `Change History` section while `CHANGELOG.md` exists, the validator warns about state duplication
+- If `AGENTS.md` still contains a `Change History` section while `CHANGELOG.md`
+  exists, the validator warns about state duplication
+- If an unchecked backlog slice label also appears in `CHANGELOG.md`, the
+  validator warns about possible open/completed state drift
 
 ## README Reachability Details
 
@@ -52,6 +66,18 @@ The validator treats subtree `README.md` files as human entrypoints, not decorat
 - Root `README.md` is exempt from inbound-link checks
 - A subtree `README.md` should be linked from at least one other markdown file
 - Zero inbound markdown links usually means the entrypoint is isolated and likely stale or undiscoverable
+
+## Markdown Shape Details
+
+Markdown shape checks are style warnings, not hard failures by default.
+
+- `ABCD_MARKDOWN_SHAPE_CHECKS=0` disables the check for project-local overlays.
+- `ABCD_TABLE_TARGET_WIDTH` sets the soft target, default `76`.
+- `ABCD_TABLE_HARD_MAX_WIDTH` sets the warning threshold, default `80`.
+- Wide rows are detected only on source lines that begin with a Markdown table
+  pipe outside fenced code blocks.
+- Definition-list tables are detected by common two-column headers such as
+  `Term/Meaning`, `Field/Description`, and `Parameter/Purpose`.
 
 ## Link Validation Details
 
@@ -63,6 +89,29 @@ The validator treats subtree `README.md` files as human entrypoints, not decorat
 - Reports file path and line number for each broken link
 - Scans all `.md` files under project root, excluding common generated/vendor paths
 - Uses UTF-8 locale when available, with safe `C` fallback
+
+## Dual Runtime
+
+`validate-context.sh` is the Bash implementation.
+`validate-context.mjs` is the Node.js twin for cross-platform environments,
+especially Windows systems where Node is more likely than Bash.
+
+The two scripts are intended to be interchangeable for core validation. Given
+the same root and environment settings, both should return the same pass/fail
+class and warning/error counts. Bash remains simple and inspectable; Node
+provides a portable modular path for future checks that need richer JSON,
+networking, or WebSocket support.
+
+`Parity bug`: If one runtime reports a core validation problem and the other does
+not, treat it as an implementation bug unless the check is explicitly documented
+as runtime-specific.
+
+## Regression Test
+
+`tests`: `scripts/_self-test.mjs` runs both runtimes against
+[`fixtures/abcd-project`](../fixtures/abcd-project/README.md), a small ABCd-style
+project with root context files, reachable docs, backlog, changelog, and compact
+Markdown shape.
 
 ## Usage
 

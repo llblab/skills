@@ -111,6 +111,22 @@ Absent failure mode: useful gene-memes remain isolated in their origin context, 
 
 Recommendation mode: optional/reward-only. Adopt it in skills or standards that intentionally move patterns between contexts.
 
+### `execution-envelope-separation`
+
+A skill keeps its domain execution semantics separate from local lifecycle envelopes such as background jobs, status views, cancellation, and observability adapters.
+
+Absent failure mode: the skill absorbs local runtime plumbing, grows broad coordinators, and stops being portable or atomic.
+
+Recommendation mode: optional/reward-only. Adopt it when a skill delegates work to subagents, jobs, queues, UI adapters, or local process managers. The skill should define domain semantics and adapter contracts; the local runtime should own lifecycle mechanics.
+
+### `dual-runtime-scripts`
+
+Portable skill automation may provide complementary Bash and Node.js implementations when the script is core infrastructure or needs cross-platform reach.
+
+Absent failure mode: Unix-only Bash scripts block Windows users, while Node-only scripts lose the simplicity and inspectability of shell fallbacks.
+
+Recommendation mode: optional/reward-only. Adopt it for important validators, network/WebSocket tools, package-facing scripts, or skills expected to run on Windows. Treat Bash and JS as complementary strands: one may launch, fallback, or cross-check the other.
+
 ## Skill-Local Research Artifacts
 
 Each skill may carry `.cross-evolution.json`.
