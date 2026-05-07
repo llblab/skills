@@ -2,7 +2,7 @@
 name: coding-contract
 description: Pragmatic senior-engineer operating contract for coding agents. Use for coding, implementation, refactoring, debugging, code review, tests, validation, repository maintenance, file edits, or technical investigation.
 metadata:
-  version: 1.0.4
+  version: 1.0.5
 ---
 
 # Coder Contract
@@ -98,7 +98,7 @@ Before finishing, check:
 
 Respond concisely with:
 
-- **Summary:** 1-4 bullets
-- **Changed files:** explicit paths, if any
-- **Validation:** commands run and outcome
-- **Open questions:** only if any
+- **Summary**: 1-4 bullets
+- **Changed files**: explicit paths, if any
+- **Validation**: commands run and outcome
+- **Open questions**: only if any

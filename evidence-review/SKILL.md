@@ -2,7 +2,7 @@
 name: evidence-review
 description: Evidence-grounded review for code, diffs, PRs, documents, plans, specs, and architecture. Use for evidence review, review, code review, quick review, sanity check, quality check, architecture review, production readiness, security review, scaling review, document review, evaluate, or check.
 metadata:
-  version: 1.0.4
+  version: 1.0.5
 ---
 
 # Evidence Review
@@ -28,7 +28,7 @@ If the mode is ambiguous and no safe default exists, ask the user to choose Quic
 
 ## Phase 1: Scope
 
-**Entry:** The user asked for a review or provided a target.
+**Entry**: The user asked for a review or provided a target.
 
 Determine target and mode:
 
@@ -47,11 +47,11 @@ Gather minimum context:
 5. Identify risk areas such as auth, secrets, validation, money, migrations, concurrency, privacy, and external APIs.
 6. For architecture mode, identify team constraints, target scale, deployment shape, and critical flows.
 
-**Exit:** Scope, mode, conventions, and risk areas are known.
+**Exit**: Scope, mode, conventions, and risk areas are known.
 
 ## Phase 2: Inspect
 
-**Entry:** Scope is known.
+**Entry**: Scope is known.
 
 Review from evidence, not impressions.
 
@@ -82,7 +82,7 @@ For architecture, inspect:
 - Scaling bottlenecks: connection pools, queues, synchronous external calls, hot queries, CPU work, and single points of failure.
 - Team fit: a correct recommendation that the team cannot operate is not a good recommendation.
 
-**Exit:** Candidate findings exist with supporting evidence.
+**Exit**: Candidate findings exist with supporting evidence.
 
 ## Architecture 90/10 Lens
 
@@ -150,7 +150,7 @@ When writing an artifact, include checked files, commands, assumptions, uncertai
 
 ## Phase 3: Challenge
 
-**Entry:** Candidate findings exist.
+**Entry**: Candidate findings exist.
 
 Challenge every finding:
 
@@ -164,11 +164,11 @@ Drop findings that cannot survive this challenge.
 Mark uncertainty explicitly instead of pretending confidence.
 For high-stakes reviews, perform an independent second pass or subagent pass when available, then reconcile disagreements against evidence.
 
-**Exit:** Findings are verified, deduplicated, and severity-ranked.
+**Exit**: Findings are verified, deduplicated, and severity-ranked.
 
 ## Phase 4: Report
 
-**Entry:** Findings are verified.
+**Entry**: Findings are verified.
 
 Report only useful signal. Put the most important issues first.
 
@@ -204,11 +204,11 @@ Omit empty sections.
 If no issues are found, say so clearly and name what was checked.
 Do not invent problems to look useful.
 
-**Exit:** Review delivered with a clear verdict.
+**Exit**: Review delivered with a clear verdict.
 
 ## Phase 5: Handoff
 
-**Entry:** Review has been delivered.
+**Entry**: Review has been delivered.
 
 Offer the next step without doing it automatically:
 

@@ -10,7 +10,7 @@ When writing to any managed file:
 - **Respect what exists.** Read current format before writing.
 - **Match tone and structure when the current shape is already honest.** Bullets → bullets. Tables → tables.
 - **Restructure when the current shape is dishonest or too flat.** If an existing file obscures the real hierarchy, evolve it toward the template instead of preserving accidental formatting.
-- **If a file is empty or new:** use templates from [`templates.md`](./templates.md)
+- **If a file is empty or new**: use templates from [`templates.md`](./templates.md)
 - For `AGENTS.md`, choose between the lean and layered starters based on actual project maturity; do not force the layered version onto tiny projects or the lean version onto mature multi-surface repos
 - Do not leave the meta-protocol section as an empty heading: instantiate it with real governing principles, then evolve the list as constraints become explicit
 

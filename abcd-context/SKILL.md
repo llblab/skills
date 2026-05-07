@@ -2,7 +2,7 @@
 name: abcd-context
 description: ABCd context protocol across ABC root files (AGENTS.md, BACKLOG.md, CHANGELOG.md), human entrypoint README.md files tree, and /docs. Use after meaningful project changes, backlog drift, documentation refactors, or when you want a forced context reconciliation pass.
 metadata:
-  version: 1.0.4
+  version: 1.0.5
 ---
 
 # ABCd Context
