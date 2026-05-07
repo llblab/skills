@@ -22,7 +22,7 @@ Horizontal Gene Transfer protocol for autonomous agent skills with gene-meme equ
 
 ```bash
 scripts/audit-cross-evolution.sh --root ~/.agents/skills
-scripts/inspect-skill.sh brainstorming --root ~/.agents/skills
+scripts/inspect-skill.sh brain-storm --root ~/.agents/skills
 scripts/inspect-gene.sh atomic-independence --root ~/.agents/skills
 ```
 

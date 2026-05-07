@@ -2,7 +2,7 @@
 name: cross-evolution
 description: Horizontal Gene Transfer protocol for skills. Synchronizes best practices and architectural patterns across the skill library.
 metadata:
-  version: 1.0.7
+  version: 1.0.8
 ---
 
 # Cross-Evolution
@@ -137,7 +137,7 @@ JSON-first observation scripts:
 
 ```bash
 bash "${SKILL_DIR}/scripts/audit-cross-evolution.sh" --root ~/.agents/skills
-bash "${SKILL_DIR}/scripts/inspect-skill.sh" brainstorming --root ~/.agents/skills
+bash "${SKILL_DIR}/scripts/inspect-skill.sh" brain-storm --root ~/.agents/skills
 bash "${SKILL_DIR}/scripts/inspect-gene.sh" atomic-independence --root ~/.agents/skills
 ```
 

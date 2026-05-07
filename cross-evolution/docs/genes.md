@@ -129,7 +129,7 @@ Do not store transient dashboard noise just because it was measured once.
 
 ```bash
 scripts/audit-cross-evolution.sh --root ~/.agents/skills
-scripts/inspect-skill.sh brainstorming --root ~/.agents/skills
+scripts/inspect-skill.sh brain-storm --root ~/.agents/skills
 scripts/inspect-gene.sh atomic-independence --root ~/.agents/skills
 ```
 

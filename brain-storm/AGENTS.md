@@ -1,4 +1,4 @@
-# AGENTS.md (brainstorming)
+# AGENTS.md (brain-storm)
 
 ## Knowledge & Conventions
 

@@ -1,25 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.0.8 - 2026-05-07
 
-- `Release`: Synchronized all skill `SKILL.md` metadata versions to `1.0.7`. Impact: the skill library stays on one coherent release line for the current gene-meme evolution slice.
-- `Context`: Refreshed the cross-evolution README with memetic recombination and horizontal gene transfer mode. Impact: the human entrypoint now reflects the current soft-proactivity and gene-meme model.
-- `Release`: Synchronized all skill `SKILL.md` metadata versions to `1.0.6`. Impact: the skill library stays on one coherent release line.
-- `Atomic Independence`: Expanded the contract from script-only isolation to reusable-skill portability: no hard-coded sibling skills, concrete projects, private repositories, or stack mirrors inside portable skill text. Impact: cross-evolution now protects skill independence at the instruction layer as well as the script layer.
-- `Gene Registry`: Added the active `portable-skill` gene for detecting project-neutral, self-contained skill instructions. Impact: audits can now reward reusable skills that compose through neutral contracts and lenses instead of direct stack coupling.
-- `Docs`: Updated README and operational context around generic synergy and adaptation-by-pritirka. Impact: the skill explains how to transfer useful patterns without mirroring local project context.
-- `Audit UX`: Replaced the wide Gene × Skill matrix with decomposed Gene Coverage and Skill Gene Profiles sections. Impact: audit structure stays readable in narrow terminals and long skill/gene lists remain easier to track.
-- `Gene Concept`: Reframed genes as deep transportable emergent meme-atoms rather than shallow file/script presence checks. Impact: future evolution should optimize for meaningful skill behavior, composition, and graceful degradation instead of checklist compliance.
-- `Architecture Direction`: Documented a JSON-first target model with a machine-readable gene registry, skill-local research artifacts, markdown explanations, and narrow observation scripts. Impact: cross-evolution now has a clearer path away from wide central markdown tables.
-- `JSON Observer`: Added local `genes.json`, skill-local `.cross-evolution.json` artifacts for cross-evolution and brainstorming, plus `audit-cross-evolution.sh`, `inspect-skill.sh`, and `inspect-gene.sh`. Impact: agents can inspect deep gene coverage and skill profiles without relying on the transitional markdown table registry.
-- `Registry Migration`: Retired the wide machine-parsed markdown gene tables in favor of the JSON registry and human-readable `docs/genes.md` notes; legacy `audit-genes.sh` now delegates to the JSON-first observer. Impact: shallow file-presence genes are no longer active registry truth, and the observation surface stays narrow.
-- `Observer UX`: Added filter-aware output for skill/gene inspection and a review queue for unignored missing genes. Impact: focused inspection no longer prints unrelated sections, while ecosystem audit gives the agent a concrete next-review list without reintroducing a wide matrix.
-- `Naming Discipline`: Renamed `cross-evolution.genes.json` to local `genes.json`. Impact: the registry avoids redundant domain prefixes when file ownership is already clear from directory context.
-- `Context-Scoped Naming`: Promoted the local naming lesson into an active reward-only deep gene in `genes.json` and documented it in `docs/genes.md`. Impact: future skill evolution can preserve compact local names without pressuring unrelated skills to add boilerplate naming prose.
-- `Soft Proactivity`: Added `docs/soft-proactivity.md` and linked it from the skill contract and docs index. Impact: cross-evolution can proactively observe, nudge, and micro-mutate without becoming an autonomous score-farming refactorer.
-- `Gene-Meme Equivalence`: Added the hard rule that, within cross-evolution, `gene == meme`. Impact: candidate genes must behave like transmissible meaning-bearing memes, not shallow conventions or local implementation details.
-- `Portable Standards`: Added a reward-only `portable-standards` gene. Impact: repeated practices can become transportable standards across projects and skills without forcing one-off habits into ceremony.
-- `Meta-Protocoling`: Added a reward-only `meta-protocoling` gene. Impact: skills can preserve the process behind the process through explicit meta-comments and meta-protocols without adding meta-layer prose to trivial instructions.
-- `Recursive Gene-Meme`: Added reward-only `gene-meme-equivalence` as a gene in `genes.json`. Impact: the rule `gene == meme` is now explicitly treated as a transmissible standard for deciding what counts as evolutionary material.
-- `Memetic Recombination`: Added reward-only `memetic-recombination` and expanded recombination from conflict resolution to decomposition, recomposition, and emergent gene-meme discovery. Impact: cross-evolution can reason about new capabilities produced by composing genes instead of only copying or pruning static labels.
-- `Horizontal Gene Transfer Mode`: Added a soft-proactivity submode and reward-only `horizontal-gene-transfer-mode` gene. Impact: cross-evolution can proactively propose one bounded donor→gene→recipient transfer without broad score-farming propagation.
+- `Release` Synchronized cross-evolution metadata to `1.0.8` as part of the skill-library release. Impact: the skill remains on the shared release line.
+- `Skill References` Updated examples and docs from `brainstorming` to `brain-storm`. Impact: cross-evolution examples match the current skill identity.
+- `Memetic Model` Finalized the gene-meme evolution model with memetic recombination, horizontal gene transfer mode, and reward-only gene support. Impact: cross-evolution can reason about transmissible behavior patterns instead of shallow checklist features.
+- `JSON Observer` Consolidated gene inspection around `genes.json`, skill-local `.cross-evolution.json`, and focused audit scripts. Impact: agents can inspect gene coverage and review queues without relying on wide markdown tables.
+- `Docs` Refreshed README and gene documentation around portable skills, local naming discipline, soft proactivity, and standards extraction. Impact: the human entrypoint reflects the current evolution protocol.
