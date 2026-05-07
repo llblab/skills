@@ -2,7 +2,7 @@
 name: cross-evolution
 description: Horizontal Gene Transfer protocol for skills. Synchronizes best practices and architectural patterns across the skill library.
 metadata:
-  version: 1.0.6
+  version: 1.0.7
 ---
 
 # Cross-Evolution
@@ -11,7 +11,7 @@ metadata:
 
 Maintain a high evolutionary standard across agent skills by identifying deep transportable skill genes, preserving research artifacts, and giving the agent clear observation tools for deciding which evolutionary pressure is real.
 
-A gene is not a superficial feature such as "has a test script" or "has a changelog". A true gene is an emergent meme-atom: a portable cognitive/operational pattern that changes how a skill thinks, acts, composes, or degrades. Good genes make skills more unique and valuable through progressive evolution, not more uniform through checklist compliance.
+A gene is not a superficial feature such as "has a test script" or "has a changelog". In cross-evolution, gene == meme: a true gene is an emergent meme-atom, a portable cognitive/operational pattern that changes how a skill thinks, acts, composes, or degrades. Good genes make skills more unique and valuable through progressive evolution, not more uniform through checklist compliance.
 
 ## Axioms
 
@@ -32,15 +32,25 @@ Skills and their scripts must be 'atomic'.
 - 'Portability Guard': Before adding project-specific adaptation to a skill, lift it into a project-neutral lens or keep it in external context instead.
 - 'Depth Gate': Reject shallow genes that only detect files, scripts, or documentation furniture unless they express a deeper reusable operating pattern.
 
-### 3. Living Protocol
+### 3. Gene-Meme Equivalence
 
-This skill proactively evolves itself and its gene registry upon discovering new constraints.
+Within cross-evolution, `gene` and `meme` are the same class of object. A gene is accepted only when it behaves like a transmissible meme: it carries meaning, changes behavior, survives transport, and has a recognizable failure mode when absent.
+
+A standard can be a gene-meme when it is portable and behavior-changing. The `gene == meme` rule is itself a gene-meme: a transmissible standard for deciding what counts as evolutionary material.
+
+Because gene == meme, every gene can be decomposed into smaller meaning-bearing parts, recombined with other genes, or composed into higher-order protocols to seek new emergent properties and new gene-memes.
+
+Do not call a checklist item, file convention, or local implementation detail a gene unless it also qualifies as a portable meme.
+
+### 4. Living Protocol
+
+This skill proactively evolves itself and its gene registry upon discovering new constraints. Its proactivity is soft: detect freely, suggest often, mutate narrowly, and never farm scores. See `docs/soft-proactivity.md`.
 
 ## Core Concepts
 
 ### Gene
 
-A deep, transportable, emergent meme-atom that improves a skill's cognition, operation, composition, or graceful degradation.
+A deep, transportable, emergent meme-atom that improves a skill's cognition, operation, composition, or graceful degradation. In this skill, gene and meme are equivalent terms; the word "gene" names a meme that can be carried by skills.
 
 A valid gene must satisfy most of these tests:
 
@@ -58,10 +68,12 @@ Machine-readable registry and observation state should live in local JSON artifa
 
 Copying a gene from a donor skill to a recipient without rewriting the recipient's core purpose.
 
+As soft proactivity, HGT is a bounded submode: identify one donor, one gene-meme, one recipient, the expected behavior change, and a stop condition. The HGT submode is itself a gene-meme because it is a transmissible pattern for safe gene transfer.
+
 ### Gene Discovery
 
 Scanning existing skills for repeated high-value patterns not yet represented in the registry.
-If a candidate passes thresholds, it is automatically written into `docs/genes.md` under "Proposed Genes".
+If a candidate passes the depth gate, the agent may add it to `genes.json` and explain it in `docs/genes.md`. Do not auto-promote repeated surface features just because they are easy to detect.
 
 ### Genetic Drift
 
@@ -76,7 +88,9 @@ Fitness is not an optimization target. A low score can be correct when a skill i
 
 ### Recombination
 
-When two genes conflict in the same skill, selective pressure creates a new hybrid gene.
+When two genes conflict in the same skill, selective pressure can create a new hybrid gene.
+
+Recombination also applies without conflict: any gene-meme may be decomposed, recombined, or composed to search for emergent properties. The output can be a narrower sub-gene, a hybrid gene, a higher-order standard, or a new meta-protocol.
 
 Recombination is preferred over checklist accumulation when two good patterns create friction.
 
@@ -115,14 +129,9 @@ Skill-local JSON should store meaningful research artifacts, not transient score
 
 ### Mode 1: Scan & Audit
 
-'Automated': `bash "${SKILL_DIR}/scripts/audit-genes.sh"`
+'Automated': `bash "${SKILL_DIR}/scripts/audit-cross-evolution.sh" --root ~/.agents/skills`
 
-Produces: decomposed gene coverage, per-skill gene profiles, fitness scores, genetic drift warnings, conflict alerts, recommendations, and discovered gene candidates (with registry sync).
-
-Legacy markdown-table audit flags:
-
-- `--no-discovery` — skip discovery phase.
-- `--no-sync-discovery` — discover candidates without writing to registry.
+Produces: decomposed gene coverage, per-skill gene profiles, and a review queue for agent judgment.
 
 JSON-first observation scripts:
 

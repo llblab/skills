@@ -6,13 +6,19 @@
     "portability-lens",
     "observation-over-score",
     "progressive-disclosure",
-    "graceful-degradation"
+    "graceful-degradation",
+    "context-scoped-naming",
+    "portable-standards",
+    "meta-protocoling",
+    "gene-meme-equivalence",
+    "memetic-recombination",
+    "horizontal-gene-transfer-mode"
   ],
   "ignoredRecommendations": [],
   "observations": [
     {
       "kind": "concept",
-      "text": "Genes are deep transportable meme-atoms, not shallow file/script/documentation presence checks."
+      "text": "In cross-evolution, gene == meme: a gene is a transmissible meme carried by skills, not a shallow file/script/documentation presence check."
     },
     {
       "kind": "architecture",
@@ -21,6 +27,34 @@
     {
       "kind": "ux",
       "text": "Agent observation needs decomposed coverage/profiles instead of wide Gene x Skill matrices."
+    },
+    {
+      "kind": "naming",
+      "text": "When local context already scopes ownership, use short artifact names instead of repeating the domain prefix."
+    },
+    {
+      "kind": "proactivity",
+      "text": "Cross-evolution should proactively observe and nudge, but only perform narrow safe mutations unless semantic skill changes are explicitly confirmed."
+    },
+    {
+      "kind": "standard",
+      "text": "When a repeated practice can travel across projects or skills, codify it as a portable standard rather than leaving it implicit."
+    },
+    {
+      "kind": "meta-protocol",
+      "text": "Meta-comments and meta-protocols preserve the process behind the process: why rules exist, when they apply, and how they evolve."
+    },
+    {
+      "kind": "recursion",
+      "text": "Gene == meme is itself a gene-meme: it is a transmissible standard for deciding what counts as evolutionary material."
+    },
+    {
+      "kind": "recombination",
+      "text": "Any gene-meme can be decomposed, recombined, and composed to seek emergent properties and new gene-memes."
+    },
+    {
+      "kind": "hgt",
+      "text": "Soft proactivity has a bounded Horizontal Gene Transfer Mode: one donor, one gene-meme, one recipient, one expected behavior change, then stop."
     }
   ],
   "lastReviewed": "2026-05-07"

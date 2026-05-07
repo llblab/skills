@@ -4,7 +4,6 @@
 
 ## Open Work
 
-- [x] `Migrate cross-evolution from table registry to JSON-first observability:` preserve deep transportable genes in a machine-readable registry, record skill-local research artifacts, and provide narrow scripts for agent-friendly observation.
-  - Exit: `genes.json` exists, skill-local `.cross-evolution.json` artifacts are supported, observation scripts can inspect ecosystem/skill/gene state, and markdown docs explain the new model without relying on wide central tables.
-- [x] `Retire shallow genes or downgrade them into observations:` convert file/script-presence checks such as changelog/docs-dir/cross-platform into non-gene observations unless a deeper operating pattern justifies promotion.
-  - Exit: Active genes describe behavioral/cognitive meme-atoms, while superficial affordances become evidence fields or local observations.
+No active open work.
+
+Future work should enter here only when it has a concrete exit criterion. Evergreen disciplines belong in `AGENTS.md`, `SKILL.md`, or `/docs`.

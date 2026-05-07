@@ -75,6 +75,96 @@
           "args": "graceful degradation|degrade|defer|stop conditions|Stop Conditions|fallback|non-goals"
         }
       ]
+    },
+    {
+      "id": "context-scoped-naming",
+      "name": "Context-scoped naming",
+      "lifecycle": "active",
+      "weight": 2,
+      "recommend": "none",
+      "meaning": "Names avoid redundant domain prefixes when directory, package, or protocol context already makes ownership clear.",
+      "failureMode": "The skill multiplies entities, smears domain boundaries, and makes local artifacts look globally distinct when they are only context-local.",
+      "detect": [
+        {
+          "type": "grep_docs",
+          "args": "context.*naming|Naming discipline|redundant.*prefix|directory context|ownership.*obvious|short local names"
+        }
+      ]
+    },
+    {
+      "id": "portable-standards",
+      "name": "Portable standards",
+      "lifecycle": "active",
+      "weight": 2,
+      "recommend": "none",
+      "meaning": "Repeated practice is codified as a transportable standard when it can serve multiple projects or skills; skills are treated as projects when they own protocols, docs, artifacts, or release discipline.",
+      "failureMode": "Useful lessons stay implicit, local, and non-transferable, so each project or skill rediscovers the same operating rules from scratch.",
+      "detect": [
+        {
+          "type": "grep_docs",
+          "args": "portable standard|transportable standard|standards?|skills.*projects|skill.*project|release discipline|standard for"
+        }
+      ]
+    },
+    {
+      "id": "meta-protocoling",
+      "name": "Meta-protocoling",
+      "lifecycle": "active",
+      "weight": 2,
+      "recommend": "none",
+      "meaning": "The skill uses explicit meta-comments or meta-protocols to name the process behind the process: why a rule exists, when it applies, and how it should evolve or degrade.",
+      "failureMode": "Agents follow rituals without understanding intent, so protocols drift into dead ceremony, hidden coupling, or unreviewable habits.",
+      "detect": [
+        {
+          "type": "grep_docs",
+          "args": "meta-protocol|meta protocol|meta-comment|meta comment|process behind the process|why.*rule exists|rule.*evolve"
+        }
+      ]
+    },
+    {
+      "id": "gene-meme-equivalence",
+      "name": "Gene-meme equivalence",
+      "lifecycle": "active",
+      "weight": 3,
+      "recommend": "none",
+      "meaning": "The system treats a gene as a transmissible meme: standards, protocols, and practices become genes only when they carry meaning, change behavior, survive transport, and expose an absent failure mode.",
+      "failureMode": "The registry confuses local conventions or checklist features for true evolutionary material, so transfer produces ceremony instead of transmissible capability.",
+      "detect": [
+        {
+          "type": "grep_docs",
+          "args": "gene == meme|gene-meme|gene.*meme|meme-atom|transmissible meme|meaning-bearing meme"
+        }
+      ]
+    },
+    {
+      "id": "memetic-recombination",
+      "name": "Memetic recombination",
+      "lifecycle": "active",
+      "weight": 3,
+      "recommend": "none",
+      "meaning": "Any gene-meme may be decomposed into smaller meaning-bearing parts, recombined with other genes, or composed into higher-order protocols to produce emergent properties and new gene-memes.",
+      "failureMode": "Genes are treated as static labels, so the ecosystem can only copy or delete them instead of discovering new capabilities through composition and recombination.",
+      "detect": [
+        {
+          "type": "grep_docs",
+          "args": "memetic recombination|gene-meme.*decompos|gene-meme.*recombin|gene-meme.*compos|decompos.*gene-meme|recombin.*gene-meme|compos.*gene-meme|hybrid gene|emergent.*gene-meme|new gene-memes"
+        }
+      ]
+    },
+    {
+      "id": "horizontal-gene-transfer-mode",
+      "name": "Horizontal gene transfer mode",
+      "lifecycle": "active",
+      "weight": 3,
+      "recommend": "none",
+      "meaning": "Soft proactivity can enter a bounded submode that looks for one valuable gene-meme transfer from a donor skill or standard into one recipient skill without forcing broad propagation.",
+      "failureMode": "Useful gene-memes remain isolated in their origin context, or the opposite failure occurs: broad propagation copies them into unrelated skills as score-farming ceremony.",
+      "detect": [
+        {
+          "type": "grep_docs",
+          "args": "Horizontal Gene Transfer Mode|horizontal gene transfer mode|bounded gene transfer|donor skill|recipient skill|one valuable gene"
+        }
+      ]
     }
   ]
 }

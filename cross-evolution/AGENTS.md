@@ -5,21 +5,26 @@
 ### Meta-Protocol Principles
 
 - 'Pragmatic HGT (Occam's Razor)': Transfer genes only when they add real value.
+- 'Gene == Meme': In cross-evolution, a gene is a transmissible meme. It must carry meaning, change behavior, survive transport, and have a recognizable absent failure mode. This equivalence is itself a gene-meme: a transmissible standard for deciding what counts as evolutionary material.
+- 'Memetic Recombination': Any gene-meme can be decomposed, recombined, and composed to seek emergent properties and new gene-memes; prefer this over blind copying when patterns interact.
+- 'Horizontal Gene Transfer Mode': In soft proactivity, transfer at most one gene-meme from one donor to one recipient before stopping, unless the user explicitly asks for broader propagation. This mode is itself a gene-meme.
 - 'Deep Gene Standard': Genes are transportable emergent meme-atoms that change skill cognition, operation, composition, or graceful degradation. Shallow file-presence features are observations, not true genes.
 - 'Atomic Independence': Skills and scripts must remain atomic. No cross-skill glue code, hard-coded sibling skill names, concrete project names, private repository names, or stack-specific mirrors inside reusable skill text.
 - 'Agent as Orchestrator': Coordination between skills is the exclusive responsibility of the AI Agent.
 - 'Generic Synergy': Skills should complement each other through project-neutral contracts, lenses, vocabulary, and handoff shapes rather than naming each other directly.
 - 'Fitness as Signal': Prioritize real evolutionary pressure; fitness scores are observation hints, not optimization targets.
+- 'Soft Proactivity': Detect freely, suggest often, mutate narrowly, never farm scores. Use `docs/soft-proactivity.md` for proactive boundaries.
+- 'Portable Standards': Promote repeated practices into transportable standards when they can serve multiple projects or skills; skills count as projects when they own protocols, docs, artifacts, or release discipline.
+- 'Meta-Protocoling': Preserve the process behind the process through explicit meta-comments and meta-protocols when a rule needs intent, scope, evolution, or degradation guidance.
 
 ### Operating Principles
 
 - Prefer JSON-first observation scripts for Mode 1: `scripts/audit-cross-evolution.sh`, `scripts/inspect-skill.sh`, and `scripts/inspect-gene.sh`.
-- Keep `scripts/audit-genes.sh` as a legacy transitional markdown-table audit until the old registry is retired.
-- `audit-genes` now auto-selects the first real skills root among `$SKILLS_HOME`, `~/.agents/skills`, the current working directory, and the local sibling directory.
+- Keep `scripts/audit-genes.sh` only as a compatibility wrapper around the JSON-first observer.
 - Set `NO_COLOR=1` when audit output is consumed by CI or other log processors.
-- Current gene registry still lives in `docs/genes.md`, but the target architecture is JSON-first: machine-readable registry, skill-local research artifacts, markdown explanation, and observation scripts.
+- The gene registry lives in local `genes.json`; `docs/genes.md` explains meanings and protocol for humans.
 - Recommendations are pragmatic: only suggest genes that make sense for the skill's domain.
-- Discovery phase must search for repeated patterns and sync valuable candidates into "Proposed Genes".
+- Gene discovery is agent-led: repeated patterns become candidates only after the depth gate, then enter `genes.json` with human-readable explanation in `docs/genes.md`.
 
 ### Discovered Constraints
 
