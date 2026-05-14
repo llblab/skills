@@ -2,7 +2,7 @@
 name: re-review
 description: Evidence-grounded review for code, diffs, PRs, documents, plans, specs, and architecture. Use for evidence review, review, code review, quick review, sanity check, quality check, architecture review, production readiness, security review, scaling review, document review, evaluate, or check.
 metadata:
-  version: 1.0.9
+  version: 1.0.10
 ---
 
 # Re-Review

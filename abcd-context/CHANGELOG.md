@@ -1,5 +1,9 @@
 # Changelog
 
+## Current
+
+- `Validator Path Argument` Added explicit project-root argument support to the Bash and Node validators, including missing-path failures, self-test coverage, and usage docs. Impact: callers can run `validate-context.sh /path/to/project` without relying on `cwd` or `VALIDATE_CONTEXT_ROOT`.
+
 ## 1.0.9 - 2026-05-07
 
 - `Dual Runtime Validator` Added `scripts/validate-context.mjs` as a Node.js twin for `validate-context.sh` and updated the regression test to run both with warning/error parity. Impact: ABCd validation now has a Windows-friendly runtime path and interchangeable core implementations.

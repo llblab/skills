@@ -29,7 +29,7 @@ const DEFAULT_CONFIG = {
     "src/main.tsx",
     "lib/index.ts",
   ],
-  sourceExtensions: [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"],
+  sourceExtensions: [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".svelte"],
   ignoreDirs: [
     ".git",
     ".hg",
@@ -53,9 +53,12 @@ const DEFAULT_CONFIG = {
     "**/*.spec.js",
     "**/__tests__/**",
   ],
+  importAliases: {},
   requireHeaders: true,
   headerPattern: "\\b(?:Domain|Domains|Zone|Zones|Owns)" + ":\\s*\\S",
   headerSeverity: "warn",
+  headerRequiredClauses: [],
+  headerRequiredClausesSeverity: "warn",
   flatRoots: false,
   flatRootSeverity: "warn",
   sharedBucketNames: [
@@ -70,6 +73,7 @@ const DEFAULT_CONFIG = {
   sharedBucketSeverity: "warn",
   forbiddenEdges: [],
   layers: [],
+  surfaceRules: [],
 };
 const DEFAULT_CONFIG_NAMES = ["domain-dag.config.json", ".domain-dag.json"];
 const MAX_LISTED_ITEMS = 30;
@@ -315,9 +319,27 @@ function getImportResolutionCandidates(basePath, config) {
   return candidates;
 }
 
-function resolveLocalImport(fromFile, specifier, fileSet, config) {
-  if (!specifier.startsWith(".")) return undefined;
-  const basePath = resolve(dirname(fromFile), specifier);
+function getImportAliasBase(root, specifier, config) {
+  const aliases = config.importAliases ?? {};
+  for (const [aliasPattern, targetPattern] of Object.entries(aliases)) {
+    if (aliasPattern.endsWith("/*") && targetPattern.endsWith("/*")) {
+      const aliasPrefix = aliasPattern.slice(0, -1);
+      if (specifier.startsWith(aliasPrefix)) {
+        const suffix = specifier.slice(aliasPrefix.length);
+        return resolve(root, targetPattern.slice(0, -1), suffix);
+      }
+      continue;
+    }
+    if (specifier === aliasPattern) return resolve(root, targetPattern);
+  }
+  return undefined;
+}
+
+function resolveLocalImport(fromFile, specifier, fileSet, config, root) {
+  const basePath = specifier.startsWith(".")
+    ? resolve(dirname(fromFile), specifier)
+    : getImportAliasBase(root, specifier, config);
+  if (!basePath) return undefined;
   for (const candidate of getImportResolutionCandidates(basePath, config)) {
     const normalized = resolve(candidate);
     if (fileSet.has(normalized)) return normalized;
@@ -332,7 +354,7 @@ function buildImportGraph(root, files, config) {
     const deps = [];
     const source = readFileSync(file, "utf8");
     for (const specifier of getImportSpecifiers(source)) {
-      const resolved = resolveLocalImport(file, specifier, fileSet, config);
+      const resolved = resolveLocalImport(file, specifier, fileSet, config, root);
       if (resolved) deps.push(toPosixPath(relative(root, resolved)));
     }
     graph.set(toPosixPath(relative(root, file)), [...new Set(deps)].sort());
@@ -394,24 +416,50 @@ function validateHeaders(root, files, config, reporter) {
   if (!config.requireHeaders) return;
   const pattern = new RegExp(config.headerPattern, "im");
   const missing = [];
+  const missingClauses = [];
+  const requiredClauses = Array.isArray(config.headerRequiredClauses)
+    ? config.headerRequiredClauses
+    : [];
   for (const file of files) {
+    const relativePath = toPosixPath(relative(root, file));
     const sourceHead = readFileSync(file, "utf8").slice(0, 1600);
-    if (!pattern.test(sourceHead))
-      missing.push(toPosixPath(relative(root, file)));
+    const hasHeader = pattern.test(sourceHead);
+    if (!hasHeader) {
+      missing.push(relativePath);
+      continue;
+    }
+    for (const clause of requiredClauses) {
+      if (clause && !sourceHead.includes(clause))
+        missingClauses.push(`${relativePath} missing '${clause}'`);
+    }
   }
-  if (missing.length === 0) {
-    reporter.pass("Domain headers are present");
+  if (missing.length === 0) reporter.pass("Domain headers are present");
+  else {
+    for (const file of missing.slice(0, MAX_LISTED_ITEMS))
+      reporter.bySeverity(
+        config.headerSeverity,
+        `Missing domain header: ${file}`,
+      );
+    if (missing.length > MAX_LISTED_ITEMS)
+      reporter.bySeverity(
+        config.headerSeverity,
+        `Additional files without domain headers: ${missing.length - MAX_LISTED_ITEMS}`,
+      );
+  }
+  if (requiredClauses.length === 0) return;
+  if (missingClauses.length === 0) {
+    reporter.pass("Required domain-header clauses are present");
     return;
   }
-  for (const file of missing.slice(0, MAX_LISTED_ITEMS))
+  for (const item of missingClauses.slice(0, MAX_LISTED_ITEMS))
     reporter.bySeverity(
-      config.headerSeverity,
-      `Missing domain header: ${file}`,
+      config.headerRequiredClausesSeverity,
+      `Domain header clause missing: ${item}`,
     );
-  if (missing.length > MAX_LISTED_ITEMS)
+  if (missingClauses.length > MAX_LISTED_ITEMS)
     reporter.bySeverity(
-      config.headerSeverity,
-      `Additional files without domain headers: ${missing.length - MAX_LISTED_ITEMS}`,
+      config.headerRequiredClausesSeverity,
+      `Additional missing domain-header clauses: ${missingClauses.length - MAX_LISTED_ITEMS}`,
     );
 }
 
@@ -516,6 +564,47 @@ function validateLayers(graph, config, reporter) {
     );
 }
 
+function validateSurfaceRules(root, files, config, reporter) {
+  if (!Array.isArray(config.surfaceRules) || config.surfaceRules.length === 0)
+    return;
+  for (const rule of config.surfaceRules) {
+    const max = Number.isFinite(rule.max) ? rule.max : undefined;
+    if (max === undefined || !rule.pattern) continue;
+    const filesGlob = Array.isArray(rule.files)
+      ? rule.files
+      : rule.files
+        ? [rule.files]
+        : ["**/*"];
+    const pattern = new RegExp(rule.pattern, rule.flags ?? "g");
+    const violations = [];
+    for (const file of files) {
+      const relativePath = toPosixPath(relative(root, file));
+      if (!matchesAnyGlob(relativePath, filesGlob)) continue;
+      const source = readFileSync(file, "utf8");
+      const matches = new Set();
+      for (const match of source.matchAll(pattern)) {
+        matches.add(match[1] ?? match[0]);
+      }
+      if (matches.size > max)
+        violations.push(`${relativePath} matched ${matches.size}/${max}`);
+    }
+    if (violations.length === 0) {
+      reporter.pass(rule.passMessage ?? `Surface rule holds: ${rule.name ?? rule.pattern}`);
+      continue;
+    }
+    for (const violation of violations.slice(0, MAX_LISTED_ITEMS))
+      reporter.bySeverity(
+        rule.severity ?? "warn",
+        `${rule.message ?? "Wide interface surface"}: ${violation}`,
+      );
+    if (violations.length > MAX_LISTED_ITEMS)
+      reporter.bySeverity(
+        rule.severity ?? "warn",
+        `Additional surface-rule violations: ${violations.length - MAX_LISTED_ITEMS}`,
+      );
+  }
+}
+
 function validateForbiddenEdges(graph, config, reporter) {
   if (
     !Array.isArray(config.forbiddenEdges) ||
@@ -599,6 +688,7 @@ function runValidation(args) {
   validateSharedBuckets(root, files, config, reporter);
   validateFlatRoots(root, files, config, reporter);
   validateLayers(graph, config, reporter);
+  validateSurfaceRules(root, files, config, reporter);
   validateForbiddenEdges(graph, config, reporter);
   if (args.json) console.log(JSON.stringify(reporter.state, null, 2));
   else

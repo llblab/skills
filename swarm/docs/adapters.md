@@ -17,7 +17,7 @@ Local environments may expose adapters similar to these:
 - `swarm_quorum`: Local synchronous quorum adapter, commonly implemented as a command-template composer.
 - `swarm_quorum_fake`: Local fake adapter for tests, if the environment wants one.
 
-`template_job` and `swarm_quorum` are example adapter names, not Swarm requirements. The portable contract is the action set plus inspectable state.
+`template_job` and `swarm_quorum` are example adapter names, not Swarm requirements. The portable contract is the action set plus inspectable state. Prefer the job path for long-running or parallel agentic work, so the orchestrator stays responsive and terminal events drive follow-up inspection.
 
 ## Portable Utilities
 
@@ -53,9 +53,7 @@ lives in the tool registry:
 }
 ```
 
-This composer is the compact sync path that demonstrates the synergy between registry-level orchestration and atomic Swarm utilities. When async status,
-manifest retention, cancellation, or event logs are required, wrap the same
-composer or quorum utility in a generic template job instead of adding a broad coordination script to this skill.
+This composer is the compact sync path that demonstrates the synergy between registry-level orchestration and atomic Swarm utilities. When work is long-running, parallel, user-visible, or likely to outlive the current turn, wrap the same composer or quorum utility in a generic template job instead of adding a broad coordination script to this skill.
 
 ## Async Quorum Example
 

@@ -20,7 +20,9 @@ ABCd context protocol for agent projects.
 ## Quick Start
 
 ```bash
-VALIDATE_CONTEXT_ROOT=/path/to/project "${SKILL_DIR}/scripts/validate-context.sh"
+"${SKILL_DIR}/scripts/validate-context.sh" /path/to/project
+# or, from the project root:
+"${SKILL_DIR}/scripts/validate-context.sh"
 ```
 
 ## Quick Links

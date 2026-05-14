@@ -3,7 +3,7 @@ name: abcd-context
 description: ABCd context protocol across ABC root files (AGENTS.md,
   BACKLOG.md, CHANGELOG.md), human entrypoint README.md files tree, and /docs. Use after meaningful project changes, backlog drift, documentation refactors, self-evolving context maintenance, or a forced context reconciliation pass.
 metadata:
-  version: 1.0.9
+  version: 1.0.10
 ---
 
 # ABCd Context
@@ -189,8 +189,10 @@ Automated documentation health checker for the ABC root-memory split, README ent
 
 - 'Design': [`docs/validation-design.md`](./docs/validation-design.md)
 - 'Usage': `bash "${SKILL_DIR}/scripts/validate-context.sh"` from project root
-- 'Override root': `VALIDATE_CONTEXT_ROOT=/path/to/project bash ...`
-- 'Exit 0' = passed, 'Exit 1' = errors found
+- 'Explicit root': `bash "${SKILL_DIR}/scripts/validate-context.sh" /path/to/project`
+- 'Environment root': `VALIDATE_CONTEXT_ROOT=/path/to/project bash "${SKILL_DIR}/scripts/validate-context.sh"`
+- 'JSON': add `--json` before or after the path
+- 'Exit 0' = passed, 'Exit 1' = errors found or invalid root path
 
 ## Backlog Sync Rules
 

@@ -4,8 +4,39 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
-const outputJson = process.argv.includes("--json");
-const root = path.resolve(process.env.VALIDATE_CONTEXT_ROOT || process.cwd());
+let outputJson = false;
+let explicitRoot;
+for (const arg of process.argv.slice(2)) {
+  if (arg === "--json") {
+    outputJson = true;
+    continue;
+  }
+  if (arg === "--help" || arg === "-h") {
+    console.log([
+      "Usage: validate-context.mjs [--json] [project-root]",
+      "",
+      "Validates the current directory by default, VALIDATE_CONTEXT_ROOT when set,",
+      "or the explicit project-root argument when provided.",
+    ].join("\n"));
+    process.exit(0);
+  }
+  if (arg.startsWith("--")) {
+    console.error(`ERROR: Unknown option: ${arg}`);
+    process.exit(1);
+  }
+  if (explicitRoot) {
+    console.error("ERROR: Multiple project roots provided");
+    process.exit(1);
+  }
+  explicitRoot = arg;
+}
+const root = path.resolve(
+  explicitRoot || process.env.VALIDATE_CONTEXT_ROOT || process.cwd(),
+);
+if (!fs.existsSync(root) || !fs.statSync(root).isDirectory()) {
+  console.error(`ERROR: Project root does not exist or is not a directory: ${root}`);
+  process.exit(1);
+}
 const noColor = process.env.NO_COLOR;
 const shapeChecks = process.env.ABCD_MARKDOWN_SHAPE_CHECKS !== "0";
 const tableTarget = Number(process.env.ABCD_TABLE_TARGET_WIDTH || 76);

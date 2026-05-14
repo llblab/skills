@@ -2,7 +2,7 @@
 name: swarm
 description: Subagent orchestration with scoped locks and quorum consensus. Use for multi-model review, parallel scoped work, delegated audit, and coordinated subagent execution.
 metadata:
-  version: 1.0.9
+  version: 1.0.10
 ---
 
 # Swarm
@@ -26,6 +26,210 @@ Swarm is independent. It must not require concrete sibling skill names, private 
 - `Reviewer`: Post-merge reviewer that checks report quality, not the original domain by default.
 - `Job Adapter`: Local async binding that starts, tracks, lists, tails, and cancels swarm jobs through a generic job runtime.
 - `Template Job`: A local async envelope around a command-template swarm composer or utility. It owns lifecycle and observability, not swarm semantics.
+- `Lens`: A deliberately narrow cognitive role assigned to one subagent, such as security, tests, architecture, economics, or operator UX.
+- `Task Card`: A bounded implementation assignment with goal, allowed files, avoided files, expected output, and validation gates.
+- `Integrator`: The human or agent that merges isolated branches/worktrees into the shared target and owns conflict resolution.
+
+## Swarm Principle
+
+One agent should hold one lens. Many independent lenses make the whole judgement stronger. Parallel lenses make the whole judgement faster.
+
+Swarm is useful because focused subagents usually perform better than one overloaded model trying to reason about every concern at once. Each subagent receives the same target but a narrower mandate, reducing cognitive load and making misses less correlated. The merger then synthesizes the independent observations into one decision-grade artifact.
+
+Use swarm when the work benefits from parallel cognitive lenses, not merely because more models are available. A good swarm decomposes the task into review surfaces that are independently meaningful, then preserves agreement, disagreement, and minority high-impact findings.
+
+## Swarm Shapes
+
+Distinguish breadth from confidence before launching subagents.
+
+```text
+Lens Swarm = different lenses on one object
+Quorum     = one lens, multiple independent judges
+```
+
+`Lens Swarm` optimizes coverage. It asks which aspects matter and sends focused agents through different mandates: architecture, security, tests, UX, release, docs, economics, governance, or operations. Use it for brainstorming, product design, architecture exploration, development planning, and broad risk review.
+
+`Quorum` optimizes confidence. It keeps the lens constant and varies models, seeds, prompts, or independent instances so several judges answer the same question. Use it mostly for verification: high-stakes review, security verdicts, ambiguous bug hypotheses, publish readiness, and final confidence checks.
+
+`Lens Swarm of Quorums` optimizes both breadth and confidence. Each important lens gets its own mini-quorum, and a merger synthesizes across lenses while preserving vote counts and minority high-impact findings. This is expensive and should be reserved for high-stakes systems such as money movement, blockchain protocols, governance, security boundaries, migrations, or public releases.
+
+Decision rule:
+
+```text
+Need breadth?     Use Lens Swarm.
+Need confidence?  Use Quorum.
+Need both?        Use Lens Swarm of Quorums.
+```
+
+## Work Modes
+
+Swarm is not only for review. The same lens discipline supports ideation, planning, implementation coordination, and verification.
+
+### Brainstorm Swarm
+
+Purpose: turn many possible futures into one recommended direction.
+
+Typical lenses:
+
+- product/user value
+- operator UX
+- protocol or platform cleanliness
+- implementation pragmatism
+- adoption/growth
+- skeptic/failure modes
+- constraints and portability
+
+Merger output:
+
+- recommended direction
+- alternatives considered and rejected
+- open questions
+- first implementation slice
+- risks and validation gates
+
+Brainstorm swarms should not vote mechanically. They should preserve creative tension and synthesize a direction that fits constraints.
+
+### Development Swarm
+
+Purpose: turn one accepted direction into coordinated slices.
+
+Recommended flow:
+
+```text
+Planner → Lens Swarm → Merger → Scoped Implementers → Integrator → Review Swarm
+```
+
+Use scoped write locks or a repository-local soft-lock manifest when multiple implementers may edit files. Keep implementation agents bounded by module, artifact, or responsibility: code, tests, docs, examples, migration, or release notes. Prefer one owner per writable scope and run verification with fresh reviewers after implementation.
+
+### Small-Team Development Swarm
+
+Also known as `MAWP`: Multi-Agent Worktree Protocol.
+
+For 2–4 implementation agents, avoid building a heavyweight orchestrator. Use the minimal pattern:
+
+```text
+1 project
+→ 1 shared backlog
+→ 2–4 isolated worktrees/branches
+→ each agent owns one small task card
+→ conflicts trigger structured reports
+→ one integrator merges
+```
+
+Agents should not concurrently mutate the same shared checkout. Prefer isolated branches or worktrees:
+
+```bash
+git worktree add ../agent-a -b agent/a-task
+git worktree add ../agent-b -b agent/b-task
+git worktree add ../agent-c -b agent/c-task
+```
+
+Prefer splitting by mutation class, not by unrelated features:
+
+```text
+2 agents: implementation; tests/docs/review
+3 agents: implementation; tests; docs + review
+4 agents: implementation; tests; docs/examples; integrator/refactor/audit
+```
+
+Stable pattern:
+
+```text
+Agent A mutates behavior
+Agent B verifies behavior
+Agent C describes behavior
+Agent D integrates behavior
+```
+
+Avoid the dangerous pattern where several agents implement unrelated features, refactor architecture, and clean shared types at the same time.
+
+Every implementation agent receives a `Task Card`:
+
+```markdown
+# Task
+
+Goal:
+- What needs to be done.
+
+Allowed files:
+- path/or/glob
+
+Avoid files:
+- path/or/glob
+
+Expected output:
+- patch
+- short summary
+- tests/checks run
+- touched files list
+```
+
+For 2–4 agents, a simple `.agents/locks.md` soft-lock manifest is often enough. The manifest states each agent's task and owned files. Agents read it before starting, add their section before editing, avoid other agents' owned files, and remove or mark the section done after completion.
+
+Use exclusive ownership for public API and central contract files. Examples: package manifests, schema files, public type modules, runtime roots, protocol specs, migration heads, and generated-client sources. If a task touches exclusive files, assign them to one agent or to the integrator.
+
+Conflict handling is bounded:
+
+```text
+No conflict       → agent handoff → integrator review → merge
+Merge conflict   → both agents write Conflict Report → resolver merges
+Semantic conflict→ stop affected workers → integrator replans
+Architecture conflict → invalidate/split backlog task
+```
+
+Conflict reports exchange semantic deltas, not open-ended discussion: what changed, why, what must be preserved, what can be discarded, and suggested resolution. See [`docs/development-swarm.md`](./docs/development-swarm.md) for templates.
+
+No agent may silently expand task scope. Do not opportunistically refactor unrelated code or edit outside declared files. If an out-of-scope change is needed, record it as a backlog item or ask the integrator to replan.
+
+### Review Swarm
+
+Purpose: turn one result into many risk lenses and a decision-grade verdict.
+
+Use lens swarm for broad coverage, quorum for confidence on one critical judgement, or both for high-stakes releases. The final report should separate consensus findings, minority findings, merger findings, risks, and recommended next actions.
+
+## Lens Catalog
+
+Choose lenses by risk. Do not run every lens by default; select the smallest set that covers the failure modes of the work.
+
+### General Software Lenses
+
+- `Architecture`: module boundaries, dependency direction, cohesion, coupling, extensibility, and long-term ownership.
+- `Correctness`: functional behavior, edge cases, invariants, state transitions, and input/output contracts.
+- `Bug Hunter`: likely defects, race conditions, null/empty cases, off-by-one errors, and broken assumptions.
+- `Security`: injection, privilege boundaries, path handling, secrets, deserialization, unsafe shell/process use, and abuse cases.
+- `Tests`: coverage quality, missing regressions, fixture realism, flaky risk, and validation gates.
+- `Performance`: algorithmic cost, latency, memory, IO, batching, backpressure, and hot paths.
+- `Concurrency`: locks, cancellation, timeouts, idempotency, retries, ordering, and stale state.
+- `Data Integrity`: migrations, schema compatibility, durability, rollback, deduplication, and corruption risk.
+- `API Compatibility`: public contract drift, backwards compatibility, versioning, deprecation, and client impact.
+- `Operator UX`: observability, error messages, status, logs, recovery paths, safe defaults, and support burden.
+- `Developer UX`: onboarding, local setup, naming, examples, docs, type ergonomics, and debugging clarity.
+- `Product UX`: user journey, surprising behavior, accessibility, copy, affordances, and feedback loops.
+- `Release`: changelog truth, version bump, package contents, CI gates, publish risk, and rollback readiness.
+- `Documentation`: README accuracy, examples, conceptual consistency, and stale references.
+- `Compliance/Policy`: licenses, privacy, retention, consent, audit trails, and organizational constraints.
+- `Incident Response`: blast radius, detection, containment, rollback, forensics, and runbook quality.
+- `SRE/Reliability`: availability, graceful degradation, monitoring, quotas, rate limits, and dependency failure.
+- `Maintainability`: simplicity, naming, duplication, dead code, testability, and future change cost.
+- `Spec Consistency`: whether code, docs, tests, prompts, and changelog describe the same behavior.
+
+### Complex System / Blockchain Lenses
+
+Use these for blockchain, distributed systems, financial protocols, governance, or adversarial environments.
+
+- `Protocol Invariants`: conservation laws, supply rules, ledger consistency, finality assumptions, and impossible states.
+- `Consensus Safety`: fork choice, quorum thresholds, validator behavior, equivocation, reorg handling, and liveness tradeoffs.
+- `Economic Security`: incentives, MEV, griefing, sybil cost, fee dynamics, slashing, reward leakage, and manipulation paths.
+- `Smart Contract Safety`: reentrancy, authorization, upgradeability, storage layout, oracle trust, token standards, and invariant tests.
+- `Cryptography`: key management, signature/domain separation, nonce use, randomness, hash commitments, and proof assumptions.
+- `Cross-Chain/Bridge`: message replay, finality mismatch, validator set drift, withdrawal delays, and custody assumptions.
+- `Governance`: proposal lifecycle, quorum rules, timelocks, emergency powers, capture risk, and voter/operator UX.
+- `Treasury/Accounting`: balance reconciliation, fee distribution, rounding, precision, reserves, and auditability.
+- `Adversarial Simulation`: attacker goals, cheapest exploit path, denial-of-service vectors, sandwiching, and liquidation games.
+- `Network/P2P`: peer discovery, gossip propagation, eclipse risk, bandwidth limits, spam resistance, and partition behavior.
+- `Node Operations`: sync, snapshots, pruning, backups, observability, upgrades, config safety, and rollback.
+- `Formal Methods`: invariant specification, model checking candidates, property tests, and proof gaps.
+- `Regulatory Surface`: custody, KYC/AML implications, sanctions, securities risk, data retention, and jurisdictional assumptions.
 
 ## Tool Contracts
 
@@ -80,7 +284,7 @@ Report white spots, contradictions, evidence, and risks.
 
 ## Async Job Adapter
 
-Async job management is an adapter concern, not a portable Swarm script requirement. A template job is the preferred mental model when the local runtime supports it: command-template execution plus a thin detached lifecycle envelope.
+Async job management is an adapter concern, not a portable Swarm script requirement. For non-trivial asynchronous agentic work, use a job-first flow when the local runtime supports it: command-template execution plus a thin detached lifecycle envelope.
 
 - `start`: Launch a swarm job in the background and return job metadata.
 - `status`: Report whether the job is running, done, degraded, or failed.
@@ -88,7 +292,7 @@ Async job management is an adapter concern, not a portable Swarm script requirem
 - `list`: Show known jobs.
 - `cancel`: Stop an owned running job when the adapter can prove pid ownership.
 
-`Purpose`: Keep the user interface responsive while reviewers, merger, and post-merge reviewer run. Generic job state belongs to a local job runtime; swarm-specific execution stays in atomic utilities or command-template composition.
+`Purpose`: Keep the user interface responsive while reviewers, merger, and post-merge reviewer run. Generic job state belongs to a local job runtime; swarm-specific execution stays in atomic utilities or command-template composition. The orchestrator should start the job, return metadata, then inspect status/tail after terminal events instead of blocking on sleeps or foreground waits.
 
 `Progress contract`: async jobs should expose structured state such as `progress.json`, `events.jsonl`, logs, and final result metadata. Local tools should read these files through job-runtime verbs instead of scraping process output.
 
@@ -169,7 +373,7 @@ After changing Swarm scripts or adapter contracts, run:
 node scripts/_self-test.mjs
 ```
 
-This is the required smoke gate for lock behavior and for preserving the script boundary: no broad coordinator and no `pi -p`-coupled quorum runner in portable Swarm scripts.
+This smoke gate checks lock behavior and script-boundary invariants: no broad coordinator and no `pi -p`-coupled quorum runner in portable Swarm scripts.
 
 ## Merge Protocol
 

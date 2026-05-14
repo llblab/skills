@@ -127,16 +127,14 @@ Triggered by heuristic signals from `validate-context.sh`, not hardcoded line li
 
 ## Consolidation Triggers
 
-| Signal                                   | Action                                                   |
-| ---------------------------------------- | -------------------------------------------------------- |
-| 3+ entries describe the same pattern     | Extract a strategic pattern, remove tactical duplication |
-| Two sections overlap >50%                | Merge, redirect references                               |
-| Section exceeds 10 entries               | Split by abstraction or consolidate                      |
-| Mistake repeated despite insight         | Escalate (see ladder below)                              |
-| `/docs` entry contradicts implementation | Flag for update or rewrite                               |
-| Two `/docs` files cover the same topic   | Merge, update index                                      |
-| `/docs` file not in `docs/README.md`     | Add to index immediately                                 |
-| `README.md` link points to missing file  | Create file or remove dead link                          |
+- `3+ entries describe the same pattern`: Extract a strategic pattern and remove tactical duplication.
+- `Two sections overlap >50%`: Merge them and redirect references.
+- `Section exceeds 10 entries`: Split by abstraction or consolidate.
+- `Mistake repeated despite insight`: Escalate using the ladder below.
+- `/docs` entry contradicts implementation`: Flag it for update or rewrite.
+- `Two /docs files cover the same topic`: Merge them and update the index.
+- `/docs file not in docs/README.md`: Add it to the index immediately.
+- `README.md link points to missing file`: Create the file or remove the dead link.
 
 ## Mistake Prevention Escalation
 

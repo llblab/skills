@@ -8,7 +8,7 @@
 
 ## Concept
 
-Swarm is a portable skill for safe subagent orchestration: delegated review, quorum consensus, scoped locks, clean-context merge, and post-merge review.
+Swarm is a portable skill for safe subagent orchestration: delegated review, quorum consensus, scoped locks, clean-context merge, and post-merge review. Its core cognitive pattern is one focused subagent per lens, many independent lenses for stronger judgement, and parallel lenses for faster wall-clock execution.
 
 ## Topology
 
@@ -17,7 +17,7 @@ Swarm is a portable skill for safe subagent orchestration: delegated review, quo
 - `BACKLOG.md`: Open work with concrete exit criteria.
 - `CHANGELOG.md`: Completed delivery history.
 - `docs/`: Adapter notes and local binding examples.
-- `scripts/`: Atomic reference utilities only; no broad runtime coordinator and no `pi -p`-coupled quorum runner.
+- `scripts/`: Atomic reference utilities and self-test only; no broad runtime coordinator and no `pi -p`-coupled quorum runner.
 
 ## Knowledge & Conventions
 
@@ -29,7 +29,17 @@ Swarm is a portable skill for safe subagent orchestration: delegated review, quo
 - Pass files by local path in the prompt. Do not require attachment support from wrappers.
 - Keep the skill independent: describe required capabilities, not concrete sibling skill names.
 - `Script boundary`: Scripts in this skill must stay atomic and narrowly specialized: lock helper, self-test helper, prompt/file utility. Broad coordination, real quorum execution, background job lifecycle, model pools, and adapter policy belong in local tool config or a generic tool-runtime layer.
-- `Template job boundary`: When async swarm work is needed, prefer a local template-job adapter around an existing command-template composer or quorum utility. The template job owns lifecycle/state/logs; the command template owns execution shape; Swarm owns quorum/lock/merge semantics.
+- `Job-first async rule`: Any non-trivial asynchronous agentic work should prefer a local job adapter over blocking foreground orchestration. Start the job, return job metadata, observe status/tail/list/cancel, and react to terminal events.
+- `Template job boundary`: When async swarm work is needed, prefer a local template-job adapter around an existing command-template composer or quorum utility. The template job owns lifecycle/state/logs/ambient progress; the command template owns execution shape and parallel fanout; Swarm owns quorum/lock/merge semantics.
+- `Lens discipline`: Assign each subagent one narrow cognitive lens. Prefer a small set of high-value lenses over an overloaded universal prompt. The merger owns synthesis; reviewers own focused evidence.
+- `Shape discipline`: Distinguish Lens Swarm from Quorum. Lens Swarm varies lenses for breadth; Quorum holds one lens constant across independent models/instances for confidence. Use Lens Swarm of Quorums only for high-stakes breadth plus confidence.
+- `Work-mode discipline`: Swarm can support brainstorm, development, and review. Brainstorm swarms synthesize directions, development swarms coordinate scoped slices, and review swarms produce verdicts.
+- `Small-team development swarm`: For 2–4 implementation agents, prefer MAWP — isolated worktrees/branches plus task cards and a soft-lock manifest over a broad orchestrator. One integrator owns merges.
+- `Task-card discipline`: Implementation agents need mutation zones, not only goals. Every task card should name allowed files, avoided files, expected output, checks, and touched-files reporting.
+- `Conflict handshake`: Agents do not negotiate freely after conflicts. Each writes a bounded conflict report; a resolver/integrator merges; original agents review affected files only.
+- `Semantic conflict awareness`: Git conflicts are not the only risk. Public API, schema, package manifest, runtime root, and protocol/spec files require exclusive ownership or integrator control.
+- `Mutation-class split`: Prefer implementation/test/docs/integration role separation over assigning unrelated feature work to parallel agents.
+- `No silent scope expansion`: In multi-agent mode, opportunistic refactors outside the task card are conflict generators. Record out-of-scope needs as backlog/conflict notes instead.
 
 ### Lock Discipline
 

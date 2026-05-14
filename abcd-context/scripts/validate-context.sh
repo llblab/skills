@@ -37,10 +37,42 @@ else
 fi
 
 # Configuration
-PROJECT_ROOT="${VALIDATE_CONTEXT_ROOT:-$(pwd)}"
-PROJECT_ROOT="$(cd "$PROJECT_ROOT" && pwd -P)"
 OUTPUT_JSON=false
-[[ "${1:-}" == "--json" ]] && OUTPUT_JSON=true
+TARGET_ROOT="${VALIDATE_CONTEXT_ROOT:-$(pwd)}"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --json)
+            OUTPUT_JSON=true
+            ;;
+        --help|-h)
+            cat <<'EOF'
+Usage: validate-context.sh [--json] [project-root]
+
+Validates the current directory by default, VALIDATE_CONTEXT_ROOT when set,
+or the explicit project-root argument when provided.
+EOF
+            exit 0
+            ;;
+        --*)
+            echo "ERROR: Unknown option: $1" >&2
+            exit 1
+            ;;
+        *)
+            if [[ "${TARGET_ROOT_EXPLICIT:-false}" == "true" ]]; then
+                echo "ERROR: Multiple project roots provided" >&2
+                exit 1
+            fi
+            TARGET_ROOT="$1"
+            TARGET_ROOT_EXPLICIT=true
+            ;;
+    esac
+    shift
+done
+if [[ ! -d "$TARGET_ROOT" ]]; then
+    echo "ERROR: Project root does not exist or is not a directory: $TARGET_ROOT" >&2
+    exit 1
+fi
+PROJECT_ROOT="$(cd "$TARGET_ROOT" && pwd -P)"
 MARKDOWN_SHAPE_CHECKS="${ABCD_MARKDOWN_SHAPE_CHECKS:-1}"
 TABLE_TARGET_WIDTH="${ABCD_TABLE_TARGET_WIDTH:-76}"
 TABLE_HARD_MAX_WIDTH="${ABCD_TABLE_HARD_MAX_WIDTH:-80}"

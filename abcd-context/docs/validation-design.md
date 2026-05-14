@@ -119,12 +119,17 @@ Markdown shape.
 # From project root (human-readable)
 bash /path/to/skill/scripts/validate-context.sh
 
-# Machine-readable JSON output
-bash /path/to/skill/scripts/validate-context.sh --json
+# Explicit project root
+bash /path/to/skill/scripts/validate-context.sh /path/to/project
 
-# With custom project root
+# Machine-readable JSON output
+bash /path/to/skill/scripts/validate-context.sh --json /path/to/project
+
+# Environment-root compatibility
 VALIDATE_CONTEXT_ROOT=/path/to/project bash /path/to/skill/scripts/validate-context.sh
 ```
+
+Root resolution order: explicit `project-root` argument, then `VALIDATE_CONTEXT_ROOT`, then current working directory. Missing or non-directory roots fail clearly before validation starts.
 
 ## Exit Codes
 
