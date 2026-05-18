@@ -2,13 +2,15 @@
 
 ## Unreleased
 
+- `Coordinator Checkpoints`: Added a portable goal for resumable subagent checkpoints: a subagent can pause, send a bounded question to the orchestrator, receive the answer, and continue in the same context when the local adapter supports it. Impact: Swarm now names same-context coordinator/subagent handoff as the desired direction while preserving a degraded artifact fallback.
+- `Collaborative Branch Subagents`: Added backlog-driven branch swarm guidance with stable task IDs, coordinator-written scope files, isolated clone/worktree branch execution, branch artifact success criteria, degraded partial-failure handling, prompt templates, and a local runner adapter contract. Impact: Swarm can now describe 2-4 implementation subagents that produce pushed branch artifacts while keeping concrete execution in local async-run adapters.
 - `Skill Manifest Design Note`: Added `docs/skill-manifest.md` with a minimal future `skill.json` candidate shape, non-goals, unresolved questions, and an adoption gate. Impact: manifest needs are captured without prematurely implementing a broad platform.
 - `Small-Team Development Swarm`: Added MAWP, a lightweight 2–4 implementation-agent protocol using isolated branches/worktrees, mutation-class role split, task cards with allowed/avoided files, optional soft-lock manifests, no silent scope expansion, bounded conflict reports, handoff reports, and one integrator merge. Impact: Swarm can now coordinate small parallel implementation safely without growing a heavyweight orchestrator.
 - `Cognitive Lens Principle`: Added the core swarm concept that one focused subagent should hold one lens, many independent lenses improve judgement, and parallel lenses reduce wall-clock time. Impact: Swarm now explains why focused reviewers outperform overloaded single-agent review.
 - `Swarm Shapes`: Clarified Lens Swarm versus Quorum: vary lenses for breadth, hold one lens across independent judges for confidence, and reserve Lens Swarm of Quorums for high-stakes breadth plus confidence. Impact: agents can choose the right swarm topology instead of treating every multi-agent run as generic review.
 - `Work Modes`: Added brainstorm, development, and review swarm modes. Impact: Swarm now covers ideation and scoped product/engineering execution in addition to verification.
 - `Lens Catalog`: Added general software and complex-system/blockchain lens catalogs for architecture, correctness, security, tests, economics, consensus, cryptography, governance, operations, and adversarial review. Impact: agents can choose targeted reviewer roles for complex software instead of inventing ad-hoc prompts.
-- `Job-First Async Rule`: Clarified that non-trivial asynchronous agentic work should prefer local job adapters over blocking foreground orchestration. Impact: Swarm now treats jobs as the default lifecycle envelope for long-running or parallel agent work while keeping execution shape in command templates and semantics in the skill.
+- `Async-Run-First Rule`: Clarified that non-trivial asynchronous agentic work should prefer local async-run adapters over blocking foreground orchestration. Impact: Swarm now treats async runs as the default lifecycle envelope for long-running or parallel agent work while keeping execution shape in command templates and semantics in the skill.
 
 ## 1.0.9 - 2026-05-07
 

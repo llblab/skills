@@ -2,22 +2,22 @@
 
 Swarm is portable protocol text plus atomic reference utilities. Local tool
 systems may bind the protocol to command templates, registered tools, or
-template jobs, but the skill must not depend on a specific tool registry or
+async runs, but the skill must not depend on a specific tool registry or
 `pi -p` runner.
 
 ## Tool Adapter Example
 
 Local environments may expose adapters similar to these:
 
-- `template_job action=start`: Start a registered composer or inline command template through a generic job runtime.
-- `template_job action=status`: Read structured job state and progress.
-- `template_job action=tail`: Show recent structured events or raw logs.
-- `template_job action=list`: List known jobs.
-- `template_job action=cancel`: Cancel an owned job when pid ownership is verified.
+- `async_run action=start`: Start a registered composer or inline command template through a generic async runtime.
+- `async_run action=status`: Read structured run state and progress.
+- `async_run action=tail`: Show recent structured events or raw logs.
+- `async_run action=list`: List known runs.
+- `async_run action=cancel`: Cancel an owned run when pid ownership is verified.
 - `swarm_quorum`: Local synchronous quorum adapter, commonly implemented as a command-template composer.
 - `swarm_quorum_fake`: Local fake adapter for tests, if the environment wants one.
 
-`template_job` and `swarm_quorum` are example adapter names, not Swarm requirements. The portable contract is the action set plus inspectable state. Prefer the job path for long-running or parallel agentic work, so the orchestrator stays responsive and terminal events drive follow-up inspection.
+`async_run` and `swarm_quorum` are example adapter names, not Swarm requirements. The portable contract is the action set plus inspectable state. Prefer the async-run path for long-running or parallel agentic work, so the orchestrator stays responsive and terminal events drive follow-up inspection.
 
 ## Portable Utilities
 
@@ -53,15 +53,16 @@ lives in the tool registry:
 }
 ```
 
-This composer is the compact sync path that demonstrates the synergy between registry-level orchestration and atomic Swarm utilities. When work is long-running, parallel, user-visible, or likely to outlive the current turn, wrap the same composer or quorum utility in a generic template job instead of adding a broad coordination script to this skill.
+This composer is the compact sync path that demonstrates the synergy between registry-level orchestration and atomic Swarm utilities. When work is long-running, parallel, user-visible, or likely to outlive the current turn, wrap the same composer or quorum utility in a generic async run instead of adding a broad coordination script to this skill.
 
 ## Async Quorum Example
 
-A local generic job runtime can start a registered composer or a quorum utility as a detached template job. Read this as command-template execution plus a thin async envelope, not as a second workflow language:
+A local generic async runtime can start a registered composer or a quorum utility as a detached async run. Read this as command-template execution plus a thin async envelope, not as a second workflow language:
 
 ```json
 {
-  "job": "spec-review",
+  "action": "start",
+  "run_id": "spec-review",
   "values": {
     "prompt": "Review for contradictions and growth risks.",
     "scope": "docs/spec.md"
@@ -110,4 +111,4 @@ node scripts/swarm-lock.mjs release --scope docs/spec.md
 - Model names are local aliases, not portable skill vocabulary.
 - Raw outputs and manifests should be retained until the merged report is
   accepted.
-- Template jobs own lifecycle and observability; command templates own execution shape. Do not move model policy or broad coordination back into Swarm scripts.
+- Async runs own lifecycle and observability; command templates own execution shape. Do not move model policy or broad coordination back into Swarm scripts.

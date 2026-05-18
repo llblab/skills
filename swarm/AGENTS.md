@@ -3,7 +3,7 @@
 ## Meta-Protocol Principles
 
 - `Atomic Skill Boundary`: Swarm owns portable subagent coordination semantics, not local tool registries or runtime plumbing.
-- `Adapter Separation`: Local adapters bind Swarm contracts to command templates, template jobs, model aliases, and tool registries.
+- `Adapter Separation`: Local adapters bind Swarm contracts to command templates, async-run lifecycles, model aliases, and tool registries.
 - `Context Hygiene`: Keep durable protocol in `AGENTS.md`, open work in `BACKLOG.md`, completed delivery in `CHANGELOG.md`, and human navigation in `README.md` plus `/docs`.
 
 ## Concept
@@ -28,9 +28,9 @@ Swarm is a portable skill for safe subagent orchestration: delegated review, quo
 - Use ad-hoc shell only to prototype a template or recover from missing tooling.
 - Pass files by local path in the prompt. Do not require attachment support from wrappers.
 - Keep the skill independent: describe required capabilities, not concrete sibling skill names.
-- `Script boundary`: Scripts in this skill must stay atomic and narrowly specialized: lock helper, self-test helper, prompt/file utility. Broad coordination, real quorum execution, background job lifecycle, model pools, and adapter policy belong in local tool config or a generic tool-runtime layer.
-- `Job-first async rule`: Any non-trivial asynchronous agentic work should prefer a local job adapter over blocking foreground orchestration. Start the job, return job metadata, observe status/tail/list/cancel, and react to terminal events.
-- `Template job boundary`: When async swarm work is needed, prefer a local template-job adapter around an existing command-template composer or quorum utility. The template job owns lifecycle/state/logs/ambient progress; the command template owns execution shape and parallel fanout; Swarm owns quorum/lock/merge semantics.
+- `Script boundary`: Scripts in this skill must stay atomic and narrowly specialized: lock helper, self-test helper, prompt/file utility. Broad coordination, real quorum execution, async run lifecycle, model pools, and adapter policy belong in local tool config or a generic tool-runtime layer.
+- `Async-run-first rule`: Any non-trivial asynchronous agentic work should prefer a local async-run adapter over blocking foreground orchestration. Start the run, return run metadata, observe status/tail/list/cancel, and react to terminal events.
+- `Async run boundary`: When async swarm work is needed, prefer a local async-run adapter around an existing command-template composer or quorum utility. The async run owns lifecycle/state/logs/ambient progress; the command template owns execution shape and parallel fanout; Swarm owns quorum/lock/merge semantics.
 - `Lens discipline`: Assign each subagent one narrow cognitive lens. Prefer a small set of high-value lenses over an overloaded universal prompt. The merger owns synthesis; reviewers own focused evidence.
 - `Shape discipline`: Distinguish Lens Swarm from Quorum. Lens Swarm varies lenses for breadth; Quorum holds one lens constant across independent models/instances for confidence. Use Lens Swarm of Quorums only for high-stakes breadth plus confidence.
 - `Work-mode discipline`: Swarm can support brainstorm, development, and review. Brainstorm swarms synthesize directions, development swarms coordinate scoped slices, and review swarms produce verdicts.
@@ -40,6 +40,7 @@ Swarm is a portable skill for safe subagent orchestration: delegated review, quo
 - `Semantic conflict awareness`: Git conflicts are not the only risk. Public API, schema, package manifest, runtime root, and protocol/spec files require exclusive ownership or integrator control.
 - `Mutation-class split`: Prefer implementation/test/docs/integration role separation over assigning unrelated feature work to parallel agents.
 - `No silent scope expansion`: In multi-agent mode, opportunistic refactors outside the task card are conflict generators. Record out-of-scope needs as backlog/conflict notes instead.
+- `Coordinator checkpoint goal`: When a subagent is blocked on a coordinator-only decision, the target pattern is pause → bounded checkpoint question → coordinator reply → same-context resume. If the local adapter cannot preserve context, write a checkpoint artifact and mark the run degraded rather than pretending continuity was preserved.
 
 ### Lock Discipline
 

@@ -61,7 +61,7 @@ Do not include these until there is strong pressure:
 
 - Model aliases or provider names.
 - Concrete local tool registry syntax.
-- Runtime job orchestration details.
+- Runtime async-run orchestration details.
 - Cross-skill dependency declarations.
 - Auto-install behavior.
 - Prompt-template language that assumes one agent harness.

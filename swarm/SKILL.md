@@ -24,10 +24,11 @@ Swarm is independent. It must not require concrete sibling skill names, private 
 - `Quorum`: Multiple independent subagents reviewing the same target.
 - `Merger`: Clean-context fifth subagent that synthesizes raw quorum outputs.
 - `Reviewer`: Post-merge reviewer that checks report quality, not the original domain by default.
-- `Job Adapter`: Local async binding that starts, tracks, lists, tails, and cancels swarm jobs through a generic job runtime.
-- `Template Job`: A local async envelope around a command-template swarm composer or utility. It owns lifecycle and observability, not swarm semantics.
+- `Async Run Adapter`: Local async binding that starts, tracks, lists, tails, and cancels swarm runs through a generic lifecycle runtime.
+- `Async Run`: A local lifecycle envelope around a command-template swarm composer or utility. It owns state, logs, status, cancellation, and observability, not swarm semantics.
 - `Lens`: A deliberately narrow cognitive role assigned to one subagent, such as security, tests, architecture, economics, or operator UX.
 - `Task Card`: A bounded implementation assignment with goal, allowed files, avoided files, expected output, and validation gates.
+- `Coordinator Checkpoint`: A deliberate subagent pause where the subagent preserves its working context, sends a bounded question or status to the orchestrator, receives a coordinator reply, and continues in the same subagent context.
 - `Integrator`: The human or agent that merges isolated branches/worktrees into the shared target and owns conflict resolution.
 
 ## Swarm Principle
@@ -168,6 +169,8 @@ Expected output:
 - touched files list
 ```
 
+For backlog-driven branch swarms, use stable task IDs and one scope file per agent. The coordinator partitions independent task cards, writes scope files with allowed files, avoided files, exit criteria, checks, branch name, and handoff path, then starts a local async-run adapter that runs each subagent in an isolated clone or worktree branch. Success means the expected branch contains a verified commit and has been pushed; partial branch failures are degraded runs for coordinator inspection, not automatic total failure.
+
 For 2–4 agents, a simple `.agents/locks.md` soft-lock manifest is often enough. The manifest states each agent's task and owned files. Agents read it before starting, add their section before editing, avoid other agents' owned files, and remove or mark the section done after completion.
 
 Use exclusive ownership for public API and central contract files. Examples: package manifests, schema files, public type modules, runtime roots, protocol specs, migration heads, and generated-client sources. If a task touches exclusive files, assign them to one agent or to the integrator.
@@ -184,6 +187,8 @@ Architecture conflict → invalidate/split backlog task
 Conflict reports exchange semantic deltas, not open-ended discussion: what changed, why, what must be preserved, what can be discarded, and suggested resolution. See [`docs/development-swarm.md`](./docs/development-swarm.md) for templates.
 
 No agent may silently expand task scope. Do not opportunistically refactor unrelated code or edit outside declared files. If an out-of-scope change is needed, record it as a backlog item or ask the integrator to replan.
+
+When a subagent is blocked by a coordinator-only decision, prefer a coordinator checkpoint over guessing or discarding context if the local runtime supports resumable subagent sessions. The checkpoint should contain the question, why coordinator input is needed, options considered, recommended option, risk if guessed, and state to preserve. The coordinator should answer only the checkpoint question; the subagent resumes in the same context and records the decision in its handoff.
 
 ### Review Swarm
 
@@ -286,27 +291,29 @@ Use the local review protocol if available.
 Report white spots, contradictions, evidence, and risks.
 ```
 
-## Async Job Adapter
+## Async Run Adapter
 
-Async job management is an adapter concern, not a portable Swarm script requirement. For non-trivial asynchronous agentic work, use a job-first flow when the local runtime supports it: command-template execution plus a thin detached lifecycle envelope.
+Async run management is an adapter concern, not a portable Swarm script requirement. For non-trivial asynchronous agentic work, use an async-run flow when the local runtime supports it: command-template execution plus a thin detached lifecycle envelope.
 
-- `start`: Launch a swarm job in the background and return job metadata.
-- `status`: Report whether the job is running, done, degraded, or failed.
-- `tail`: Show recent structured job events or raw logs.
-- `list`: Show known jobs.
-- `cancel`: Stop an owned running job when the adapter can prove pid ownership.
+- `start`: Launch a swarm run in the background and return run metadata.
+- `status`: Report whether the run is running, done, degraded, or failed.
+- `tail`: Show recent structured run events or raw logs.
+- `list`: Show known runs.
+- `cancel`: Stop an owned active run when the adapter can prove pid ownership.
 
-`Purpose`: Keep the user interface responsive while reviewers, merger, and post-merge reviewer run. Generic job state belongs to a local job runtime; swarm-specific execution stays in atomic utilities or command-template composition. The orchestrator should start the job, return metadata, then inspect status/tail after terminal events instead of blocking on sleeps or foreground waits.
+`Purpose`: Keep the user interface responsive while reviewers, merger, and post-merge reviewer run. Generic run state belongs to a local async lifecycle runtime; swarm-specific execution stays in atomic utilities or command-template composition. The orchestrator should start the run, return metadata, then inspect status/tail after terminal events instead of blocking on sleeps or foreground waits.
 
-`Progress contract`: async jobs should expose structured state such as `progress.json`, `events.jsonl`, logs, and final result metadata. Local tools should read these files through job-runtime verbs instead of scraping process output.
+`Resumable checkpoint goal`: Advanced adapters should strive to support a paused subagent that can ask the orchestrator for input and then resume in the same subagent context. The portable contract is a structured coordinator checkpoint plus a coordinator reply; the mechanism may be a TTY session, persistent model session, message queue, or runtime-specific resume token. If the runtime cannot preserve context, degrade to a handoff artifact and a new subagent, and mark the context loss explicitly.
 
-`Minimum state`: an adapter should expose `job_id`, `status`, timestamps, state directory or output directory, recent events, stdout/stderr logs, and final result metadata.
+`Progress contract`: async runs should expose structured state such as `progress.json`, `events.jsonl`, logs, and final result metadata. Local tools should read these files through async-run verbs instead of scraping process output.
+
+`Minimum state`: an adapter should expose `run_id`, `status`, timestamps, state directory or output directory, recent events, stdout/stderr logs, and final result metadata.
 
 `Terminal statuses`: `done`, `failed`, `timeout`, and `cancelled` are terminal. `running` and `degraded` are observable non-terminal states.
 
-`Cancellation boundary`: cancel only an owned running job when pid ownership or runtime ownership can be verified. Stale pid reuse must fail closed.
+`Cancellation boundary`: cancel only an owned active run when pid ownership or runtime ownership can be verified. Stale pid reuse must fail closed.
 
-`Reference binding`: Use a local generic job runtime or tool registry adapter. If the local runtime exposes a single action tool, bind these verbs as actions rather than adding more Swarm scripts. Swarm scripts themselves should stay atomic and narrowly specialized.
+`Reference binding`: Use a local generic async-run runtime or tool registry adapter. If the local runtime exposes a single action tool, bind these verbs as actions rather than adding more Swarm scripts. Swarm scripts themselves should stay atomic and narrowly specialized.
 
 ## `swarm_quorum`
 
@@ -333,7 +340,7 @@ Multi-model review by independent subagents.
 7. Store or return the merged report.
 8. Optionally run post-merge review.
 
-`Reference binding`: Implement this contract through a local adapter such as a command-template composer, registered tool, or template job. The portable Swarm skill intentionally does not ship a `pi -p` quorum runner.
+`Reference binding`: Implement this contract through a local adapter such as a command-template composer, registered tool, or async run. The portable Swarm skill intentionally does not ship a `pi -p` quorum runner.
 
 `Serious quorum rule`: For high-stakes review, the merger is not the current orchestrator. The merger is a fifth clean-context subagent.
 
@@ -461,6 +468,7 @@ Run a reviewer on the merged report when the output will drive code, architectur
 
 - `LOCK_CONFLICT`: Retry, back off, or choose another scope.
 - `SUBAGENT_TIMEOUT`: Keep partial results and release locks by TTL.
+- `COORDINATOR_INPUT_REQUIRED`: Pause only if the adapter can preserve subagent context; otherwise write a checkpoint artifact and stop degraded for coordinator replanning.
 - `MODEL_FAILURE`: Continue with fewer votes and mark degraded quorum.
 - `MERGE_FAILURE`: Return `INSUFFICIENT_DATA` or rerun merger.
 - `REVIEW_FAILURE`: Keep merged report and mark post-review missing.
