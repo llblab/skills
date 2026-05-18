@@ -1,6 +1,6 @@
 {
   "name": "@llblab/skills",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "private": false,
   "description": "Dream Skills",
   "keywords": [
@@ -25,6 +25,7 @@
     "coding-contract/",
     "cross-evolution/",
     "domain-dag/",
+    "dev2main-release/",
     "edge-tts/",
     "frontend-design/",
     "groq-stt/",

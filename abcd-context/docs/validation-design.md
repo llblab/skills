@@ -72,10 +72,9 @@ The validator treats subtree `README.md` files as human entrypoints, not decorat
 Markdown shape checks are style warnings, not hard failures by default.
 
 - `ABCD_MARKDOWN_SHAPE_CHECKS=0` disables the check for project-local overlays.
-- `ABCD_TABLE_TARGET_WIDTH` sets the soft target, default `76`.
-- `ABCD_TABLE_HARD_MAX_WIDTH` sets the warning threshold, default `80`.
-- Wide rows are detected only on source lines that begin with a Markdown table
-  pipe outside fenced code blocks.
+- `ABCD_TABLE_TARGET_WIDTH` sets the soft target, default `116`.
+- `ABCD_TABLE_HARD_MAX_WIDTH` sets the warning threshold, default `120`.
+- Wide tables are detected as contiguous Markdown table blocks outside fenced code blocks; each table emits at most one width warning with line range, max width, and affected-row count.
 - Definition-list tables are detected by common two-column headers such as
   `Term/Meaning`, `Field/Description`, and `Parameter/Purpose`.
 

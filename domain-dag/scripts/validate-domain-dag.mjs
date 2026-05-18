@@ -75,7 +75,7 @@ const DEFAULT_CONFIG = {
   layers: [],
   surfaceRules: [],
 };
-const DEFAULT_CONFIG_NAMES = ["domain-dag.config.json", ".domain-dag.json"];
+const DEFAULT_CONFIG_NAMES = ["domain-dag.json", ".domain-dag.json"];
 const MAX_LISTED_ITEMS = 30;
 
 function toPosixPath(path) {
@@ -564,32 +564,77 @@ function validateLayers(graph, config, reporter) {
     );
 }
 
+function collectConfiguredGlobs(config) {
+  const globs = [];
+  const add = (owner, value) => {
+    if (!value) return;
+    const values = Array.isArray(value) ? value : [value];
+    for (const item of values) {
+      if (typeof item === "string") globs.push({ owner, value: item });
+    }
+  };
+  add("sourceRoots", config.sourceRoots);
+  add("entrypoints", config.entrypoints);
+  add("allowedSharedBuckets", config.allowedSharedBuckets);
+  for (const edge of config.forbiddenEdges ?? []) {
+    add("forbiddenEdges.from", edge.from);
+    add("forbiddenEdges.to", edge.to);
+  }
+  for (const layer of config.layers ?? [])
+    add(`layers.${layer.name ?? "unnamed"}`, layer.files);
+  for (const rule of config.surfaceRules ?? [])
+    add(`surfaceRules.${rule.name ?? "unnamed"}`, rule.files);
+  return globs;
+}
+
+function validateConfigSyntax(config, reporter) {
+  const unsupportedBraceGlobs = collectConfiguredGlobs(config).filter(
+    ({ value }) => /[{}]/.test(value),
+  );
+  for (const glob of unsupportedBraceGlobs.slice(0, MAX_LISTED_ITEMS)) {
+    reporter.warn(
+      `Unsupported brace glob syntax in ${glob.owner}: ${glob.value}; expand it into separate glob entries`,
+    );
+  }
+  if (unsupportedBraceGlobs.length > MAX_LISTED_ITEMS)
+    reporter.warn(
+      `Additional unsupported brace globs: ${unsupportedBraceGlobs.length - MAX_LISTED_ITEMS}`,
+    );
+}
+
 function validateSurfaceRules(root, files, config, reporter) {
   if (!Array.isArray(config.surfaceRules) || config.surfaceRules.length === 0)
     return;
   for (const rule of config.surfaceRules) {
     const max = Number.isFinite(rule.max) ? rule.max : undefined;
-    if (max === undefined || !rule.pattern) continue;
+    if (max === undefined) continue;
     const filesGlob = Array.isArray(rule.files)
       ? rule.files
       : rule.files
         ? [rule.files]
         : ["**/*"];
-    const pattern = new RegExp(rule.pattern, rule.flags ?? "g");
     const violations = [];
     for (const file of files) {
       const relativePath = toPosixPath(relative(root, file));
       if (!matchesAnyGlob(relativePath, filesGlob)) continue;
       const source = readFileSync(file, "utf8");
-      const matches = new Set();
-      for (const match of source.matchAll(pattern)) {
-        matches.add(match[1] ?? match[0]);
+      let count = 0;
+      if (rule.metric === "lines") {
+        count = source.split(/\r?\n/).length;
+      } else {
+        if (!rule.pattern) continue;
+        const pattern = new RegExp(rule.pattern, rule.flags ?? "g");
+        const matches = new Set();
+        for (const match of source.matchAll(pattern)) {
+          matches.add(match[1] ?? match[0]);
+        }
+        count = matches.size;
       }
-      if (matches.size > max)
-        violations.push(`${relativePath} matched ${matches.size}/${max}`);
+      if (count > max)
+        violations.push(`${relativePath} measured ${count}/${max}`);
     }
     if (violations.length === 0) {
-      reporter.pass(rule.passMessage ?? `Surface rule holds: ${rule.name ?? rule.pattern}`);
+      reporter.pass(rule.passMessage ?? `Surface rule holds: ${rule.name ?? rule.pattern ?? rule.metric}`);
       continue;
     }
     for (const violation of violations.slice(0, MAX_LISTED_ITEMS))
@@ -666,6 +711,7 @@ function runValidation(args) {
   if (!args.json) console.log("--- DOMAIN DAG VALIDATOR ---");
   reporter.info(`Root: ${root}`);
   if (configPath) reporter.info(`Config: ${configPath}`);
+  validateConfigSyntax(config, reporter);
   reporter.info(
     `Source files ${files.length}, local edges ${countEdges(graph)}`,
   );

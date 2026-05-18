@@ -12,12 +12,14 @@ for (const arg of process.argv.slice(2)) {
     continue;
   }
   if (arg === "--help" || arg === "-h") {
-    console.log([
-      "Usage: validate-context.mjs [--json] [project-root]",
-      "",
-      "Validates the current directory by default, VALIDATE_CONTEXT_ROOT when set,",
-      "or the explicit project-root argument when provided.",
-    ].join("\n"));
+    console.log(
+      [
+        "Usage: validate-context.mjs [--json] [project-root]",
+        "",
+        "Validates the current directory by default, VALIDATE_CONTEXT_ROOT when set,",
+        "or the explicit project-root argument when provided.",
+      ].join("\n"),
+    );
     process.exit(0);
   }
   if (arg.startsWith("--")) {
@@ -34,13 +36,15 @@ const root = path.resolve(
   explicitRoot || process.env.VALIDATE_CONTEXT_ROOT || process.cwd(),
 );
 if (!fs.existsSync(root) || !fs.statSync(root).isDirectory()) {
-  console.error(`ERROR: Project root does not exist or is not a directory: ${root}`);
+  console.error(
+    `ERROR: Project root does not exist or is not a directory: ${root}`,
+  );
   process.exit(1);
 }
 const noColor = process.env.NO_COLOR;
 const shapeChecks = process.env.ABCD_MARKDOWN_SHAPE_CHECKS !== "0";
-const tableTarget = Number(process.env.ABCD_TABLE_TARGET_WIDTH || 76);
-const tableMax = Number(process.env.ABCD_TABLE_HARD_MAX_WIDTH || 80);
+const tableMax = Number(process.env.ABCD_TABLE_HARD_MAX_WIDTH || 120);
+const tableTarget = Number(process.env.ABCD_TABLE_TARGET_WIDTH || 116);
 
 const indexCandidates = [
   "AGENTS.md",
@@ -160,7 +164,7 @@ function headingAnchor(text) {
     .replace(/-+/g, "-");
 }
 
-progress("--- ABCd CONTEXT PROTOCOL VALIDATOR (Node) ---");
+progress("--- ABCd CONTEXT PROTOCOL VALIDATOR (Node) ---\n");
 
 let contextName = "";
 let contextFile = "";
@@ -364,22 +368,46 @@ if (shapeChecks) {
     const lines = read(file).split(/\r?\n/);
     let fenced = false;
     let maybeDef = false;
+    let table = null;
+    const flushTable = () => {
+      if (!table) return;
+      if (table.maxLen > tableMax) {
+        warn(
+          `Wide Markdown table: ${rel(file)}:${table.start}-${table.end} (max ${table.maxLen} chars, ${table.hardRows}/${table.rows} rows > ${tableMax}; prefer bullets for prose-heavy cells)`,
+        );
+        shapeWarn = true;
+      } else if (table.maxLen > tableTarget) {
+        info(
+          `Near-wide Markdown table: ${rel(file)}:${table.start}-${table.end} (max ${table.maxLen} chars, ${table.targetRows}/${table.rows} rows > ${tableTarget})`,
+        );
+      }
+      table = null;
+    };
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       if (line.startsWith("```")) {
+        flushTable();
         fenced = !fenced;
         continue;
       }
-      if (fenced || !/^ *\|/.test(line)) continue;
-      if (line.length > tableMax) {
-        warn(
-          `Wide Markdown table row: ${rel(file)}:${i + 1} (${line.length} chars, max ${tableMax})`,
-        );
-        shapeWarn = true;
-      } else if (line.length > tableTarget)
-        info(
-          `Near-wide Markdown table row: ${rel(file)}:${i + 1} (${line.length} chars, target ${tableTarget})`,
-        );
+      if (fenced || !/^ *\|/.test(line)) {
+        flushTable();
+        continue;
+      }
+      if (!table)
+        table = {
+          start: i + 1,
+          end: i + 1,
+          rows: 0,
+          maxLen: 0,
+          hardRows: 0,
+          targetRows: 0,
+        };
+      table.end = i + 1;
+      table.rows += 1;
+      table.maxLen = Math.max(table.maxLen, line.length);
+      if (line.length > tableMax) table.hardRows += 1;
+      if (line.length > tableTarget) table.targetRows += 1;
       const cells = line
         .replace(/^ *\|/, "")
         .replace(/\| *$/, "")
@@ -396,6 +424,7 @@ if (shapeChecks) {
       )
         maybeDef = true;
     }
+    flushTable();
     if (maybeDef) {
       warn(
         `Definition-list style table: ${rel(file)} (prefer label/bullet definitions)`,
@@ -450,7 +479,7 @@ if (outputJson) {
     ),
   );
 } else {
-  console.log("\n--- VALIDATION SUMMARY ---");
+  console.log("\n--- VALIDATION SUMMARY ---\n");
   console.log(`Warnings: ${warnings}`);
   console.log(`Errors: ${errors}\n`);
   if (!errors)

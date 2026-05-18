@@ -2,7 +2,7 @@
 name: domain-dag
 description: Validates and guides Domain DAG architecture for domain ownership, acyclic local dependency graphs, composition roots, boundary direction, public contracts, interface-surface pressure, and shared-bucket drift. Use when auditing, refactoring, or extending modular codebases across frontend, backend, extensions, CLIs, SDKs, and service packages.
 metadata:
-  version: 1.0.10
+  version: 1.0.13
 ---
 
 # Domain DAG
@@ -147,7 +147,7 @@ bash "${SKILL_DIR}/scripts/validate-domain-dag.sh" --root .
 Useful flags:
 
 - `--root <path>` — project root; defaults to the current directory
-- `--config <path>` — JSON config; defaults to `domain-dag.config.json`, then `.domain-dag.json`
+- `--config <path>` — JSON config; defaults to `domain-dag.json`, then `.domain-dag.json`
 - `--strict` — treat warnings as failures
 - `--json` — machine-readable output
 
@@ -162,7 +162,7 @@ The validator checks:
 
 ## Configuration
 
-Add a project-local `domain-dag.config.json` when defaults are too broad or too narrow:
+Add a project-local `domain-dag.json` when defaults are too broad or too narrow:
 
 ```json
 {
@@ -223,7 +223,9 @@ Layer rule: lower ranks must not import higher ranks. Same-rank and downward imp
 
 `importAliases` lets the validator resolve local path aliases such as `@/*`, `$lib/*`, or package-internal aliases. Keep aliases project-local; the skill should not assume any particular bundler or language server convention.
 
-`surfaceRules` are intentionally generic: they count unique regex matches in selected files. Use them for local pressure signals such as too many callback props, too many exported commands, broad adapter methods, or other project-specific interface smells. Keep them warnings unless the signal is proven noise-free.
+Glob support is intentionally small and portable: `*`, `**`, and `?` are supported, but brace expansion such as `src/{a,b}/**` is not. Use multiple explicit glob entries or rules instead; the validator warns when configured globs contain unsupported braces.
+
+`surfaceRules` are intentionally generic: by default they count unique regex matches in selected files, and with `metric: "lines"` they count file lines. Use them for local pressure signals such as too many callback props, too many exported commands, broad adapter methods, oversized widgets/modules, or other project-specific interface smells. Keep them warnings unless the signal is proven noise-free.
 
 ## Rule-Severity Ladder
 

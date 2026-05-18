@@ -2,7 +2,7 @@
 name: swarm
 description: Subagent orchestration with scoped locks and quorum consensus. Use for multi-model review, parallel scoped work, delegated audit, and coordinated subagent execution.
 metadata:
-  version: 1.0.10
+  version: 1.0.11
 ---
 
 # Swarm
@@ -149,15 +149,19 @@ Every implementation agent receives a `Task Card`:
 # Task
 
 Goal:
+
 - What needs to be done.
 
 Allowed files:
+
 - path/or/glob
 
 Avoid files:
+
 - path/or/glob
 
 Expected output:
+
 - patch
 - short summary
 - tests/checks run
