@@ -1,0 +1,4 @@
+{
+  "name": "audit-cross-evolution",
+  "template": "../scripts/audit-cross-evolution.mjs"
+}

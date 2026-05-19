@@ -1,8 +1,9 @@
 # Changelog
 
-## Current
+## 1.0.12 - 2026-05-19
 
 - `Validator Path Argument` Added explicit project-root argument support to the Bash and Node validators, including missing-path failures, self-test coverage, and usage docs. Impact: callers can run `validate-context.sh /path/to/project` without relying on `cwd` or `VALIDATE_CONTEXT_ROOT`.
+- `Recipe Binding` Added `recipes/validate-context.json` with a relative `../scripts/validate-context.mjs` template. Impact: agents can bind the validator as a portable pi-auto-tools recipe without hard-coded local skill paths.
 
 ## 1.0.9 - 2026-05-07
 

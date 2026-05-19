@@ -1,0 +1,5 @@
+{
+  "name": "inspect-gene",
+  "args": ["gene:string"],
+  "template": "../scripts/inspect-gene.sh {gene}"
+}

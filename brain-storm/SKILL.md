@@ -1,13 +1,13 @@
 ---
 name: brain-storm
-description: Collaborative idea-to-design protocol. Use for product/architecture exploration, feature shaping, standards, specs, UX concepts, module boundaries, and non-trivial behavior changes when design uncertainty matters.
+description: Collaborative idea-to-design and inquiry protocol. Use for product/architecture exploration, research-style question shaping, feature design, standards, specs, UX concepts, module boundaries, and non-trivial behavior changes when uncertainty matters.
 metadata:
-  version: 1.0.11
+  version: 1.0.12
 ---
 
 # Brain Storm
 
-Turn rough ideas into clear, implementation-ready designs through lightweight collaborative exploration.
+Turn rough ideas into clear, implementation-ready designs or research-ready inquiry briefs through lightweight collaborative exploration.
 
 This skill is intentionally independent. It does not require or name any other skill, project, repository, framework, or workflow. It composes by producing clean design truth that surrounding processes can store, review, plan, or implement in their own way.
 
@@ -20,6 +20,8 @@ Use this skill when the useful next step is clarification rather than immediate 
 - Standards / protocol drafting
 - Product or ecosystem-shaping decisions
 - UI/UX concept exploration
+- Research-style inquiry shaping before evidence collection
+- Literature, market, policy, or technical exploration when the question is still vague
 - Scope decomposition before implementation
 - Risky changes where intent and constraints matter more than speed
 
@@ -31,8 +33,9 @@ Brainstorming produces one of:
 
 1. A concise approved direction
 2. A written design/specification
-3. A decomposed set of smaller slices
-4. A decision to stop or defer
+3. A research or exploration brief
+4. A decomposed set of smaller slices
+5. A decision to stop or defer
 
 Implementation may begin once design uncertainty for the current slice is resolved. Approval can be explicit (`yes`, `approved`, `do it`) or implicit when the user directly asks to implement the proposed direction.
 
@@ -48,6 +51,8 @@ Implementation may begin once design uncertainty for the current slice is resolv
 - Treat durable context, documentation, and open-work state as part of design truth.
 - Avoid speculative architecture. Add complexity only when a discovered constraint earns it.
 - Preserve local vocabulary instead of importing new ontology unnecessarily.
+- If the user has a vague interest rather than a clear question, guide first instead of producing an unwanted report.
+- Treat claims, assumptions, and evidence needs as design material; do not invent certainty before investigation.
 
 ## Composition Contract
 
@@ -76,6 +81,46 @@ When the design is risky, broad, or security-sensitive, request an evidence-grou
 ### Execution loops
 
 When the accepted direction contains many small tasks, define stop conditions and let the local execution process iterate. Brainstorming should not become the execution loop itself.
+
+## Inquiry Lens
+
+Use this when the user is exploring a topic, policy, technical direction, market, literature area, or problem space and the right question is not yet clear. Brainstorm is a form of research when it shapes inquiry before evidence collection.
+
+Guide toward:
+
+- Research or exploration question
+- Scope boundaries and non-goals
+- Known assumptions and uncertainty
+- Evidence needed to answer the question
+- Likely source classes or stakeholders
+- Contradictions to look for
+- Decision the research should support
+- Stop condition for "enough research"
+
+Prefer Socratic guidance when the user expresses uncertainty. Ask genuine questions that expose assumptions; do not lead the user to a predetermined conclusion. Good layers are:
+
+1. Clarify the interest or decision.
+2. Probe assumptions and definitions.
+3. Ask what evidence would change the answer.
+4. Explore alternative perspectives or counter-examples.
+5. Convert the insight into a bounded question, plan, or next slice.
+
+A compact inquiry brief can use:
+
+```markdown
+## Inquiry Brief
+
+Question:
+Scope:
+Assumptions:
+Evidence needed:
+Likely sources or probes:
+Counter-questions:
+Decision this supports:
+Next slice:
+```
+
+Do not run a full research pipeline inside brainstorming. If the question is now clear and the user wants evidence, hand off to the local research, review, or implementation workflow.
 
 ## Portability Lens
 
@@ -162,6 +207,8 @@ Prefer questions about:
 - Data/state lifecycle
 - Safety and rollback
 - What must be portable vs product-specific
+- The decision the inquiry should support
+- What evidence would confirm, weaken, or falsify the current direction
 
 Skip questions when the user already gave enough constraints for a safe first design.
 
@@ -197,6 +244,8 @@ Cover only relevant sections:
 - Non-goals
 - Scope boundary
 - Concepts / vocabulary
+- Research or exploration question
+- Assumptions and evidence needs
 - Architecture / module ownership
 - Data flow / lifecycle
 - API or contract shape
@@ -214,6 +263,7 @@ Ask for approval when the next step would commit the design into durable docs, b
 Pick the smallest durable artifact that matches the project:
 
 - No artifact: ephemeral clarification only
+- Inquiry brief: research-style question, assumptions, evidence needs, and next probe
 - Backlog item: future work only
 - Short doc section: small standard/behavior update
 - Full spec/design doc: medium or large design

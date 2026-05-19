@@ -1,0 +1,5 @@
+{
+  "name": "say-edge",
+  "args": ["text:string", "lang:string=ru", "rate:string=+30%"],
+  "template": "../scripts/say.sh {text} {lang} {rate}"
+}

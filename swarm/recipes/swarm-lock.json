@@ -1,0 +1,10 @@
+{
+  "name": "swarm-lock",
+  "args": [
+    "command:enum(claim,release,status,prune)=status",
+    "scope:string=",
+    "mode:enum(read,write)=write",
+    "ttl:int=300"
+  ],
+  "template": "../scripts/swarm-lock.mjs {command} --scope {scope} --mode {mode} --ttl {ttl}"
+}

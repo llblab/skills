@@ -1,0 +1,5 @@
+{
+  "name": "validate-domain-dag",
+  "args": ["root:path=."],
+  "template": "../scripts/validate-domain-dag.mjs --root {root}"
+}

@@ -1,7 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.0.12 - 2026-05-19
 
+- `Research Swarm`: Added a research-style swarm mode with scope-first inquiry, separate source discovery and verification lenses, evidence checkpoints, contradiction preservation, and traceable synthesis. Impact: Swarm can coordinate evidence-backed inquiry without turning into an academic report pipeline.
+- `Swarm Lock Recipe`: Added one consolidated `recipes/swarm-lock.json` binding for claim, release, status, and prune commands using a relative `../scripts/swarm-lock.mjs` template. Impact: agents can expose lock management as one portable recipe instead of several command-specific wrappers.
 - `Coordinator Checkpoints`: Added a portable goal for resumable subagent checkpoints: a subagent can pause, send a bounded question to the orchestrator, receive the answer, and continue in the same context when the local adapter supports it. Impact: Swarm now names same-context coordinator/subagent handoff as the desired direction while preserving a degraded artifact fallback.
 - `Collaborative Branch Subagents`: Added backlog-driven branch swarm guidance with stable task IDs, coordinator-written scope files, isolated clone/worktree branch execution, branch artifact success criteria, degraded partial-failure handling, prompt templates, and a local runner adapter contract. Impact: Swarm can now describe 2-4 implementation subagents that produce pushed branch artifacts while keeping concrete execution in local async-run adapters.
 - `Skill Manifest Design Note`: Added `docs/skill-manifest.md` with a minimal future `skill.json` candidate shape, non-goals, unresolved questions, and an adoption gate. Impact: manifest needs are captured without prematurely implementing a broad platform.

@@ -1,0 +1,5 @@
+{
+  "name": "validate-context",
+  "args": ["path:path=."],
+  "template": "../scripts/validate-context.mjs {path}"
+}

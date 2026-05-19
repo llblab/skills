@@ -1,0 +1,5 @@
+{
+  "name": "inspect-skill",
+  "args": ["skill:string"],
+  "template": "../scripts/inspect-skill.sh {skill}"
+}

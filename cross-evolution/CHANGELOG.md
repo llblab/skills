@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.0.12 - 2026-05-19
 
 - `Execution/Envelope Separation`: Added a gene-meme for separating skill-owned domain execution semantics from local runtime lifecycle envelopes such as template jobs, status, cancellation, and observability. Impact: async/job lessons can transfer across skills without hard-coupling portable skills to local process managers.
+- `Recipe Bindings` Added portable recipes for audit, skill inspection, and gene inspection using relative `../scripts` templates. Impact: agents can bind cross-evolution observers as reusable tools without hard-coded local skill paths.
 
 ## 1.0.9 - 2026-05-07
 

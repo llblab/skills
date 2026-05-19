@@ -2,7 +2,7 @@
 name: swarm
 description: Subagent orchestration with scoped locks and quorum consensus. Use for multi-model review, parallel scoped work, delegated audit, and coordinated subagent execution.
 metadata:
-  version: 1.0.11
+  version: 1.0.12
 ---
 
 # Swarm
@@ -29,6 +29,7 @@ Swarm is independent. It must not require concrete sibling skill names, private 
 - `Lens`: A deliberately narrow cognitive role assigned to one subagent, such as security, tests, architecture, economics, or operator UX.
 - `Task Card`: A bounded implementation assignment with goal, allowed files, avoided files, expected output, and validation gates.
 - `Coordinator Checkpoint`: A deliberate subagent pause where the subagent preserves its working context, sends a bounded question or status to the orchestrator, receives a coordinator reply, and continues in the same subagent context.
+- `Evidence Checkpoint`: A deliberate stop where a subagent records sources, assumptions, confidence, contradictions, or blocking evidence gaps before synthesis.
 - `Integrator`: The human or agent that merges isolated branches/worktrees into the shared target and owns conflict resolution.
 
 ## Swarm Principle
@@ -64,7 +65,7 @@ Need both?        Use Lens Swarm of Quorums.
 
 ## Work Modes
 
-Swarm is not only for review. The same lens discipline supports ideation, planning, implementation coordination, and verification.
+Swarm is not only for review. The same lens discipline supports ideation, research-style exploration, planning, implementation coordination, and verification.
 
 ### Brainstorm Swarm
 
@@ -89,6 +90,37 @@ Merger output:
 - risks and validation gates
 
 Brainstorm swarms should not vote mechanically. They should preserve creative tension and synthesize a direction that fits constraints.
+
+### Research Swarm
+
+Purpose: turn a broad question into evidence-backed synthesis without letting one agent's search path dominate the answer.
+
+Typical lenses:
+
+- question/scope formulation
+- source discovery
+- source verification
+- synthesis and contradiction mapping
+- devil's advocate / counter-evidence
+- ethics, policy, or stakeholder impact when relevant
+
+Research swarm rules:
+
+1. Scope first: the coordinator defines the question, non-goals, source classes, and stop condition before launching evidence work.
+2. Search and verification are separate lenses when stakes are high; the searcher finds candidates, the verifier checks quality and support.
+3. Every material claim in synthesis must trace to a source note, inspected artifact, or explicit uncertainty statement.
+4. Contradictory evidence is preserved as a first-class output, not hidden by consensus language.
+5. Evidence checkpoints block synthesis when sources are insufficient, unverifiable, conflicted, or ethically unsafe to use.
+
+Merger output:
+
+- bounded research question
+- evidence map with confidence and source quality
+- areas of convergence and contradiction
+- limitations and not-checkable claims
+- recommended decision or next evidence slice
+
+Research swarms are for inquiry and synthesis, not automatic publication pipelines. Keep report formatting local to the caller's domain.
 
 ### Development Swarm
 
@@ -195,6 +227,8 @@ When a subagent is blocked by a coordinator-only decision, prefer a coordinator 
 Purpose: turn one result into many risk lenses and a decision-grade verdict.
 
 Use lens swarm for broad coverage, quorum for confidence on one critical judgement, or both for high-stakes releases. The final report should separate consensus findings, minority findings, merger findings, risks, and recommended next actions.
+
+A review swarm synthesis must not fabricate claims. Every final finding should trace to a reviewer note, checked artifact, command output, source, or explicit merger rationale. Devil's Advocate critical findings must be preserved or explicitly disproved with evidence.
 
 ## Lens Catalog
 

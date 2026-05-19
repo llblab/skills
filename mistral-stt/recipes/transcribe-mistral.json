@@ -1,0 +1,9 @@
+{
+  "name": "transcribe-mistral",
+  "args": [
+    "file:path",
+    "lang:string=ru",
+    "model:string=voxtral-mini-latest"
+  ],
+  "template": "../scripts/transcribe.sh {file} {lang} {model}"
+}

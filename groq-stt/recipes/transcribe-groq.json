@@ -1,0 +1,9 @@
+{
+  "name": "transcribe-groq",
+  "args": [
+    "file:path",
+    "lang:string=ru",
+    "model:string=whisper-large-v3-turbo"
+  ],
+  "template": "../scripts/transcribe.sh {file} {lang} {model}"
+}
