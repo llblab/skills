@@ -28,6 +28,7 @@ Swarm is independent. It must not require concrete sibling skill names, private 
 - `Async Run`: A local lifecycle envelope around a command-template swarm composer or utility. It owns state, logs, status, cancellation, and observability, not swarm semantics.
 - `Lens`: A deliberately narrow cognitive role assigned to one subagent, such as security, tests, architecture, economics, or operator UX.
 - `Task Card`: A bounded implementation assignment with goal, allowed files, avoided files, expected output, and validation gates.
+- `Component Capability`: An abstract adapter operation such as launcher, reviewer, verifier, merger, quorum, checkpoint, follow-up, judge, or normalizer. Swarm may target these capabilities, but local adapters bind them to concrete tools, recipes, command templates, async runs, or services.
 - `Coordinator Checkpoint`: A deliberate subagent pause where the subagent preserves its working context, sends a bounded question or status to the orchestrator, receives a coordinator reply, and continues in the same subagent context.
 - `Evidence Checkpoint`: A deliberate stop where a subagent records sources, assumptions, confidence, contradictions, or blocking evidence gaps before synthesis.
 - `Integrator`: The human or agent that merges isolated branches/worktrees into the shared target and owns conflict resolution.

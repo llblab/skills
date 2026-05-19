@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- `Component Capability Contract`: Added `docs/component-contract.md` and core terminology for launchers, reviewers, verifiers, mergers, quorums, checkpoints, follow-ups, judges, and normalizers. Impact: Swarm can target an abstract component toolkit while local adapters bind those capabilities to concrete runtimes without hard dependencies.
+- `Adapter Boundary`: Neutralized concrete automation-extension wording in adapter docs. Impact: Swarm remains a high-level portable coordination reference instead of depending on a specific local recipe/tool implementation.
+- `Context Health`: Renamed the durable conventions section to `Operating Principles & Conventions`. Impact: the ABCd context validator now recognizes the skill's core structure without warnings.
+
 ## 1.0.12 - 2026-05-19
 
 - `Research Swarm`: Added a research-style swarm mode with scope-first inquiry, separate source discovery and verification lenses, evidence checkpoints, contradiction preservation, and traceable synthesis. Impact: Swarm can coordinate evidence-backed inquiry without turning into an academic report pipeline.
@@ -17,7 +23,7 @@
 ## 1.0.9 - 2026-05-07
 
 - `Local Adapter Defaults`: Updated quorum model guidance to avoid Google defaults and prefer the local non-Google pool of GPT 5.5, GPT 5.4, DeepSeek v4 Flash, DeepSeek v4 Pro, Kimi K2.6, Mistral Medium, and Grok 4.3.
-- `AutoTools Composer`: Added an adapter example that uses `mode: "parallel"` command-template composition for reviewer fanout plus merger flow. Impact: Swarm can demonstrate registry-level orchestration while keeping scripts utility-focused.
+- `Command-Template Composer`: Added an adapter example that uses `mode: "parallel"` command-template composition for reviewer fanout plus merger flow. Impact: Swarm can demonstrate local orchestration bindings while keeping scripts utility-focused.
 - `Script Boundary`: Clarified that Swarm skill scripts should stay atomic and narrowly specialized, while broad coordination, job lifecycle, model pools, and adapter policy belong in local tool config or a generic runtime layer. Impact: the broad async coordinator script is removed from the active script set.
 - `Coordinator Removal`: Removed the broad async coordinator script and retargeted async guidance to generic job-runtime adapters. Impact: Swarm now keeps only atomic scripts for locks, quorum execution, and self-validation.
 - `Async Adapter Contract`: Clarified minimum async adapter state, terminal statuses, cancellation boundary, and `_self-test.mjs` as the required smoke gate after script or adapter-contract changes. Impact: local job-runtime bindings have a tighter portable contract.
@@ -26,4 +32,4 @@
 - `Skill Birth`: Added the Swarm skill as a portable protocol for subagent orchestration, scoped locks, quorum review, clean-context merge, and post-merge review. Impact: multi-agent work now has a reusable operating contract.
 - `Executable Runtime`: Added `scripts/swarm-coordinator.mjs`, `scripts/swarm-quorum.mjs`, `scripts/swarm-lock.mjs`, and `scripts/_self-test.mjs`. Reviewers run concurrently, while merge/review stages run after raw outputs complete. Jobs emit `progress.json` and `events.jsonl` for structured polling. Impact: async job coordination, quorum review, lock helpers, fake regression, command construction checks, manifests, raw-output retention, clean merge, and optional post-merge review are executable rather than prose-only.
 - `Protocol Validation`: Added one private `scripts/_self-test.mjs` entrypoint for skill self-validation. It covers read/write conflicts, TTL expiry, lock release, fake quorum outputs, command shapes, merge output, post-merge review output, and manifests. Impact: core swarm behavior can be validated without invoking real models.
-- `Adapter Documentation`: Added `docs/adapters.md` with local AutoTools-style examples for quorum, fake quorum, and lock helpers. Impact: local convenience wrappers are documented without becoming portable skill dependencies.
+- `Adapter Documentation`: Added `docs/adapters.md` with local command-template examples for quorum, fake quorum, and lock helpers. Impact: local convenience wrappers are documented without becoming portable skill dependencies.

@@ -2,7 +2,7 @@
 
 ## Open Work
 
-No open work is actionable until a concrete resumable adapter exists.
+No open work is actionable until a concrete resumable adapter or component implementation experiment exists.
 
 ## Blocked Work
 

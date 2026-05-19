@@ -28,11 +28,11 @@ The portable script set is intentionally narrow:
 
 A real `pi -p` quorum runner is not portable enough to live in this skill. Keep it in local tool configuration or in a local adapter package.
 
-## AutoTools Composer Example
+## Command-Template Composer Example
 
 A local adapter can express reviewer fanout directly with command-template
 composition. Swarm scripts then stay utility primitives, while adapter policy
-lives in the tool registry:
+lives in the local binding layer:
 
 ```json
 {
@@ -53,7 +53,7 @@ lives in the tool registry:
 }
 ```
 
-This composer is the compact sync path that demonstrates the synergy between registry-level orchestration and atomic Swarm utilities. When work is long-running, parallel, user-visible, or likely to outlive the current turn, wrap the same composer or quorum utility in a generic async run instead of adding a broad coordination script to this skill.
+This composer is a compact sync path that demonstrates the synergy between local orchestration bindings and atomic Swarm utilities. When work is long-running, parallel, user-visible, or likely to outlive the current turn, wrap the same composer or quorum utility in a generic async run instead of adding a broad coordination script to this skill.
 
 ## Async Quorum Example
 

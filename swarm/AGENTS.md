@@ -19,7 +19,7 @@ Swarm is a portable skill for safe subagent orchestration: delegated review, quo
 - `docs/`: Adapter notes and local binding examples.
 - `scripts/`: Atomic reference utilities and self-test only; no broad runtime coordinator and no `pi -p`-coupled quorum runner.
 
-## Knowledge & Conventions
+## Operating Principles & Conventions
 
 ### Tooling Discipline
 
@@ -27,7 +27,8 @@ Swarm is a portable skill for safe subagent orchestration: delegated review, quo
 - Keep concrete tool registries outside this portable skill.
 - Use ad-hoc shell only to prototype a template or recover from missing tooling.
 - Pass files by local path in the prompt. Do not require attachment support from wrappers.
-- Keep the skill independent: describe required capabilities, not concrete sibling skill names.
+- Keep the skill independent: describe required capabilities, not concrete sibling skill or extension names.
+- `Component-contract boundary`: Swarm may target an abstract toolkit of component capabilities (launcher, reviewer, verifier, merger, quorum, checkpoint, follow-up, judge, normalizer) as a weak coordination contract, but it must not name or depend on a concrete local automation extension. Local adapters own the binding from those abstract components to recipes, command templates, async runs, or tool registries.
 - `Script boundary`: Scripts in this skill must stay atomic and narrowly specialized: lock helper, self-test helper, prompt/file utility. Broad coordination, real quorum execution, async run lifecycle, model pools, and adapter policy belong in local tool config or a generic tool-runtime layer.
 - `Async-run-first rule`: Any non-trivial asynchronous agentic work should prefer a local async-run adapter over blocking foreground orchestration. Start the run, return run metadata, observe status/tail/list/cancel, and react to terminal events.
 - `Async run boundary`: When async swarm work is needed, prefer a local async-run adapter around an existing command-template composer or quorum utility. The async run owns lifecycle/state/logs/ambient progress; the command template owns execution shape and parallel fanout; Swarm owns quorum/lock/merge semantics.
