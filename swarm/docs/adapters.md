@@ -41,7 +41,7 @@ lives in the local binding layer:
   "template": [
     "mkdir -p {out_dir}",
     {
-      "mode": "parallel",
+      "parallel": true,
       "template": [
         "pi -p --model openai-codex/gpt-5.5 --thinking off --tools read,bash \"Review {scope}. {prompt}\"",
         "pi -p --model openai-codex/gpt-5.4 --thinking off --tools read,bash \"Review {scope}. {prompt}\"",
@@ -70,7 +70,7 @@ A local generic async runtime can start a registered composer or a quorum utilit
   "template": [
     "node scripts/swarm-lock.mjs claim --scope docs/spec.md --mode read --ttl 300",
     {
-      "mode": "parallel",
+      "parallel": true,
       "template": [
         {
           "label": "gpt-5.5",

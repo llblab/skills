@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `Adapter Examples`: Migrated command-template fanout examples from legacy `mode: "parallel"` to `parallel: true`. Impact: Swarm docs now match the pi-auto-tools 0.8 command-template contract.
 - `Component Capability Contract`: Added `docs/component-contract.md` and core terminology for launchers, reviewers, verifiers, mergers, quorums, checkpoints, follow-ups, judges, and normalizers. Impact: Swarm can target an abstract component toolkit while local adapters bind those capabilities to concrete runtimes without hard dependencies.
 - `Adapter Boundary`: Neutralized concrete automation-extension wording in adapter docs. Impact: Swarm remains a high-level portable coordination reference instead of depending on a specific local recipe/tool implementation.
 - `Context Health`: Renamed the durable conventions section to `Operating Principles & Conventions`. Impact: the ABCd context validator now recognizes the skill's core structure without warnings.
