@@ -85,6 +85,7 @@ Use these questions when creating or moving code:
 - **Survival test**: If the current route/screen/job/command disappeared, would this module still be useful? If yes, it likely belongs below the orchestration layer.
 - **Noun vs journey**: Business nouns/capabilities belong in domain modules. User journeys, workflows, route handlers, modal/screen flows, jobs, and shell composition belong in orchestration/features/use cases.
 - **Reuse pressure**: Peer orchestration modules should not import each other for shared behavior. Extract the reusable capability down to a domain/support module, or extract generic mechanics down to foundation/UI/platform.
+- **Entrypoint shim pressure**: If executable scripts grow substantive behavior, keep the executable file as a thin runner and move the behavior into a named compiled domain module when reuse, testing, packaging, or runtime compatibility benefits are plausible. Do not extract self-contained app scripts whose logic has no expected second consumer; keep them standalone when the boundary would be theater.
 - **Policy locality**: Persistence policy, transaction boundaries, routing, lifecycle registration, drag/drop registration, message acknowledgement, and external transport wiring usually remain in the owning composition/use-case layer unless they are themselves reusable policies.
 - **Naming is not ownership**: A `cards` feature and a `cards` domain can coexist if one owns the journey and the other owns reusable card capabilities.
 - **Public surface test**: Consumers should import what the owner deliberately exposes, not whatever file is easy to reach. Public barrels, package exports, ports, facades, or documented function groups are all valid contracts when they fit the ecosystem.
@@ -118,6 +119,7 @@ When decomposing or extending a module:
 Do **not** keep decomposing just because a file is large. Stop when:
 
 - Remaining code is orchestration glue with high local context value.
+- The module is a self-contained executable application and its behavior is unlikely to be imported by another domain.
 - The next slice would have no reusable responsibility beyond “some markup from the host”.
 - The extracted child would need most of the host state as props.
 - The boundary would create a long flat callback list instead of a meaningful contract.

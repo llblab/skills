@@ -121,7 +121,8 @@ Task touched any *.md file? → YES → run POST_TASK
 4. DOCS SYNC — update the appropriate contract/architecture doc when implementation or public behavior changed
 5. CHANGELOG SYNC — record the delivered slice if something materially landed
 6. AGENTS SYNC — update durable protocol only if a reusable pattern or constraint emerged
-7. CONNECTIVITY SYNC — keep README reachability and `docs/README.md` honest when touched scope changed navigation
+7. SKILL SYNC — if the work produced a portable operating lesson beyond the project, update the relevant system/project skill narrowly instead of burying the lesson in backlog notes
+8. CONNECTIVITY SYNC — keep README reachability and `docs/README.md` honest when touched scope changed navigation
 
 'Full post-task' (broad diff, architectural impact, or context refactor):
 
@@ -131,9 +132,10 @@ Task touched any *.md file? → YES → run POST_TASK
 4. DOCS SYNC — update the relevant subsystem docs
 5. CHANGELOG SYNC — add the completed delivery entry
 6. AGENTS SYNC — promote reusable insight into durable protocol
-7. CONSOLIDATE — merge duplicates and remove stale context
-8. CONNECTIVITY SYNC — ensure root/docs/README navigation still matches reality
-9. VALIDATE — `bash "${SKILL_DIR}/scripts/validate-context.sh"`
+7. SKILL SYNC — transfer durable, project-neutral lessons into relevant skills when they change future agent behavior; keep project-specific facts in project context
+8. CONSOLIDATE — merge duplicates and remove stale context
+9. CONNECTIVITY SYNC — ensure root/docs/README navigation still matches reality
+10. VALIDATE — `bash "${SKILL_DIR}/scripts/validate-context.sh"`
 
 ### Mode 2: ALWAYS_ON (Opt-in)
 
