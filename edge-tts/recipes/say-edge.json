@@ -1,5 +1,9 @@
 {
   "name": "say-edge",
+  "description": "Synthesize speech from text through the Edge TTS skill.",
   "args": ["text:string", "lang:string=ru", "rate:string=+30%"],
-  "template": "../scripts/say.sh {text} {lang} {rate}"
+  "defaults": {
+    "skill_dir": "~/.pi/agent/skills/edge-tts"
+  },
+  "template": "{skill_dir}/scripts/say.sh {text} {lang} {rate}"
 }

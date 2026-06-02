@@ -14,7 +14,7 @@ When writing to any managed file:
 - For `AGENTS.md`, choose between the lean and layered starters based on actual project maturity; do not force the layered version onto tiny projects or the lean version onto mature multi-surface repos
 - Do not leave the meta-protocol section as an empty heading: instantiate it with real governing principles, then evolve the list as constraints become explicit
 - Do not use Markdown tables for definition-list content such as `term → meaning`; use label/bullet definitions instead
-- When a real table is needed, keep source rows short: target 76 characters and hard max 80 characters for rows that contain the pipe delimiter.
+- Do not hard-wrap prose; preserve readable paragraph flow unless a project-specific formatter requires wrapping.
 - Prefer compact tables plus expanding bullets below them when details would make table rows wide
 
 ## Root File Resolution

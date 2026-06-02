@@ -3,7 +3,7 @@ name: abcd-context
 description: ABCd context protocol across ABC root files (AGENTS.md,
   BACKLOG.md, CHANGELOG.md), human entrypoint README.md files tree, and /docs. Use after meaningful project changes, backlog drift, documentation refactors, self-evolving context maintenance, or a forced context reconciliation pass.
 metadata:
-  version: 1.0.13
+  version: 1.0.14
 ---
 
 # ABCd Context
@@ -161,7 +161,7 @@ Full forced reconciliation pass across ABC + README tree + `/docs`, followed by 
 Defaults for new files and restructuring targets for existing ones. If a file already has a format, match that format unless the current structure is clearly flatter, drifted, or less truthful than the template hierarchy — in that case, evolve it toward the template rather than preserving accidental shape.
 Full templates: [`docs/templates.md`](./docs/templates.md)
 
-`Markdown style`: Do not use tables for definition-list content. Use label/bullet definitions. If a real table is needed, target 76 source characters per table row and treat 80 as the hard max.
+`Markdown style`: Do not use tables for definition-list content. Use label/bullet definitions. Do not hard-wrap prose; preserve readable paragraph flow unless a project-specific formatter requires wrapping.
 
 ### Quick Reference
 

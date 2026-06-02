@@ -1,9 +1,13 @@
 {
   "name": "transcribe-mistral",
+  "description": "Transcribe an audio file through the Mistral STT skill.",
   "args": [
     "file:path",
     "lang:string=ru",
     "model:string=voxtral-mini-latest"
   ],
-  "template": "../scripts/transcribe.sh {file} {lang} {model}"
+  "defaults": {
+    "skill_dir": "~/.pi/agent/skills/mistral-stt"
+  },
+  "template": "{skill_dir}/scripts/transcribe.sh {file} {lang} {model}"
 }

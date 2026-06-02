@@ -354,7 +354,13 @@ function buildImportGraph(root, files, config) {
     const deps = [];
     const source = readFileSync(file, "utf8");
     for (const specifier of getImportSpecifiers(source)) {
-      const resolved = resolveLocalImport(file, specifier, fileSet, config, root);
+      const resolved = resolveLocalImport(
+        file,
+        specifier,
+        fileSet,
+        config,
+        root,
+      );
       if (resolved) deps.push(toPosixPath(relative(root, resolved)));
     }
     graph.set(toPosixPath(relative(root, file)), [...new Set(deps)].sort());
@@ -634,7 +640,10 @@ function validateSurfaceRules(root, files, config, reporter) {
         violations.push(`${relativePath} measured ${count}/${max}`);
     }
     if (violations.length === 0) {
-      reporter.pass(rule.passMessage ?? `Surface rule holds: ${rule.name ?? rule.pattern ?? rule.metric}`);
+      reporter.pass(
+        rule.passMessage ??
+          `Surface rule holds: ${rule.name ?? rule.pattern ?? rule.metric}`,
+      );
       continue;
     }
     for (const violation of violations.slice(0, MAX_LISTED_ITEMS))
@@ -708,7 +717,7 @@ function runValidation(args) {
   const files = collectSourceFiles(root, config);
   const graph = buildImportGraph(root, files, config);
   const cycles = findCycles(graph);
-  if (!args.json) console.log("--- DOMAIN DAG VALIDATOR ---");
+  if (!args.json) console.log("--- DOMAIN DAG VALIDATOR ---\n");
   reporter.info(`Root: ${root}`);
   if (configPath) reporter.info(`Config: ${configPath}`);
   validateConfigSyntax(config, reporter);
@@ -739,7 +748,7 @@ function runValidation(args) {
   if (args.json) console.log(JSON.stringify(reporter.state, null, 2));
   else
     console.log(
-      `Result: ${reporter.state.errors} error(s), ${reporter.state.warnings} warning(s)`,
+      `\nResult: ${reporter.state.errors} error(s), ${reporter.state.warnings} warning(s)`,
     );
   return reporter.state.errors === 0 ? 0 : 1;
 }

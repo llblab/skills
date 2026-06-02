@@ -2,7 +2,7 @@
 name: domain-dag
 description: Validates and guides Domain DAG architecture for domain ownership, acyclic local dependency graphs, composition roots, boundary direction, public contracts, interface-surface pressure, and shared-bucket drift. Use when auditing, refactoring, or extending modular codebases across frontend, backend, extensions, CLIs, SDKs, and service packages.
 metadata:
-  version: 1.0.13
+  version: 1.0.14
 ---
 
 # Domain DAG
@@ -258,6 +258,7 @@ A mature Domain DAG has few hard rules and good explanations. It does not need m
 - **Failures**: Cycles, entrypoint reach-through, invalid configured layer edges, invalid configured forbidden edges.
 - **Warnings**: Missing headers, missing configured header clauses, shared-bucket candidates, flat-root drift, configured surface pressure.
 - **Pass**: The checked graph is acyclic and configured boundary rules hold.
+- **Human-readable spacing**: In non-JSON mode, separate section banners from diagnostic lines with a blank line and separate final summaries from the diagnostic stream with a blank line. Example: `--- DOMAIN DAG VALIDATOR ---`, blank line, `[INFO] ...`; after the last `[PASS]` / `[WARN]` / `[FAIL]`, blank line, `Result: N error(s), M warning(s)`. Do not add this spacing inside `--json` output.
 
 ## Review Lens
 

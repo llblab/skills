@@ -1,4 +1,8 @@
 {
   "name": "audit-cross-evolution",
-  "template": "../scripts/audit-cross-evolution.mjs"
+  "description": "Audit cross-evolution skill metadata and gene state.",
+  "defaults": {
+    "skill_dir": "~/.pi/agent/skills/cross-evolution"
+  },
+  "template": "{skill_dir}/scripts/audit-cross-evolution.sh"
 }

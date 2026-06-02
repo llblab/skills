@@ -1,9 +1,13 @@
 {
   "name": "transcribe-groq",
+  "description": "Transcribe an audio file through the Groq STT skill.",
   "args": [
     "file:path",
     "lang:string=ru",
     "model:string=whisper-large-v3-turbo"
   ],
-  "template": "../scripts/transcribe.sh {file} {lang} {model}"
+  "defaults": {
+    "skill_dir": "~/.pi/agent/skills/groq-stt"
+  },
+  "template": "{skill_dir}/scripts/transcribe.sh {file} {lang} {model}"
 }

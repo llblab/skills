@@ -2,7 +2,7 @@
 name: while-true
 description: Continuous execution-loop protocol — assess reality, refine the plan, execute the next task, repeat until a real stop condition is reached.
 metadata:
-  version: 1.0.13
+  version: 1.0.14
 ---
 
 # While True
