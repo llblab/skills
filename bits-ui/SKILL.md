@@ -2,7 +2,7 @@
 name: bits-ui
 description: Build, refactor, review, or debug Svelte 5 components that use Bits UI primitives. Use when working with bits-ui dialogs, popovers, dropdowns, comboboxes, selects, tabs, date/time controls, menus, tooltips, portals, render delegation, or Bits UI type helpers.
 metadata:
-  version: 1.0.15
+  version: 1.0.16
 ---
 
 # Bits UI Skill

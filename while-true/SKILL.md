@@ -2,7 +2,7 @@
 name: while-true
 description: Continuous execution-loop protocol — assess reality, refine the plan, execute the next task, repeat until a real stop condition is reached.
 metadata:
-  version: 1.0.15
+  version: 1.0.16
 ---
 
 # While True
@@ -42,7 +42,7 @@ Activate when at least one of:
 
 ### Session mode
 
-When the user explicitly activates `while-true` (`keep going`, `non-stop`, etc.), the mode persists across checkpoint summaries, progress updates, and clarification answers until:
+When the user explicitly activates `while-true` (`keep going`, `non-stop`, etc.), first locate the canonical plan file and start the highest-priority actionable open item. The mode persists across checkpoint summaries, progress updates, and clarification answers until:
 
 - The user explicitly says `stop` or `pause`
 - No actionable backlog items remain
