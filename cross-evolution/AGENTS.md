@@ -16,7 +16,7 @@
 - 'Soft Proactivity': Detect freely, suggest often, mutate narrowly, never farm scores. Use `docs/soft-proactivity.md` for proactive boundaries.
 - 'Portable Standards': Promote repeated practices into transportable standards when they can serve multiple projects or skills; skills count as projects when they own protocols, docs, artifacts, or release discipline.
 - 'Meta-Protocoling': Preserve the process behind the process through explicit meta-comments and meta-protocols when a rule needs intent, scope, evolution, or degradation guidance.
-- 'Skill Root Cleanliness': The skills root must not contain Markdown control files such as `AGENTS.md`, `BACKLOG.md`, `CHANGELOG.md`, or `README.md`; pi treats root Markdown files as candidate skills and reports `description is required` conflicts.
+- 'Skill Root Cleanliness': The skills root must not contain Markdown control files such as `AGENTS.md`, `BACKLOG.md`, or `README.md`; pi treats root Markdown files as candidate skills and reports `description is required` conflicts.
 - 'Execution/Envelope Separation': Skills should keep domain execution semantics separate from local lifecycle envelopes such as background jobs, status views, cancellation, and observability adapters.
 
 ### Operating Principles

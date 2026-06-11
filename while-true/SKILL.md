@@ -2,7 +2,7 @@
 name: while-true
 description: Continuous execution-loop protocol — assess reality, refine the plan, execute the next task, repeat until a real stop condition is reached.
 metadata:
-  version: 1.0.14
+  version: 1.0.15
 ---
 
 # While True
@@ -77,6 +77,7 @@ The single operation performed at every loop boundary.
 - If a task stays open after meaningful progress, rewrite it to describe the remaining work instead of leaving stale pre-iteration wording untouched
 - Epics are allowed, but the currently active next slice must be represented concretely under the epic before continuing execution
 - Do not leave evergreen maintenance disciplines as unchecked backlog items; move those into durable instructions or architecture/spec docs instead
+- Keep the canonical plan as an **open-work surface**, not a delivery-history mirror. Completed iteration detail belongs in changelog/release history, and should be compressed into grouped outcomes when it starts reading like an implementation diary.
 - Do not re-enter planning repeatedly without execution progress — a checkpoint should be smaller than the next execution phase
 
 ### Step 1: Assess current reality
@@ -136,6 +137,8 @@ Decompose insights into actionable new tasks and fixate them in the most appropr
 
 Do not use docs as a substitute for backlog state: if an insight changes what remains to be built, the plan file must still be updated even when the same nuance is also recorded in a spec or architecture doc.
 
+When a local guard, helper, or validation stack becomes the new coordination truth, update the human entrypoint docs in the same pass. Documentation must describe the real operational boundary (for example bootstrap vs seeding, direct gate vs aggregate fast gate) rather than inherited assumptions.
+
 ### Step 5: Select and start the next task
 
 1. Re-read the updated plan
@@ -147,6 +150,16 @@ If a checkpoint update is emitted, summarize the plan delta explicitly in one sh
 
 If the highest-priority item is not actionable, skip to the next one.
 If a full item is ambiguous but a safe subset is clear, execute the subset and keep the item open.
+
+## Progressive Improvement Rules
+
+Use these rules for open-ended improvement loops. Keep this skill abstract: project-specific checks, terminology, scripts, and policies belong in project-local instructions or skills.
+
+1. **Observe before growing** — look for real friction, stale assumptions, unclear ownership, brittle feedback, doc/practice mismatch, duplication, and missing safeguards. Prefer the smallest correction that prevents recurrence.
+2. **Guard the lesson** — when a recurring failure is fixed, add or refine a narrow guard only if it is fast enough for its role, explainable, scoped, and low-noise: `find drift → fix instance → guard → record boundary`.
+3. **Keep feedback discoverable** — treat tests, audits, reviews, checklists, and probes as coordination infrastructure. Expose the practical fast path clearly; keep costly, flaky, or environment-dependent checks opt-in unless required.
+4. **Avoid regressive fixes** — do not apply suggestions blindly. Classify each change as safe bounded improvement, gated compatibility break, external blocker, or risk escalation that needs investigation.
+5. **Consolidate boundaries, compress history** — repeated decisions should move into the right named boundary. Public changes need surface audits. Release/handoff notes should become grouped outcomes, not raw telemetry.
 
 ## Priority Rules
 
@@ -206,8 +219,8 @@ Use this pattern when the work should narrow through reality checks over multipl
 
 ### Task quality
 
-Good: `Add runtime regression for dust assignment when delegator split leaves operator remainder`
-Good epic + slice: epic `Governance productization in /web-client` + child `Add typed proposal-status query adapter used by proposal list/detail pages`
+Good: `Add regression for rounding remainder when proportional split leaves dust`
+Good epic + slice: epic `Productize proposal workflow` + child `Add typed status adapter used by list/detail views`
 Bad: `Fix rewards`
 
 ## Stop Conditions

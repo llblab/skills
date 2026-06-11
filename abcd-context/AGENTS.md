@@ -17,8 +17,7 @@
 - Prefer the ABC root control plane: `README.md` + `AGENTS.md` + `BACKLOG.md` + `CHANGELOG.md`, with subtree `README.md` files as human entrypoints and `docs/README.md` + `/docs` as the knowledge plane.
 - SKILL.md stays compact; `docs/protocols.md` contains only what SKILL.md does not.
 - `BACKLOG.md` keeps only remaining open, gated, or blocked work; close or narrow items in the same pass that changed reality.
-- `CHANGELOG.md` tracks completed delivery history; `AGENTS.md` should not accumulate per-iteration delivery logs when `CHANGELOG.md` exists.
-- Keep root `README.md` connected to `AGENTS.md`, `BACKLOG.md`, `CHANGELOG.md`, and `docs/README.md`.
+- Keep root `README.md` connected to `AGENTS.md`, `BACKLOG.md`, and `docs/README.md`.
 - Keep subtree `README.md` files reachable from parent/root/docs navigation once they become real human entrypoints.
 
 ### Discovered Constraints

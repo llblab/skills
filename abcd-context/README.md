@@ -30,5 +30,4 @@ ABCd context protocol for agent projects.
 - [Skill Definition](SKILL.md)
 - [Project Index](AGENTS.md)
 - [Open Backlog](BACKLOG.md)
-- [Delivery History](CHANGELOG.md)
 - [Documentation Index](docs/README.md)

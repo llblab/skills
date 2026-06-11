@@ -34,5 +34,4 @@ scripts/inspect-gene.sh atomic-independence --root ~/.agents/skills
 - [Gene Notes](docs/genes.md)
 - [Soft Proactivity Standard](docs/soft-proactivity.md)
 - [Project Index](AGENTS.md)
-- [Changelog](CHANGELOG.md)
 - [Documentation](docs/README.md)
