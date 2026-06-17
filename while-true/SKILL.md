@@ -2,7 +2,7 @@
 name: while-true
 description: Continuous execution-loop protocol — assess reality, refine the plan, execute the next task, repeat until a real stop condition is reached.
 metadata:
-  version: 1.0.16
+  version: 1.0.17
 ---
 
 # While True
@@ -160,6 +160,33 @@ Use these rules for open-ended improvement loops. Keep this skill abstract: proj
 3. **Keep feedback discoverable** — treat tests, audits, reviews, checklists, and probes as coordination infrastructure. Expose the practical fast path clearly; keep costly, flaky, or environment-dependent checks opt-in unless required.
 4. **Avoid regressive fixes** — do not apply suggestions blindly. Classify each change as safe bounded improvement, gated compatibility break, external blocker, or risk escalation that needs investigation.
 5. **Consolidate boundaries, compress history** — repeated decisions should move into the right named boundary. Public changes need surface audits. Release/handoff notes should become grouped outcomes, not raw telemetry.
+6. **Re-rank by current risk** — after each validated slice, ask what risk now dominates: correctness, security, invariant coverage, doc truth, integration/live behavior, or polish. Continue with the highest-risk actionable slice, not with the next stale checklist item.
+7. **Use the right artifact for the lesson** — put remaining work in the plan, user-visible change history in changelog/release notes, durable operating rules in project instructions, design truth in architecture/spec docs, and only enforceable behavior in tests/guards.
+
+## Gate And Validation Discipline
+
+Long loops often reach a point where local implementation is complete but the remaining risk is external, slow, or manual. Treat that as a first-class state instead of pretending the loop is done.
+
+### Validation ladder
+
+Choose the cheapest rung that can falsify the current slice, then climb only as needed:
+
+1. focused checks for the changed surface
+2. type/build checks
+3. broader unit/integration test suites
+4. project context/docs validators
+5. live/manual smoke verification for transport, credentials, remote APIs, UI clients, or other environment-shaped behavior
+
+A slice may be **locally complete** when the relevant local rungs pass, but it is not fully done if a required live/manual rung remains unverified.
+
+### External gate handling
+
+When the top remaining risk is gated by credentials, hardware, remote services, operator action, or live UI behavior:
+
+- Mark the plan item as `blocked/gated` or narrow it to the exact remaining live verification.
+- Continue only with `gated-but-preparable` work: smoke checklists, diagnostics, safe config examples, fallback handling, docs honesty, and local regressions that improve the future live run.
+- Stop when all useful preparation is complete and the next meaningful step truly requires the external gate.
+- Do not convert unverified assumptions into completed claims; document them as risks or live-test items.
 
 ## Priority Rules
 

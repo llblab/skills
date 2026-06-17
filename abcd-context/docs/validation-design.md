@@ -72,8 +72,9 @@ The validator treats subtree `README.md` files as human entrypoints, not decorat
 Markdown shape checks are style warnings, not hard failures by default.
 
 - `ABCD_MARKDOWN_SHAPE_CHECKS=0` disables the check for project-local overlays.
-- `ABCD_TABLE_TARGET_WIDTH` sets the soft target, default `116`.
-- `ABCD_TABLE_HARD_MAX_WIDTH` sets the warning threshold, default `120`.
+- Table width warnings are disabled by default.
+- `--table-width N` (alias: `--table-max-width N`) enables width warnings for table rows longer than `N` characters.
+- `ABCD_TABLE_WIDTH_WARN_THRESHOLD=N` enables the same threshold from the environment; legacy `ABCD_TABLE_HARD_MAX_WIDTH=N` is still accepted as an opt-in alias.
 - Wide tables are detected as contiguous Markdown table blocks outside fenced code blocks; each table emits at most one width warning with line range, max width, and affected-row count.
 - Definition-list tables are detected by common two-column headers such as
   `Term/Meaning`, `Field/Description`, and `Parameter/Purpose`.
@@ -82,6 +83,7 @@ Markdown shape checks are style warnings, not hard failures by default.
 
 - Parses markdown link patterns from files
 - Skips links inside fenced code blocks
+- Skips link scanning for large Markdown files above `ABCD_MARKDOWN_LINK_SCAN_MAX_BYTES` bytes, default `262144`, to avoid spending validation time on vendored/API reference dumps
 - Handles anchor-only links, file links, and file+anchor links
 - Supports GitHub-style line references (`#L10`, `#L10-L20`)
 - Converts headings to GitHub-style anchors for validation
@@ -123,6 +125,9 @@ bash /path/to/skill/scripts/validate-context.sh /path/to/project
 
 # Machine-readable JSON output
 bash /path/to/skill/scripts/validate-context.sh --json /path/to/project
+
+# Opt-in table width warnings
+bash /path/to/skill/scripts/validate-context.sh --table-width 120 /path/to/project
 
 # Environment-root compatibility
 VALIDATE_CONTEXT_ROOT=/path/to/project bash /path/to/skill/scripts/validate-context.sh

@@ -46,3 +46,5 @@
 - `realpath --relative-to` is GNU-specific — prefer path-prefix stripping for docs-relative paths.
 - UTF-8 locales differ by platform (`en_US.UTF-8`, `C.UTF-8`, `C.utf8`) — include safe `C` fallback.
 - Validation logs may be consumed by CI or other agents — honor `NO_COLOR` whenever output is not meant for a terminal.
+- Table width validation is opt-in because vendored/API reference docs often contain intentionally wide tables; require an explicit threshold such as `--table-width 120` before warning on width.
+- Large Markdown reference dumps should not dominate link validation; skip link scanning above a bounded byte threshold while still validating the surrounding context graph.

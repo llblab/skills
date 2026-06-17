@@ -2,7 +2,7 @@
 name: dev2main-release
 description: Manage a guarded release flow that commits prepared release work on dev, opens a dev-to-main pull request with a release-focused PR summary, waits for checks, merges on success, tags, and optionally publishes an existing npm package. Use when the user asks to prepare or execute a dev→main release PR, hotfix release PR, or Dev2Main PR Summary workflow.
 metadata:
-  version: 1.0.16
+  version: 1.0.17
 ---
 
 # Dev2Main Release
@@ -25,31 +25,27 @@ If any criterion fails, reject the flow and stop. Do not stage, commit, push, cr
 After the hard gate passes:
 
 1. Inspect `git status --short --branch` and confirm the repository is on `dev` with uncommitted release files.
-2. Inspect the package or application version and confirm it is already bumped to the intended release version.
+2. Identify the project version source and confirm it is already bumped to the intended release version. Prefer the repository's primary manifest or release metadata, such as `package.json`, `pyproject.toml`, `Cargo.toml`, app config, or a documented version file. Do not assume npm unless the project is an npm package.
 3. Read the relevant version section in `CHANGELOG.md`.
-4. Run the smallest meaningful validation first. Prefer the project release validation command when available.
-5. Stage only intentional release files.
-6. Create one release commit using this format:
+4. Confirm release-note freshness: the intended version section must exist, describe the release being shipped, and not leave those same shipped changes stranded under `Unreleased`. Stop and ask if the changelog shape is ambiguous or the intended version section is missing.
+5. Run the smallest meaningful validation first. Prefer the project release validation command when available.
+6. Stage only intentional release files.
+7. Inspect the repository's recent commit-message style before writing the release commit message:
 
-```text
-<version>: <short release theme>, <secondary theme>
+```bash
+git log -5 --pretty=%s
 ```
 
-Example:
-
-```text
-0.8.1: outbound voice translation hotfix, queue safety
-```
-
-7. Push `dev` to `origin/dev`.
-8. Open a pull request from `dev` to `main`.
-9. Build the PR body from `CHANGELOG.md`, not from memory only.
-10. Watch PR checks until they finish.
-11. If all required checks pass, merge the PR into `main`.
-12. After a successful merge, switch the local repository to `main`.
-13. Pull the latest `main` changes.
-14. Confirm the version on `main` matches the intended release version.
-15. Create and push exactly one release tag for the confirmed version on the current `main` commit:
+8. Create one release commit whose format matches the discovered local style. If the recent history shows a stable release-commit pattern, adapt that pattern to the intended version and release theme. If the style is mixed or too sparse to infer confidently, use the latest relevant commit subject as the fallback style template rather than imposing this skill's example format.
+9. Push `dev` to `origin/dev`.
+10. Open a pull request from `dev` to `main`.
+11. Build the PR body from `CHANGELOG.md`, not from memory only.
+12. Watch PR checks until they finish.
+13. If all required checks pass, merge the PR using the repository's established merge method. Prefer the repository default when available; otherwise infer from recent merged PRs or project convention. If no convention is discoverable, use a normal merge commit rather than squash/rebase because it preserves the dev release commit and release audit trail.
+14. After a successful merge, switch the local repository to `main`.
+15. Pull the latest `main` changes.
+16. Confirm the version on `main` matches the intended release version.
+17. Create and push exactly one release tag for the confirmed version on the current `main` commit:
 
 ```bash
 git tag v<version>
@@ -58,13 +54,13 @@ git push origin v<version>
 
 If the tag already exists locally or remotely, verify it points to the current `main` commit before continuing. If an existing `v<version>` tag points anywhere else, stop and report the mismatch. Do not move, delete, or force-push tags.
 
-16. Before publishing, check whether the package already exists on npm:
+18. Before publishing, check whether the package already exists on npm:
 
 ```bash
 npm view <package-name> version
 ```
 
-17. Publish only when both conditions are true:
+19. Publish only when both conditions are true:
 
 - The package already exists on npm.
 - The `main` version matches the intended release version and is newer than the npm version.
@@ -76,6 +72,26 @@ npm publish --access public
 ```
 
 If the package does not exist on npm, do not publish. New packages must never be published by this skill.
+
+## Version And Changelog Contract
+
+The version source is project-local. For npm packages use `package.json` and lockfiles when present. For Python, Rust, mobile, or custom apps, use the manifest or release metadata that the repository treats as authoritative. If multiple version files exist, they must agree before release actions continue.
+
+The changelog must have a section for the intended version before the release flow starts. The section should contain the release changes being shipped. `Unreleased` may remain as an empty placeholder, but it must not still contain the same shipped changes after they have been assigned to the version section.
+
+## Release Commit Message Contract
+
+The release commit subject is a repository-local convention, not a universal template.
+
+Before committing, inspect recent history with `git log -5 --pretty=%s` (or fewer commits if the repository has fewer). Infer the broad subject style from nearby commits, especially prior release/version commits when present. Preserve observable conventions such as version prefixing, separators, casing, imperative vs noun-phrase wording, and whether a secondary theme is included.
+
+Examples of adaptation, not mandatory formats:
+
+- Recent: `0.8.1: outbound voice translation hotfix, queue safety` -> next release may use `<version>: <theme>, <secondary theme>`.
+- Recent: `release: 0.8.1` -> next release may use `release: <version>`.
+- Recent: `v0.8.1` -> next release may use `v<version>`.
+
+If no stable pattern can be inferred, use the latest relevant commit subject as the fallback style template and adapt only the version/theme content. Do not stop solely because the style is mixed; stop only when the commit subject would be misleading or the release version/theme cannot be identified safely.
 
 ## PR Body Contract
 
@@ -148,6 +164,8 @@ It also <secondary behavior/safety/compatibility outcome from CHANGELOG.md>.
 Stop without merging, tagging, or publishing when:
 
 - Run criteria fail.
+- The version source cannot be identified safely or multiple version files disagree.
+- The intended changelog version section is missing, ambiguous, or still duplicated under `Unreleased`.
 - Validation fails and cannot be fixed safely inside the release scope.
 - PR checks fail.
 - The pulled `main` version does not match the intended release version.

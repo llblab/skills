@@ -38,18 +38,34 @@ fi
 
 # Configuration
 OUTPUT_JSON=false
+TABLE_WIDTH_WARN_THRESHOLD_ARG=""
 TARGET_ROOT="${VALIDATE_CONTEXT_ROOT:-$(pwd)}"
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --json)
             OUTPUT_JSON=true
             ;;
+        --table-width|--table-max-width)
+            if [[ $# -lt 2 || "$2" == --* ]]; then
+                echo "ERROR: $1 requires a positive integer width" >&2
+                exit 1
+            fi
+            if ! [[ "$2" =~ ^[0-9]+$ ]] || [[ "$2" -le 0 ]]; then
+                echo "ERROR: $1 requires a positive integer width" >&2
+                exit 1
+            fi
+            TABLE_WIDTH_WARN_THRESHOLD_ARG="$2"
+            shift
+            ;;
         --help|-h)
             cat <<'EOF'
-Usage: validate-context.sh [--json] [project-root]
+Usage: validate-context.sh [--json] [--table-width N] [project-root]
 
 Validates the current directory by default, VALIDATE_CONTEXT_ROOT when set,
 or the explicit project-root argument when provided.
+
+Markdown table width warnings are disabled by default. Pass --table-width N
+to warn when a table row exceeds N characters.
 EOF
             exit 0
             ;;
@@ -74,8 +90,18 @@ if [[ ! -d "$TARGET_ROOT" ]]; then
 fi
 PROJECT_ROOT="$(cd "$TARGET_ROOT" && pwd -P)"
 MARKDOWN_SHAPE_CHECKS="${ABCD_MARKDOWN_SHAPE_CHECKS:-1}"
-TABLE_HARD_MAX_WIDTH="${ABCD_TABLE_HARD_MAX_WIDTH:-120}"
-TABLE_TARGET_WIDTH="${ABCD_TABLE_TARGET_WIDTH:-116}"
+TABLE_WIDTH_WARN_THRESHOLD="${TABLE_WIDTH_WARN_THRESHOLD_ARG:-${ABCD_TABLE_WIDTH_WARN_THRESHOLD:-${ABCD_TABLE_HARD_MAX_WIDTH:-}}}"
+if [[ -n "$TABLE_WIDTH_WARN_THRESHOLD" ]]; then
+    if ! [[ "$TABLE_WIDTH_WARN_THRESHOLD" =~ ^[0-9]+$ ]] || [[ "$TABLE_WIDTH_WARN_THRESHOLD" -le 0 ]]; then
+        echo "ERROR: table width threshold must be a positive integer" >&2
+        exit 1
+    fi
+fi
+MARKDOWN_LINK_SCAN_MAX_BYTES="${ABCD_MARKDOWN_LINK_SCAN_MAX_BYTES:-262144}"
+if ! [[ "$MARKDOWN_LINK_SCAN_MAX_BYTES" =~ ^[0-9]+$ ]] || [[ "$MARKDOWN_LINK_SCAN_MAX_BYTES" -le 0 ]]; then
+    echo "ERROR: markdown link scan max bytes must be a positive integer" >&2
+    exit 1
+fi
 INDEX_CANDIDATES=("AGENTS.md" "CLAUDE.md" "CODEX.md" "GEMINI.md" "CONTEXT.md")
 PLAN_CANDIDATES=("BACKLOG.md" "TODO.md" "PLAN.md" "ROADMAP.md")
 LINK_TARGETS_FILE="$(mktemp)"
@@ -132,6 +158,10 @@ normalize_existing_path() {
     dir="$(dirname "$path")"
     base="$(basename "$path")"
     printf '%s/%s\n' "$(cd "$dir" && pwd -P)" "$base"
+}
+
+get_file_size_bytes() {
+    stat -c %s "$1" 2>/dev/null || stat -f %z "$1" 2>/dev/null || echo 0
 }
 
 echo_progress "--- ABCd CONTEXT PROTOCOL VALIDATOR ---"
@@ -268,6 +298,11 @@ heading_to_anchor() {
 while IFS= read -r -d '' file; do
     [[ -f "$file" ]] || continue
     source_file="$(normalize_existing_path "$file")"
+    source_size="$(get_file_size_bytes "$file")"
+    if [[ "$source_size" -gt "$MARKDOWN_LINK_SCAN_MAX_BYTES" ]]; then
+        log_info "Skipped link validation for large Markdown file: ${source_file#$PROJECT_ROOT/} (${source_size} bytes > ${MARKDOWN_LINK_SCAN_MAX_BYTES})"
+        continue
+    fi
 
     # Find relative links using grep for better extraction
     while IFS= read -r link_match; do
@@ -570,38 +605,33 @@ if [[ "$MARKDOWN_SHAPE_CHECKS" != "0" ]]; then
         [[ -f "$file" ]] || continue
         rel_file="${file#$PROJECT_ROOT/}"
 
-        while IFS=: read -r start_line end_line row_count max_len hard_rows target_rows; do
-            [[ -n "$start_line" ]] || continue
-            if [[ "$max_len" -gt "$TABLE_HARD_MAX_WIDTH" ]]; then
-                log_warn "Wide Markdown table: $rel_file:${start_line}-${end_line} (max ${max_len} chars, ${hard_rows}/${row_count} rows > ${TABLE_HARD_MAX_WIDTH}; prefer bullets for prose-heavy cells)"
+        if [[ -n "$TABLE_WIDTH_WARN_THRESHOLD" ]]; then
+            while IFS=: read -r start_line end_line row_count max_len wide_rows; do
+                [[ -n "$start_line" ]] || continue
+                log_warn "Wide Markdown table: $rel_file:${start_line}-${end_line} (max ${max_len} chars, ${wide_rows}/${row_count} rows > ${TABLE_WIDTH_WARN_THRESHOLD}; prefer bullets for prose-heavy cells)"
                 HAS_MARKDOWN_SHAPE_WARNINGS=true
-            elif [[ "$max_len" -gt "$TABLE_TARGET_WIDTH" ]]; then
-                log_info "Near-wide Markdown table: $rel_file:${start_line}-${end_line} (max ${max_len} chars, ${target_rows}/${row_count} rows > ${TABLE_TARGET_WIDTH})"
-            fi
-        done < <(
-            awk -v hard="$TABLE_HARD_MAX_WIDTH" -v target="$TABLE_TARGET_WIDTH" '
-                function flush() {
-                    if (in_table) {
-                        if (max_len > target) {
-                            print start ":" end ":" rows ":" max_len ":" hard_rows ":" target_rows
+            done < <(
+                awk -v threshold="$TABLE_WIDTH_WARN_THRESHOLD" '
+                    function flush() {
+                        if (in_table && max_len > threshold) {
+                            print start ":" end ":" rows ":" max_len ":" wide_rows
                         }
+                        in_table=0; start=0; end=0; rows=0; max_len=0; wide_rows=0
                     }
-                    in_table=0; start=0; end=0; rows=0; max_len=0; hard_rows=0; target_rows=0
-                }
-                /^```/ {flush(); f=!f; next}
-                f {next}
-                !/^ *\|/ {flush(); next}
-                /^ *\|/ {
-                    len=length($0)
-                    if (!in_table) {in_table=1; start=FNR}
-                    end=FNR; rows++
-                    if (len > max_len) max_len=len
-                    if (len > hard) hard_rows++
-                    if (len > target) target_rows++
-                }
-                END {flush()}
-            ' "$file"
-        )
+                    /^```/ {flush(); f=!f; next}
+                    f {next}
+                    !/^ *\|/ {flush(); next}
+                    /^ *\|/ {
+                        len=length($0)
+                        if (!in_table) {in_table=1; start=FNR}
+                        end=FNR; rows++
+                        if (len > max_len) max_len=len
+                        if (len > threshold) wide_rows++
+                    }
+                    END {flush()}
+                ' "$file"
+            )
+        fi
 
         if awk '
             /^```/ {f=!f; next}

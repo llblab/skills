@@ -6,18 +6,34 @@ import process from "node:process";
 
 let outputJson = false;
 let explicitRoot;
-for (const arg of process.argv.slice(2)) {
+let tableWidthWarnArg;
+const args = process.argv.slice(2);
+for (let index = 0; index < args.length; index += 1) {
+  const arg = args[index];
   if (arg === "--json") {
     outputJson = true;
+    continue;
+  }
+  if (arg === "--table-width" || arg === "--table-max-width") {
+    const value = args[index + 1];
+    if (!value || value.startsWith("--") || !/^[0-9]+$/.test(value) || Number(value) <= 0) {
+      console.error(`ERROR: ${arg} requires a positive integer width`);
+      process.exit(1);
+    }
+    tableWidthWarnArg = value;
+    index += 1;
     continue;
   }
   if (arg === "--help" || arg === "-h") {
     console.log(
       [
-        "Usage: validate-context.mjs [--json] [project-root]",
+        "Usage: validate-context.mjs [--json] [--table-width N] [project-root]",
         "",
         "Validates the current directory by default, VALIDATE_CONTEXT_ROOT when set,",
         "or the explicit project-root argument when provided.",
+        "",
+        "Markdown table width warnings are disabled by default. Pass --table-width N",
+        "to warn when a table row exceeds N characters.",
       ].join("\n"),
     );
     process.exit(0);
@@ -43,8 +59,26 @@ if (!fs.existsSync(root) || !fs.statSync(root).isDirectory()) {
 }
 const noColor = process.env.NO_COLOR;
 const shapeChecks = process.env.ABCD_MARKDOWN_SHAPE_CHECKS !== "0";
-const tableMax = Number(process.env.ABCD_TABLE_HARD_MAX_WIDTH || 120);
-const tableTarget = Number(process.env.ABCD_TABLE_TARGET_WIDTH || 116);
+const tableWidthWarnValue =
+  tableWidthWarnArg ||
+  process.env.ABCD_TABLE_WIDTH_WARN_THRESHOLD ||
+  process.env.ABCD_TABLE_HARD_MAX_WIDTH ||
+  "";
+const tableWidthWarnThreshold = tableWidthWarnValue ? Number(tableWidthWarnValue) : undefined;
+if (
+  tableWidthWarnValue &&
+  (!Number.isInteger(tableWidthWarnThreshold) || tableWidthWarnThreshold <= 0)
+) {
+  console.error("ERROR: table width threshold must be a positive integer");
+  process.exit(1);
+}
+const markdownLinkScanMaxBytes = Number(
+  process.env.ABCD_MARKDOWN_LINK_SCAN_MAX_BYTES || 262144,
+);
+if (!Number.isInteger(markdownLinkScanMaxBytes) || markdownLinkScanMaxBytes <= 0) {
+  console.error("ERROR: markdown link scan max bytes must be a positive integer");
+  process.exit(1);
+}
 
 const indexCandidates = [
   "AGENTS.md",
@@ -264,6 +298,13 @@ const mdFiles = walk(root);
 let broken = false;
 const targets = new Set();
 for (const file of mdFiles) {
+  const sourceSize = fs.statSync(file).size;
+  if (sourceSize > markdownLinkScanMaxBytes) {
+    info(
+      `Skipped link validation for large Markdown file: ${rel(file)} (${sourceSize} bytes > ${markdownLinkScanMaxBytes})`,
+    );
+    continue;
+  }
   const base = path.dirname(file);
   const text = stripFences(read(file));
   for (const m of text.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)) {
@@ -371,15 +412,14 @@ if (shapeChecks) {
     let table = null;
     const flushTable = () => {
       if (!table) return;
-      if (table.maxLen > tableMax) {
+      if (
+        tableWidthWarnThreshold !== undefined &&
+        table.maxLen > tableWidthWarnThreshold
+      ) {
         warn(
-          `Wide Markdown table: ${rel(file)}:${table.start}-${table.end} (max ${table.maxLen} chars, ${table.hardRows}/${table.rows} rows > ${tableMax}; prefer bullets for prose-heavy cells)`,
+          `Wide Markdown table: ${rel(file)}:${table.start}-${table.end} (max ${table.maxLen} chars, ${table.wideRows}/${table.rows} rows > ${tableWidthWarnThreshold}; prefer bullets for prose-heavy cells)`,
         );
         shapeWarn = true;
-      } else if (table.maxLen > tableTarget) {
-        info(
-          `Near-wide Markdown table: ${rel(file)}:${table.start}-${table.end} (max ${table.maxLen} chars, ${table.targetRows}/${table.rows} rows > ${tableTarget})`,
-        );
       }
       table = null;
     };
@@ -400,14 +440,16 @@ if (shapeChecks) {
           end: i + 1,
           rows: 0,
           maxLen: 0,
-          hardRows: 0,
-          targetRows: 0,
+          wideRows: 0,
         };
       table.end = i + 1;
       table.rows += 1;
       table.maxLen = Math.max(table.maxLen, line.length);
-      if (line.length > tableMax) table.hardRows += 1;
-      if (line.length > tableTarget) table.targetRows += 1;
+      if (
+        tableWidthWarnThreshold !== undefined &&
+        line.length > tableWidthWarnThreshold
+      )
+        table.wideRows += 1;
       const cells = line
         .replace(/^ *\|/, "")
         .replace(/\| *$/, "")
