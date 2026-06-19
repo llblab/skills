@@ -16,7 +16,12 @@ for (let index = 0; index < args.length; index += 1) {
   }
   if (arg === "--table-width" || arg === "--table-max-width") {
     const value = args[index + 1];
-    if (!value || value.startsWith("--") || !/^[0-9]+$/.test(value) || Number(value) <= 0) {
+    if (
+      !value ||
+      value.startsWith("--") ||
+      !/^[0-9]+$/.test(value) ||
+      Number(value) <= 0
+    ) {
       console.error(`ERROR: ${arg} requires a positive integer width`);
       process.exit(1);
     }
@@ -64,7 +69,9 @@ const tableWidthWarnValue =
   process.env.ABCD_TABLE_WIDTH_WARN_THRESHOLD ||
   process.env.ABCD_TABLE_HARD_MAX_WIDTH ||
   "";
-const tableWidthWarnThreshold = tableWidthWarnValue ? Number(tableWidthWarnValue) : undefined;
+const tableWidthWarnThreshold = tableWidthWarnValue
+  ? Number(tableWidthWarnValue)
+  : undefined;
 if (
   tableWidthWarnValue &&
   (!Number.isInteger(tableWidthWarnThreshold) || tableWidthWarnThreshold <= 0)
@@ -75,8 +82,13 @@ if (
 const markdownLinkScanMaxBytes = Number(
   process.env.ABCD_MARKDOWN_LINK_SCAN_MAX_BYTES || 262144,
 );
-if (!Number.isInteger(markdownLinkScanMaxBytes) || markdownLinkScanMaxBytes <= 0) {
-  console.error("ERROR: markdown link scan max bytes must be a positive integer");
+if (
+  !Number.isInteger(markdownLinkScanMaxBytes) ||
+  markdownLinkScanMaxBytes <= 0
+) {
+  console.error(
+    "ERROR: markdown link scan max bytes must be a positive integer",
+  );
   process.exit(1);
 }
 
@@ -198,7 +210,7 @@ function headingAnchor(text) {
     .replace(/-+/g, "-");
 }
 
-progress("--- ABCd CONTEXT PROTOCOL VALIDATOR (Node) ---\n");
+progress("--- ABCd CONTEXT PROTOCOL VALIDATOR ---\n");
 
 let contextName = "";
 let contextFile = "";

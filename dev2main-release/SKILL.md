@@ -2,7 +2,7 @@
 name: dev2main-release
 description: Manage a guarded release flow that commits prepared release work on dev, opens a dev-to-main pull request with a release-focused PR summary, waits for checks, merges on success, tags, and optionally publishes an existing npm package. Use when the user asks to prepare or execute a dev→main release PR, hotfix release PR, or Dev2Main PR Summary workflow.
 metadata:
-  version: 1.0.17
+  version: 1.0.18
 ---
 
 # Dev2Main Release

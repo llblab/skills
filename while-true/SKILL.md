@@ -2,14 +2,14 @@
 name: while-true
 description: Continuous execution-loop protocol — assess reality, refine the plan, execute the next task, repeat until a real stop condition is reached.
 metadata:
-  version: 1.0.17
+  version: 1.0.18
 ---
 
 # While True
 
 ## Purpose
 
-A continuous planning-and-execution loop that keeps the canonical plan aligned with reality, captures every implementation insight as it emerges, chains into the next actionable task automatically, and never stalls on planning or reporting alone.
+A continuous planning-and-execution loop that turns the canonical backlog/plan into iterative execution. It keeps the open-work file aligned with reality, captures every implementation insight as it emerges, chains into the next actionable task automatically, and never stalls on planning or reporting alone.
 
 ## Core Model
 
@@ -53,6 +53,12 @@ When the user explicitly activates `while-true` (`keep going`, `non-stop`, etc.)
 - The interaction is purely informational with no new tasks
 - The user explicitly asks to stop
 - Continuing would require approval for destructive or externally sensitive actions
+
+## Backlog Engine Framing
+
+Treat `while-true` as the agent's backlog execution engine: its job is to move epic open-work items toward implementation through repeated reality checks, small validated slices, and plan reconciliation. `BACKLOG.md` is the preferred name when present because it naturally represents open work; `ROADMAP.md`, `PLAN.md`, and `TODO.md` are accepted aliases for repositories with different naming conventions.
+
+The canonical file is not a diary. It is the current contract for what remains to be done, what is blocked, and what should happen next.
 
 ## Plan File Selection
 
@@ -139,10 +145,25 @@ Do not use docs as a substitute for backlog state: if an insight changes what re
 
 When a local guard, helper, or validation stack becomes the new coordination truth, update the human entrypoint docs in the same pass. Documentation must describe the real operational boundary (for example bootstrap vs seeding, direct gate vs aggregate fast gate) rather than inherited assumptions.
 
-### Step 5: Select and start the next task
+### Step 5: Anti-Bullshit Gate
+
+Before selecting the next slice, explicitly ask whether continuing would still be high-value work or merely available work.
+
+Use these checks:
+
+- **Value**: Does this slice directly move the active backlog epic toward its stop condition?
+- **Priority**: Is this still the highest current risk or highest-value open item?
+- **Evidence**: Did reality expose this task, or am I inventing speculative polish?
+- **Compression**: Can I delete, narrow, isolate, or document a boundary instead of adding surface?
+- **Validation cost**: Is the validation ladder proportional to the change?
+- **Stop honesty**: Would stopping now be more truthful because the remaining work is gated, low-value, destructive, or ambiguous?
+
+If the gate shows scope drift, re-rank the backlog, narrow the slice, mark the item gated/deferred, or stop. Do not continue just because another locally valid edit is available.
+
+### Step 6: Select and start the next task
 
 1. Re-read the updated plan
-2. Pick the highest-priority actionable task (see Priority Rules)
+2. Pick the highest-priority actionable task that survives the Anti-Bullshit Gate (see Priority Rules)
 3. **Start executing before emitting any checkpoint report** — read relevant files, run validation, make the first edit
 4. Only then emit a concise progress update if needed
 
@@ -270,13 +291,14 @@ If a safe subset exists, continue with that subset.
 3. **Execute, don't just plan** — start work before reporting; never terminate on a planning or reporting step alone
 4. **No hidden debt** — every discovered limitation, compromise, or follow-up becomes visible in the plan immediately
 5. **Backlog state must move** — each meaningful iteration must leave the canonical plan more truthful: close, narrow, split, retarget, or gate something
-6. **Compress, don't bloat** — capture insight in the shortest form that preserves future usefulness; prefer the smallest plan edit that preserves truth
+6. **Anti-bullshit before momentum** — do not keep editing merely because more locally valid work exists; re-rank, narrow, gate, or stop when the next slice is not the best move
+7. **Compress, don't bloat** — capture insight in the shortest form that preserves future usefulness; prefer the smallest plan edit that preserves truth
 
 ## Loop Invariant
 
 ```text
 while actionable, safe work remains:
-  checkpoint (assess → refine plan → select task → start execution)
+  checkpoint (assess → refine plan → anti-bullshit gate → select task → start execution)
   execute a meaningful slice
   repeat
 ```
