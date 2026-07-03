@@ -2,7 +2,7 @@
 name: while-true
 description: Continuous execution-loop protocol — assess reality, refine the plan, execute the next task, repeat until a real stop condition is reached.
 metadata:
-  version: 1.0.18
+  version: 1.0.19
 ---
 
 # While True
@@ -209,6 +209,42 @@ When the top remaining risk is gated by credentials, hardware, remote services, 
 - Stop when all useful preparation is complete and the next meaningful step truly requires the external gate.
 - Do not convert unverified assumptions into completed claims; document them as risks or live-test items.
 
+### Actionability classification
+
+Before choosing the next slice, classify the highest-priority open item:
+
+- `local-actionable`: can be advanced now with local reads, edits, tests, validators, or deterministic fixtures.
+- `gated-but-preparable`: the final proof is external, but local preparation can still reduce risk for the future live/manual run.
+- `operator-gated`: needs the human to click, observe, approve, provide input, or run a client-specific/manual check.
+- `environment-gated`: needs hardware, OS, credentials, network, external accounts, or a runtime not available in the current environment.
+- `upstream-gated`: needs another project/API/maintainer decision before this repo can implement honestly.
+- `approval-gated`: safe technically, but destructive, irreversible, publishing, account-affecting, or otherwise requiring explicit permission.
+
+Execute `local-actionable` and useful `gated-but-preparable` work. For every other class, record the exact unblocker for that item, then re-rank the remaining backlog. Stop only when no obvious high-value `local-actionable` or useful `gated-but-preparable` work remains.
+
+### Checkpoint signature and no-op detection
+
+At each checkpoint, remember the practical signature of the loop:
+
+- selected open item and actionability class;
+- files or surfaces changed since the previous checkpoint;
+- validation rung last run and result;
+- remaining blocker/unblocker;
+- whether the plan became more truthful.
+
+If the next checkpoint has the same signature and the only available actions are repeating validators, re-reading unchanged plans, or restating the same blocker, treat the loop as no-op. Stop with a concise proof-of-stop instead of creating activity noise.
+
+### Evidence ledger and terminal handoff
+
+Prefer compact evidence over verbose progress narration. A good checkpoint leaves a small ledger such as `typecheck ✅`, `validate ✅ 993 pass / 1 skip`, `context ✅`, or `live state: badVisibleNames=0`.
+
+When the loop stops, produce a handoff with:
+
+- what was closed or narrowed;
+- what validation proves it;
+- what remains gated;
+- the exact next operator/environment/upstream input that would restart useful work.
+
 ## Priority Rules
 
 Determine priority in this order:
@@ -280,7 +316,7 @@ Stop only when:
 - The user explicitly asks to stop
 - Remaining ambiguity blocks even a safe subset
 - No actionable backlog items remain
-- Only blocked or externally gated work remains
+- Only blocked, externally gated, no-op, or low-value speculative work remains
 
 If a safe subset exists, continue with that subset.
 
@@ -292,13 +328,15 @@ If a safe subset exists, continue with that subset.
 4. **No hidden debt** — every discovered limitation, compromise, or follow-up becomes visible in the plan immediately
 5. **Backlog state must move** — each meaningful iteration must leave the canonical plan more truthful: close, narrow, split, retarget, or gate something
 6. **Anti-bullshit before momentum** — do not keep editing merely because more locally valid work exists; re-rank, narrow, gate, or stop when the next slice is not the best move
-7. **Compress, don't bloat** — capture insight in the shortest form that preserves future usefulness; prefer the smallest plan edit that preserves truth
+7. **Proof-of-stop is progress** — when only gated/no-op work remains, stopping with exact evidence and unblockers is better than simulating activity
+8. **Compress, don't bloat** — capture insight in the shortest form that preserves future usefulness; prefer the smallest plan edit that preserves truth
 
 ## Loop Invariant
 
 ```text
 while actionable, safe work remains:
-  checkpoint (assess → refine plan → anti-bullshit gate → select task → start execution)
+  checkpoint (assess → refine plan → classify actionability → anti-bullshit gate → select task → start execution)
   execute a meaningful slice
-  repeat
+  reconcile evidence and checkpoint signature
+  stop when no obvious high-value actionable or preparable work remains
 ```

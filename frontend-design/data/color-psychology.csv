@@ -1,0 +1,11 @@
+color,signals,common_fit,caution,pairings
+blue,"trust, stability, professionalism, calm","finance, healthcare, tech, corporate",can_feel_generic,"white, gold, light gray"
+red,"energy, passion, urgency, danger","food, sports, entertainment, alerts",avoid_casual_healthcare_use,"white, black, gold"
+green,"growth, nature, health, sustainability","eco, wellness, success, finance growth",red_green_alone_fails_accessibility,"white, brown, blue"
+yellow_gold,"optimism, warmth, luxury, attention","food, children, luxury, energy",low_contrast_on_white,"black, navy, dark brown"
+purple,"creativity, wisdom, mystery, premium","beauty, creative, spiritual, premium",overused_in_generic_ai_ui,"gold, white, pink"
+orange,"friendly, energetic, confident, youthful","food, sport, retail, youth",can_feel_cheap_if_overused,"white, navy, dark gray"
+black,"sophistication, power, elegance, authority","luxury, fashion, premium tech",heavy_without_rhythm,"white, gold, silver"
+white,"purity, simplicity, cleanliness, modern","healthcare, modern, spacious UI",empty_without_hierarchy,any
+brown_beige,"earth, craft, warmth, stability","food, eco, artisan, heritage",can_feel_dated,"green, cream, black"
+teal,"clarity, freshness, health, modernity","health, SaaS, wellness, climate",may_lack_authority_alone,"navy, white, coral"

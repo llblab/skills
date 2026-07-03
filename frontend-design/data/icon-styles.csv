@@ -1,0 +1,16 @@
+style,best_for,stroke,fill,checks
+outlined,general UI and web apps,2px,none,consistent stroke and currentColor
+filled,mobile nav and active states,0,solid,clear silhouette at 16px
+duotone,marketing and feature cards,0,dual,secondary tone does not reduce clarity
+thin,luxury and editorial,1-1.5px,none,test small sizes carefully
+bold,hero sections and high-impact labels,3px,none,avoid clutter at small sizes
+rounded,friendly health education,2px,none,round caps and joins consistent
+sharp,tech fintech enterprise,2px,none,crisp angles and pixel alignment
+flat,material-like UI,0,solid,simple shape language
+gradient,modern brand/landing,0,gradient,avoid in dense functional UI
+glass,overlays and premium UI,1px,semi_transparent,contrast over background
+pixel,gaming retro,0,solid,align to pixel grid
+hand_drawn,artisan creative,varies,none,keep metaphor recognizable
+isometric,docs explainers infographics,1-2px,partial,perspective consistent
+glyph,system UI compact,0,solid,works at 16px
+animated_ready,onboarding interactive UI,2px,varies,separate animatable parts

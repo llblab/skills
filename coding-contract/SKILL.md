@@ -1,8 +1,8 @@
 ---
 name: coding-contract
-description: Pragmatic senior-engineer operating contract for coding agents. Use for coding, implementation, refactoring, debugging, code review, tests, validation, repository maintenance, file edits, or technical investigation.
+description: Default senior-engineer execution and safety contract for software work covering coding, implementation, refactoring, debugging, tests, validation, repository maintenance, file edits, and technical investigation. Provides implementation discipline, inspection, safe file mutation, validation, and maintainability practices without claiming ownership of every artifact domain.
 metadata:
-  version: 1.0.18
+  version: 1.0.19
 ---
 
 # Coder Contract
@@ -31,6 +31,15 @@ Use this skill as the default operating contract for software engineering work.
 - If ambiguity exists but a safe subset is clear, execute that subset first and state the assumption.
 - Do not pause on acknowledgment or direction-confirming phrases.
 - Present numbered options only when approaches are mutually exclusive and trade-offs matter.
+
+## Skill Composition
+
+- This contract is an execution envelope, not an exclusive router.
+- Before editing, notice the dominant artifact or risk surface in the user request.
+- Preserve room for specialized domain judgment when the artifact is not primarily a code-quality problem.
+- Use this contract for safety, inspection, file mutation, and validation discipline.
+- Do not let generic implementation readiness override the user's actual surface.
+- Keep skills atomically independent: compose through general roles, handoff shape, and validation criteria, not by hard-coding sibling skill names.
 
 ## Ask First
 

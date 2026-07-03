@@ -1,0 +1,21 @@
+surface,type,size,aspect_ratio,safe_zone,notes
+Facebook,cover_desktop,820x312,2.6:1,central_80_percent,Check mobile crop separately
+Facebook,cover_mobile,640x360,16:9,central_80_percent,Keep text away from edges
+Facebook,event_cover,1920x1080,16:9,central_80_percent,Works as general social hero
+Twitter/X,header,1500x500,3:1,central_70_percent,Profile image may overlap left area
+LinkedIn,company_cover,1128x191,5.9:1,central_70_percent,Very shallow height; avoid long copy
+LinkedIn,personal_banner,1584x396,4:1,central_75_percent,Good for professional proof/value prop
+YouTube,channel_art,2560x1440,16:9,1546x423_center_safe_area,Critical content only in safe band
+Instagram,story,1080x1920,9:16,central_80_percent,Leave top/bottom UI chrome space
+Instagram,post_square,1080x1080,1:1,central_85_percent,Thumbnail legibility matters
+Pinterest,pin,1000x1500,2:3,central_80_percent,Vertical hierarchy
+Google Display,medium_rectangle,300x250,6:5,central_80_percent,High CTR; very short copy
+Google Display,leaderboard,728x90,8:1,central_70_percent,One line message
+Google Display,wide_skyscraper,160x600,4:15,central_75_percent,Vertical CTA near bottom
+Google Display,half_page,300x600,1:2,central_80_percent,Premium display unit
+Website,full_width_hero,1920x600-1080,variable,central_80_percent,Responsive crop strategy required
+Website,section_banner,1200x400,3:1,central_80_percent,Good for feature/section breaks
+Website,blog_header,1200x628,1.91:1,central_80_percent,Social sharing compatible
+Email,header,600x200,3:1,central_80_percent,Small file size and high legibility
+Print,roll_up,850mmx2000mm,vertical,central_80_percent,300DPI preferred; bleed needed
+Print,trade_show,33inx78in,vertical,central_80_percent,Readable from distance

@@ -1,0 +1,11 @@
+formula,use_for,structure,template,emotion
+PAS,problem sections and pain points,problem -> agitate -> solution,"[Pain]? Every [timeframe], [consequence]. [Solution] fixes this by [mechanism].",frustration_to_hope
+AIDA,CTA and closing sections,attention -> interest -> desire -> action,"[Bold statement]. [Benefit detail]. [Proof]. [CTA].",curiosity_to_action
+FAB,feature cards and product showcases,feature -> advantage -> benefit,"[Feature] lets you [advantage], so you can [benefit].",confidence
+Before After Bridge,transformation and case studies,before -> after -> bridge,"[Pain before]. [Desired state after]. [Product] is the bridge.",hope
+Cost of Inaction,urgency and risk sections,status quo -> loss -> time decay,"Without [solution], [audience] loses [cost/risk] every [period].",urgency
+Proof Stack,traction and trust sections,claim -> evidence -> implication,"[Claim]. Proven by [metric/proof]. That means [business/user outcome].",trust
+Value Stack,pricing and plan comparison,price -> inclusions -> outcome,"For [price], get [included value] so you can [outcome] without [pain].",confidence
+Objection Handling,sales and conversion flows,objection -> reassurance -> proof,"Worried about [objection]? [Reassurance]. [Proof/example].",trust
+Social Proof,testimonials and trust bands,user -> result -> quote,"[Audience] achieved [result]: '[quote]'",trust
+Urgency CTA,limited campaigns and launches,time/context -> value -> action,"[Window/context] is open. Get [value] before [constraint]. [CTA].",urgency
