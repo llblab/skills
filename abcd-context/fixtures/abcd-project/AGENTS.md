@@ -7,4 +7,4 @@
 
 ## Operating Principles
 
-- Keep context compact and truthful.
+- `Context Domain`: Keep context compact and truthful.

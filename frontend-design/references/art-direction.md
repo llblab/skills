@@ -4,11 +4,11 @@ Use art direction to make an interface feel authored rather than assembled. Choo
 
 ## Direction Brief
 
-- **Product metaphor**: Machine, archive, studio, cockpit, marketplace, ledger, gallery, ritual, playground, control room, instrument, map, document, organism.
-- **Emotional target**: Trust, speed, precision, calm, power, delight, mystery, luxury, urgency, transparency, craft, authority.
-- **Density**: Sparse, editorial, operational, information-dense, immersive, kiosk-like.
-- **Energy**: Static, restrained, tactile, cinematic, kinetic, real-time.
-- **Memory hook**: One thing the user remembers: a layout move, material, type treatment, animation, icon language, or interaction.
+- `Product metaphor`: Machine, archive, studio, cockpit, marketplace, ledger, gallery, ritual, playground, control room, instrument, map, document, organism.
+- `Emotional target`: Trust, speed, precision, calm, power, delight, mystery, luxury, urgency, transparency, craft, authority.
+- `Density`: Sparse, editorial, operational, information-dense, immersive, kiosk-like.
+- `Energy`: Static, restrained, tactile, cinematic, kinetic, real-time.
+- `Memory hook`: One thing the user remembers: a layout move, material, type treatment, animation, icon language, or interaction.
 
 ## Style Families
 

@@ -6,14 +6,14 @@ Frontend design work often produces artifacts beyond code: tokens, screenshots, 
 
 Before an asset or UI surface is considered ready:
 
-- **Purpose**: Serves the stated goal and audience.
-- **Brand**: Uses approved/local direction for logo, palette, type, imagery, tone, and terminology.
-- **Accessibility**: Contrast, focus, alt text, labels, reading order, and non-color indicators checked.
-- **Responsive**: Works at target widths and crops safely.
-- **Content**: Copy is proofread, voice-consistent, and CTA is clear.
-- **Technical**: Correct format, dimensions, size, naming, metadata, and optimization.
-- **Legal/compliance**: Licensed assets, no misleading claims, required disclosures/terms/privacy links where relevant.
-- **Versioning**: Final file and previous variants are distinguishable.
+- `Purpose`: Serves the stated goal and audience.
+- `Brand`: Uses approved/local direction for logo, palette, type, imagery, tone, and terminology.
+- `Accessibility`: Contrast, focus, alt text, labels, reading order, and non-color indicators checked.
+- `Responsive`: Works at target widths and crops safely.
+- `Content`: Copy is proofread, voice-consistent, and CTA is clear.
+- `Technical`: Correct format, dimensions, size, naming, metadata, and optimization.
+- `Legal/compliance`: Licensed assets, no misleading claims, required disclosures/terms/privacy links where relevant.
+- `Versioning`: Final file and previous variants are distinguishable.
 
 ## Asset Organization
 

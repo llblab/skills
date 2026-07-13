@@ -79,13 +79,13 @@ Data UI should answer a question, not merely display a chart. Start from the dec
 
 ## Metric Card Anatomy
 
-- **Label**: What is measured.
-- **Value**: Current number, formatted consistently.
-- **Unit**: Currency, percent, count, duration.
-- **Trend**: Direction and magnitude.
-- **Timeframe**: Compared to when.
-- **Freshness**: Last updated when, if relevant.
-- **Action**: Drilldown or recovery if the metric indicates a problem.
+- `Label`: What is measured.
+- `Value`: Current number, formatted consistently.
+- `Unit`: Currency, percent, count, duration.
+- `Trend`: Direction and magnitude.
+- `Timeframe`: Compared to when.
+- `Freshness`: Last updated when, if relevant.
+- `Action`: Drilldown or recovery if the metric indicates a problem.
 
 ## Color Semantics
 

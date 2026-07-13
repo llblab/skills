@@ -2,7 +2,7 @@
 name: extra-self
 description: High-density memetic-systems cognition mode. Use for extra self, be yourself, give me the base, foundational synthesis, first-principles compression, deep structure, memetic analysis, strong framing, naming, narrative architecture, ideology, culture, protocol dynamics, governance, economics, product strategy, institutional diagnosis, prompt/spec compression, or architecture-first strategic thought.
 metadata:
-  version: 1.0.19
+  version: 1.0.20
 ---
 
 # Extra Self

@@ -1,8 +1,8 @@
 ---
 name: dev2main-release
-description: Manage a guarded release flow that commits prepared release work on dev, opens a dev-to-main pull request with a release-focused PR summary, waits for checks, merges on success, tags, and optionally publishes an existing npm package. Use when the user asks to prepare or execute a dev→main release PR, hotfix release PR, or Dev2Main PR Summary workflow.
+description: Manage a guarded release flow that commits prepared release work on dev, opens a dev-to-main pull request with a release-focused PR summary, waits for checks, merges on success, tags, creates the matching GitHub Release, and optionally publishes an existing npm package. Use when the user asks to prepare or execute a dev→main release PR, hotfix release PR, or Dev2Main PR Summary workflow.
 metadata:
-  version: 1.0.19
+  version: 1.0.20
 ---
 
 # Dev2Main Release
@@ -16,9 +16,9 @@ Run release actions only when all criteria are true:
 1. The current branch is `dev`.
 2. There are uncommitted files intended for the release.
 3. The package or application version is already bumped to the intended release version.
-4. The user explicitly asked to run the release flow, including external actions such as pushing, opening a PR, merging, tagging, or publishing.
+4. The user explicitly asked to run the release flow, including external actions such as pushing, opening a PR, merging, tagging, creating a GitHub Release, or publishing.
 
-If any criterion fails, reject the flow and stop. Do not stage, commit, push, create PRs, merge, tag, publish, or modify files from this plan.
+If any criterion fails, reject the flow and stop. Do not stage, commit, push, create PRs, merge, tag, create a GitHub Release, publish, or modify files from this plan.
 
 ## Release Flow
 
@@ -54,13 +54,45 @@ git push origin v<version>
 
 If the tag already exists locally or remotely, verify it points to the current `main` commit before continuing. If an existing `v<version>` tag points anywhere else, stop and report the mismatch. Do not move, delete, or force-push tags.
 
-18. Before publishing, check whether the package already exists on npm:
+18. Create exactly one published GitHub Release for the confirmed tag. First determine whether the intended version is stable or a prerelease from the version and changelog, then check whether a release already exists:
+
+```bash
+gh release view v<version> --json tagName,isDraft,isPrerelease,publishedAt,url
+```
+
+Treat the release as absent only when GitHub explicitly reports that `v<version>` has no release, such as an HTTP 404 or `release not found`. Authentication, authorization, network, rate-limit, repository-resolution, and other CLI/API failures are not absence; stop and report them instead of attempting creation.
+
+If no release exists, create it with the existing tag, the changelog release heading as its title, and release-focused notes derived from that changelog section.
+
+For a normal stable release:
+
+```bash
+gh release create v<version> --verify-tag --latest --title "<changelog release heading without Markdown prefix>" --notes-file <release-notes-file>
+```
+
+For an explicit prerelease:
+
+```bash
+gh release create v<version> --verify-tag --prerelease --latest=false --title "<changelog release heading without Markdown prefix>" --notes-file <release-notes-file>
+```
+
+If a release already exists, verify that `tagName` equals `v<version>`, `isDraft` is false, `publishedAt` is present, and `isPrerelease` matches the intended stable/prerelease state. Reuse it instead of creating a duplicate. If any field conflicts, stop and report the mismatch; do not silently edit, delete, or replace it.
+
+After creation or reuse, verify latest state. For a stable release, the latest-release endpoint must resolve to the intended tag:
+
+```bash
+gh api repos/{owner}/{repo}/releases/latest --jq .tag_name
+```
+
+For a prerelease, confirm that the endpoint does not resolve to the prerelease tag. A missing latest stable release is acceptable for a prerelease-only repository.
+
+19. Before publishing, check whether the package already exists on npm:
 
 ```bash
 npm view <package-name> version
 ```
 
-19. Publish only when both conditions are true:
+20. Publish only when both conditions are true:
 
 - The package already exists on npm.
 - The `main` version matches the intended release version and is newer than the npm version.
@@ -78,6 +110,16 @@ If the package does not exist on npm, do not publish. New packages must never be
 The version source is project-local. For npm packages use `package.json` and lockfiles when present. For Python, Rust, mobile, or custom apps, use the manifest or release metadata that the repository treats as authoritative. If multiple version files exist, they must agree before release actions continue.
 
 The changelog must have a section for the intended version before the release flow starts. The section should contain the release changes being shipped. `Unreleased` may remain as an empty placeholder, but it must not still contain the same shipped changes after they have been assigned to the version section.
+
+## GitHub Release Contract
+
+The GitHub Release and Git tag are one release unit. A successful tag push is not a completed release until a matching published GitHub Release exists.
+
+- Derive the title from the changelog heading by removing the Markdown prefix, for example `## 0.4.0: Bounded Worker Meta-Protocol` becomes `0.4.0: Bounded Worker Meta-Protocol`.
+- Derive notes from the matching changelog section. Compress when needed, but cover every meaningful release group and do not include older version sections.
+- Use the already-pushed `v<version>` tag; never create a second tag through release creation.
+- Mark a normal stable release as latest with `--latest`. Mark an explicit prerelease with `--prerelease --latest=false`; never promote a prerelease to latest.
+- Verify the resulting release URL, tag, published state, prerelease state, and latest state before continuing to registry publication.
 
 ## Release Commit Message Contract
 
@@ -161,7 +203,7 @@ It also <secondary behavior/safety/compatibility outcome from CHANGELOG.md>.
 
 ## Stop Conditions
 
-Stop without merging, tagging, or publishing when:
+Stop further release actions and report the state already completed when:
 
 - Run criteria fail.
 - The version source cannot be identified safely or multiple version files disagree.
@@ -170,6 +212,7 @@ Stop without merging, tagging, or publishing when:
 - PR checks fail.
 - The pulled `main` version does not match the intended release version.
 - The release tag exists on a different commit.
+- GitHub Release creation or verification fails, or an existing release conflicts with the confirmed tag/version state.
 - The npm package does not exist.
 - The `main` version is not newer than the npm version.
 
@@ -183,5 +226,6 @@ Report:
 - Merge status
 - `main` version confirmation
 - Release tag push/result
+- GitHub Release URL and published/prerelease/latest state
 - npm package existence/version check
 - Publish result or publish skip reason

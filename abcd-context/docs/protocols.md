@@ -1,206 +1,199 @@
-# Protocols Reference
+# ABCd Context Protocols
 
-Supplementary protocols for the ABCd Context protocol.
-For the compact version, see [SKILL.md](../SKILL.md).
+Deep reference for the operating kernel in [SKILL.md](../SKILL.md). This document owns file resolution, full reconciliation, state transitions, consolidation, and local-overlay coexistence.
 
-## Adaptation Rules
+## File Resolution
 
-When writing to any managed file:
+### Human Entrypoints
 
-- **Respect what exists.** Read current format before writing.
-- **Match tone and structure when the current shape is already honest.** Bullets → bullets. Tables → tables.
-- **Restructure when the current shape is dishonest or too flat.** If an existing file obscures the real hierarchy, evolve it toward the template instead of preserving accidental formatting.
-- **If a file is empty or new**: use templates from [`templates.md`](./templates.md)
-- For `AGENTS.md`, choose between the lean and layered starters based on actual project maturity; do not force the layered version onto tiny projects or the lean version onto mature multi-surface repos
-- Do not leave the meta-protocol section as an empty heading: instantiate it with real governing principles, then evolve the list as constraints become explicit
-- Do not use Markdown tables for definition-list content such as `term → meaning`; use label/bullet definitions instead
-- Do not hard-wrap prose; preserve readable paragraph flow unless a project-specific formatter requires wrapping.
-- Prefer compact tables plus expanding bullets below them when details would make table rows wide
+Root and subtree `README.md` files form the human navigation plane.
 
-## Root File Resolution
+- Root `README.md` should link to the durable protocol, canonical open work, completed history when present, and primary docs index.
+- A subtree `README.md` becomes managed when the subtree acts as a real human entrypoint.
+- Update the nearest relevant README when setup, topology, ownership, usage semantics, or same-domain operator/developer knowledge changes.
+- Keep subtree entrypoints reachable from a parent README, root README, or docs index.
 
-### README Entrypoint Plane
+### Durable Protocol
 
-`README.md` files are the human navigation layer.
+Preferred file: `AGENTS.md`.
+
+Accepted inherited fallbacks, in resolution order: `CLAUDE.md`, `CODEX.md`, `GEMINI.md`, `CONTEXT.md`.
+
+Create `AGENTS.md` only when project convention permits it. If an inherited durable file contains useful material but mixes abstraction levels or state types, restructure it toward the appropriate template instead of appending another flat section.
+
+### Canonical Open Work
+
+Preferred file: `BACKLOG.md`.
+
+Accepted inherited fallbacks: `TODO.md`, `PLAN.md`, `ROADMAP.md`.
+
+- If exactly one exists and project behavior confirms it, use it.
+- If several exist, identify the actively maintained canonical source before editing.
+- Prefer eventual convergence toward one source, but do not rename established project files casually.
+- Never mirror the same open item across multiple plans.
+
+### Completed Delivery
+
+Preferred file: `CHANGELOG.md`.
+
+If the project already keeps canonical shipped history elsewhere, preserve that convention rather than inventing a parallel changelog. Completed delivery never belongs as rolling history in `AGENTS.md`.
+
+### Documentation Plane
+
+- `docs/README.md` indexes project documentation.
+- `docs/*` owns subsystem, architecture, operations, decision, and public-contract detail.
+- Root protocol files should link to docs rather than duplicate them.
+
+## Adaptation and Restructuring
+
+When writing managed files:
+
+1. Read the current structure, tone, and ownership.
+2. Decide whether the structure still represents reality honestly.
+3. Match established form when it remains clear.
+4. Restructure when one file mixes durable protocol, open work, completed history, or unrelated documentation.
+5. Route new information only after ownership becomes clear.
+6. Consolidate existing duplication in the same pass when safe.
+
+Use [templates.md](./templates.md) for new/empty files and as target shapes for inherited drift. Choose the lean `AGENTS.md` starter for low coordination load and the layered starter only when real subsystem or governance complexity justifies it.
+
+Do not preserve accidental formatting merely because it exists. Do not impose a mature hierarchy on a tiny project.
+
+## Proportional Reconciliation
+
+### Light Pass
+
+Use after a small meaningful slice:
+
+1. Reconcile the affected backlog item.
+2. Update the nearest README or contract doc only if user-facing or operator-facing truth changed.
+3. Record a changelog outcome only when delivery is meaningful.
+4. Promote a durable lesson only when it will change future behavior.
+5. Validate changed context and stop.
+
+### Full Pass
+
+Use for architecture changes, broad documentation refactors, migration of context ownership, or explicit audits:
+
+1. Map root files, README entrypoints, docs index, and local overlays.
+2. Identify canonical owners for durable protocol, open work, shipped history, and subsystem contracts.
+3. Compare claims with repository reality.
+4. Repair backlog truth first.
+5. Repair README entrypoints and navigation.
+6. Reconcile subsystem docs and docs index coverage.
+7. Record meaningful delivered outcomes.
+8. Promote only reusable constraints into durable protocol.
+9. Merge duplicates and remove stale context.
+10. Run validation, inspect warnings, and repeat only for concrete remaining drift.
+
+## Backlog State Transitions
+
+Use one of these explicit transitions:
+
+- `Close`: Exit criteria are satisfied in reality; remove the item from open work.
+- `Narrow`: Part landed; rewrite the item to describe only what remains.
+- `Split`: One vague item became multiple independently executable slices.
+- `Retarget`: The original wording no longer matches the real desired outcome.
+- `Defer`: The item remains valid but no longer ranks as the next useful slice.
+- `Gate`: Progress requires an external condition or approval.
+- `Block`: Progress requires another unresolved internal or external dependency.
 
 Rules:
 
-- Root `README.md` should point to the root control plane and the primary documentation surface
-- Subtree `README.md` files should explain the local area honestly once that area becomes a real entry point for humans
-- When setup, topology, ownership, usage semantics, or same-domain operator/developer insight changes, update the nearest relevant `README.md` in the same pass
-- If meaningful work happened inside a domain that already has its own `README.md`, treat that local README as part of completion rather than optional polish
-- Prefer keeping subtree `README.md` files reachable from parent/root/docs navigation paths instead of leaving them as isolated islands
-
-### Durable Protocol File
-
-If an inherited `AGENTS.md` exists but is overly flat, mixed-level, or missing stable sections that the project clearly needs, restructure it toward the chosen template instead of only appending more bullets at the bottom.
-
-Default: `AGENTS.md`.
-Fallbacks: `CLAUDE.md`, `CODEX.md`, `GEMINI.md`, `CONTEXT.md`.
-
-Detection: scan project root for the first match. If none found, create `AGENTS.md` only if project conventions permit it.
-
-### Canonical Open-Work File
-
-Preferred: `BACKLOG.md`.
-Fallbacks: `TODO.md`, `PLAN.md`, `ROADMAP.md`.
-
-Rules:
-
-- If exactly one exists, use it
-- If multiple exist, use the one actively maintained for open work
-- Prefer converging inherited aliases toward `BACKLOG.md`, but do not break an established project convention casually
-- Do not duplicate backlog state across multiple plan files
-
-### Completed Delivery File
-
-Preferred and canonical: `CHANGELOG.md`.
-
-Rules:
-
-- Completed delivery belongs here, not as rolling iteration history in `AGENTS.md`
-- If a project already keeps versioned release notes elsewhere, do not invent a parallel changelog without explicit convention support
-- When both `AGENTS.md` and `CHANGELOG.md` exist, use `AGENTS.md` for durable rules and `CHANGELOG.md` for shipped history
-
-## Context Restructuring Protocol
-
-When `abcd-context` is invoked on an existing project, it should not behave like a passive note appender.
-
-Preferred order:
-
-1. Detect the current shape of `AGENTS.md`, `BACKLOG.md`, `CHANGELOG.md`, README entrypoints, and `/docs`
-2. Decide whether the current structure is already truthful enough
-3. If not, reorganize toward the appropriate template shape
-4. Only then add the newly discovered insights into the correct layer
-
-Restructure when:
-
-- One file mixes durable protocol, open work, and delivered history
-- `AGENTS.md` contains meaningful durable material but lacks stable hierarchy
-- Repeated additions are making navigation harder instead of clearer
-- README entrypoints exist but are disconnected from the navigation graph
-
-## Context Lifecycle Management
-
-### Growth Control Pipeline
-
-```text
-Discovery → Route to durable rule / open slice / completed delivery / README sync → Consolidation
-```
-
-## Backlog Coherence Protocol
-
-When post-task review reveals that implementation reality and the canonical plan disagree, repair the plan in the same pass.
-
-### Allowed backlog transitions
-
-- `Close`: The item's exit criteria are satisfied in reality.
-- `Narrow`: Part landed; the item should now describe only the remaining work.
-- `Split`: One vague item turned into multiple concrete executable slices.
-- `Retarget`: The original wording no longer matches the actual remaining work.
-- `Defer`: The item remains valid but is no longer the best next slice.
-- `Move to gated`: Remaining work now depends on an external condition or approval.
-- `Move to blocked`: Work is still desired but blocked by another unresolved gap.
-
-### Rules
-
-- Epics may remain in the plan, but active execution should still expose at least one concrete next slice
-- If a completed slice was not explicitly listed before work began, add or retarget the relevant item before finishing the pass
-- If a docs or architecture update changes the true exit criteria of an item, update the item instead of leaving stale wording
-- Evergreen maintenance disciplines belong in durable instructions or docs, not as perpetually open checkboxes
-- Prefer refining existing items over creating near-duplicates
+- Active epics should expose at least one concrete next slice.
+- If implementation completed work absent from the plan, update the nearest existing item or record delivery without fabricating retrospective backlog ceremony.
+- If docs or architecture change exit criteria, update the item rather than preserving stale wording.
+- Evergreen maintenance disciplines belong in durable protocol, not perpetual checkboxes.
+- Prefer refining existing items over creating near-duplicates.
 
 ## Completed Delivery Sync
 
-When a meaningful slice lands, record it in `CHANGELOG.md` in the same pass.
+Record meaningful outcomes from reality, not intention.
 
-Rules:
+A good entry names:
 
-- Write from reality, not intention
-- Prefer impact-oriented entries over commit-style trivia
-- Do not mirror the same delivery bullet inside `AGENTS.md`
+- The affected area.
+- What changed for users, operators, developers, or system behavior.
+- Material compatibility, migration, or safety impact when relevant.
 
-## Garbage Collection
+Avoid version-bump-only notes, test bookkeeping, and duplicates of `AGENTS.md` rules.
 
-Triggered by heuristic signals from `validate-context.sh`, not hardcoded line limits.
-3+ bloat signals → mandatory GC. 1–2 signals → consolidation at agent discretion.
+## Consolidation
 
-## Consolidation Triggers
+### Triggers
 
-- `3+ entries describe the same pattern`: Extract a strategic pattern and remove tactical duplication.
-- `Two sections overlap >50%`: Merge them and redirect references.
-- `Section exceeds 10 entries`: Split by abstraction or consolidate.
-- `Mistake repeated despite insight`: Escalate using the ladder below.
-- `/docs` entry contradicts implementation`: Flag it for update or rewrite.
-- `Two /docs files cover the same topic`: Merge them and update the index.
-- `/docs file not in docs/README.md`: Add it to the index immediately.
-- `README.md link points to missing file`: Create the file or remove the dead link.
+Consolidate when:
 
-## Mistake Prevention Escalation
+- Three or more entries describe one pattern.
+- Two sections substantially overlap.
+- A section grows beyond easy scanning because abstraction levels became mixed.
+- A mistake repeats despite an existing rule.
+- Docs contradict implementation.
+- Two docs own the same contract.
+- A docs file lacks index coverage.
+- A README entrypoint becomes unreachable or stale.
+
+Heuristics suggest inspection; they do not replace judgment.
+
+### Procedure
+
+1. Identify the authoritative home.
+2. Preserve unique and still-true information.
+3. Resolve contradictions against implementation and current project convention.
+4. Merge the useful content.
+5. Remove or explicitly deprecate the weaker source.
+6. Repair links and index coverage.
+7. Validate the resulting graph.
+
+### Escalation Ladder
+
+When a mistake repeats:
 
 ```text
-Level 1: Insight logged in AGENTS.md
-  ↓ repeated
-Level 2: Convention with emphasis
-  ↓ repeated
-Level 3: Hard rule with validation step
-  ↓ repeated
-Level 4: Structural change (tooling, automation)
+Durable insight
+→ Emphasized convention
+→ Hard rule with validation
+→ Structural tooling or automation
 ```
 
-## Documentation Consolidation Protocol
+Escalate only after evidence shows the previous level failed.
 
-When duplicate documentation is detected:
+## Local Overlay Coexistence
 
-1. Identify overlapping documents
-2. Determine the better home
-3. Merge content: preserve unique info, resolve contradictions with implementation truth
-4. Delete or deprecate the weaker document
-5. Update `docs/README.md` and cross-references
+ABCd owns portable context hygiene:
 
-## Project-Local Overlay Coexistence
-
-`abcd-context` owns generic context hygiene, not every repository-specific gate.
-It should cooperate with stricter local overlays without duplicating their rules.
-
-`ABCd responsibility`:
-
-- Root state split: durable protocol, open work, completed delivery.
-- README entrypoint reachability and docs index coverage.
-- Link health, context freshness, bloat signals, and Markdown shape warnings.
+- Root state separation.
+- README and docs-index connectivity.
+- Link health and basic Markdown shape.
 - Generic backlog/changelog drift detection.
+- Context bloat and freshness signals.
 
-`Local overlay responsibility`:
+Local overlays own project-specific behavior:
 
-- Product-specific release gates.
-- Architecture or domain ownership rules.
-- Stack-specific validation, tests, deployment, and security checks.
-- Organization-specific style rules stricter than ABCd defaults.
+- Release and deployment gates.
+- Architecture/domain ownership rules.
+- Stack-specific tests and security checks.
+- Organization-specific conventions.
 
-`Handoff rule`: If a local overlay exists, run ABCd first to verify the context
-surface, then run the stricter overlay for project-specific gates. Do not copy
-local overlay rules into ABCd unless they become portable across projects.
+Run ABCd to verify the context surface, then run the stricter local overlay. Do not copy local rules into ABCd unless they become portable across projects. Tune style warnings through documented options or environment variables rather than forking the validator for one repository.
 
-`Override rule`: ABCd style warnings may be disabled or tuned when a project has
-a deliberate local convention. Prefer environment/config knobs over editing the
-portable validator for one repository.
+## Full Audit Checklist
 
-## Validation Checklist (ON_REQUEST mode)
+After automated validation, manually verify what scripts cannot prove:
 
-Run `validate-context.sh` first — it automates link, structural, root-memory, and README-entrypoint checks.
-Manual-only items the script cannot verify:
-
-- [ ] No information duplicated across `AGENTS.md`, `BACKLOG.md`, `CHANGELOG.md`, README entrypoints, and `/docs`
-- [ ] Entries match existing file style
-- [ ] General → specific structure is maintained where the project expects it
-- [ ] Canonical open-work state reflects reality for touched work
-- [ ] Completed delivery is recorded in `CHANGELOG.md` when something actually landed
-- [ ] Touched root/subtree `README.md` files still describe the local area honestly
-- [ ] Same-domain README entrypoints were refreshed when the work produced local insights useful to a future human starting there
-- [ ] Open epics still expose a concrete next slice where active execution is expected
+- [ ] Repository claims match implementation and current operations.
+- [ ] One authoritative home owns each material fact.
+- [ ] Canonical open work reflects real remaining work.
+- [ ] Completed work no longer appears open.
+- [ ] Durable protocol contains reusable constraints rather than delivery history.
+- [ ] Relevant README entrypoints describe current setup, topology, usage, and ownership.
+- [ ] Subtree entrypoints remain reachable.
+- [ ] Docs index covers current docs without phantom entries.
+- [ ] Active epics expose an executable next slice.
+- [ ] Local overlays remain authoritative for project-specific gates.
 
 ## Related
 
-- [SKILL.md](../SKILL.md) — compact skill definition
-- [templates.md](./templates.md) — file templates
-- [validation-design.md](./validation-design.md) — validator design
+- [SKILL.md](../SKILL.md) — operating kernel
+- [templates.md](./templates.md) — starter and restructuring shapes
+- [validation-design.md](./validation-design.md) — validator behavior and parity contract

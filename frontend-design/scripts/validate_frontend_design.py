@@ -59,6 +59,10 @@ def main() -> int:
     parser.add_argument("--max", type=int, default=80, help="Maximum findings to print")
     args = parser.parse_args()
     scanned = files(args.paths)
+    if not scanned:
+        print("Heuristic evidence unavailable: scanned 0 frontend files")
+        print("Check the input paths and supported extensions; no validation was performed.")
+        return 2
     findings: list[tuple[str, int, str, str]] = []
     corpus = []
     for path in scanned:
@@ -75,9 +79,9 @@ def main() -> int:
         for code, needle, message in GLOBAL_CHECKS:
             if needle not in joined:
                 findings.append(("<global>", 0, code, message))
-    print(f"Scanned {len(scanned)} files")
+    print(f"Heuristic evidence: scanned {len(scanned)} frontend files")
     if not findings:
-        print("No heuristic findings")
+        print("No heuristic findings; this does not replace framework checks or visual review.")
         return 0
     for path, line, code, message in findings[: args.max]:
         loc = f"{path}:{line}" if line else path
@@ -85,6 +89,7 @@ def main() -> int:
     remaining = len(findings) - args.max
     if remaining > 0:
         print(f"... {remaining} more findings")
+    print("Heuristic findings require review; confirm them with project checks and rendered behavior.")
     return 1
 
 

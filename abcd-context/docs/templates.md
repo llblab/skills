@@ -1,21 +1,13 @@
-# Entry Templates
+# ABCd Context Templates
 
-Default templates for new or empty files managed by the ABCd Context protocol.
-If a file already has an established format, use **that** format instead.
+Starter and restructuring shapes for files managed by ABCd. Existing honest project conventions win. Use only the files and sections the project actually needs.
 
-## Root Starter (`README.md` + `AGENTS.md` + `BACKLOG.md` + `CHANGELOG.md`)
-
-Choose the `AGENTS.md` starter that matches project maturity.
-
-- 'Lean': early projects, low coordination load, few durable constraints
-- 'Layered mature project': repositories with multiple subsystems, stronger naming/contracts, or autonomous-agent coordination pressure
-
-### `README.md`
+## Root README
 
 ```markdown
 # [Project Name]
 
-[One-sentence explanation of what this project is]
+[One-sentence project purpose.]
 
 ## Start Here
 
@@ -25,203 +17,178 @@ Choose the `AGENTS.md` starter that matches project maturity.
 - [Documentation](./docs/README.md)
 ```
 
-### `AGENTS.md` — Lean
+Omit links to surfaces the project deliberately does not maintain. Do not create empty control-plane files merely to satisfy the template.
 
-Use when the project is still simple and the context burden is low.
-Even the lean starter should include a minimal meta-protocol layer so the file can explain how it evolves.
+## AGENTS — Lean
+
+Use for early projects with low coordination load and few durable constraints.
 
 ```markdown
 # Project Context
 
 ## Meta-Protocol Principles
 
-- `Constraint-Driven Evolution`: Add structure when real constraints justify it
-- `Single Source of Truth`: Each fact lives in one authoritative layer
-- `Context Hygiene`: Compress, consolidate, and remove stale context before it turns into drag
-- `Boundary Clarity`: Keep durable protocol, open work, completed delivery, and docs in distinct files
+- `Constraint-Driven Evolution`: Add structure when real constraints justify it.
+- `Single Source of Truth`: Keep each fact in one authoritative layer.
+- `Context Hygiene`: Consolidate and remove stale context before it becomes drag.
+- `Boundary Clarity`: Separate durable protocol, open work, completed history, and docs.
 
 ## Concept
 
-[One-sentence project purpose]
+[One-sentence project purpose and boundary.]
 
 ## Topology
 
-- `/[directory]/`: [Purpose]
+- `/[directory]/`: [Responsibility.]
 
 ## Durable Conventions
 
-- '[label]': [Constraint or rule]
-  - Trigger: [cause]
-  - Action: [what to do]
+- `[Label]`: [Constraint or rule.]
+  - Trigger: [When it applies.]
+  - Action: [Required behavior.]
 ```
 
-### `AGENTS.md` — Layered Mature Project
+## AGENTS — Layered
 
-Use when the project needs a durable, hierarchical protocol rather than a tiny note file.
-This mirrors the evolved style used by mature repositories: general → specific, concept before topology, topology before implementation, conventions before task checklists.
-This is also the preferred restructuring target when an existing `AGENTS.md` already carries enough weight that a flat layout is no longer truthful.
+Use only when multiple subsystems, stronger contracts, or autonomous coordination pressure justify a durable hierarchy. This also serves as a restructuring target for overgrown flat files.
 
 ```markdown
 # Project Context
 
 ## 0. Meta-Protocol Principles
 
-- `Constraint-Driven Evolution`: Add complexity only when discovered constraints justify it
-- `Single Source of Truth`: Durable protocol, open work, completed delivery, and subsystem docs must not silently duplicate one another
-- `Decreasing Abstraction Structure`: Organize context from the most general mental model down to execution protocols
-- `Context Optimization`: Consolidate, compress, and remove stale structure before context turns into entropy
-- `Boundary Clarity`: Keep product identity, architecture, operations, and task rituals in separate sections so one layer does not leak into another
-- `Validation Infrastructure`: Pair structural rules with explicit validation and completion checks
-- `Human + Agent Coherence`: The same context graph should make sense to a future human and a future agent
-- `Template as Target Shape`: If the inherited structure is flatter or drifted, restructure it toward this hierarchy instead of preserving accidental form
+- `Constraint-Driven Evolution`: Add complexity only when discovered constraints justify it.
+- `Single Source of Truth`: Keep durable protocol, open work, completed history, and subsystem docs distinct.
+- `Decreasing Abstraction`: Organize context from mental model to execution protocol.
+- `Context Optimization`: Consolidate and remove stale structure before context becomes entropy.
+- `Validation Infrastructure`: Pair structural rules with explicit checks.
+- `Human + Agent Coherence`: Keep the same graph useful to future humans and agents.
 
 ## 1. Concept
 
-[What the project is, what problem it solves, product boundary]
+[Project identity, problem, and product boundary.]
 
-## 2. Identity & Naming Contract
+## 2. Identity and Naming
 
-- [Canonical terms and naming boundaries]
+- [Canonical terms and naming boundaries.]
 
-## 3. Project Topology
+## 3. Topology
 
-- `/[directory]/`: [Purpose]
+- `/[directory]/`: [Responsibility.]
 
 ## 4. Core Entities
 
-- [Durable domain atoms]
+- [Durable domain atoms.]
 
 ## 5. Architectural Decisions
 
-- [Stable design decisions and launch-line constraints]
+- [Stable boundaries and design decisions.]
 
 ## 6. Engineering Conventions
 
-- [Validation, code standards, implementation discipline]
+- [Validation, implementation, and code standards.]
 
 ## 7. Operational Conventions
 
-- [Docs policy, frontend/tooling provenance, coordination rules]
+- [Documentation, tooling, coordination, and release rules.]
 
 ## 8. Integration Protocols
 
-- [Upstream/runtime/network/integration seams]
+- [Runtime, upstream, network, and service seams.]
 
-## 9. Pre-Task Preparation Protocol
+## 9. Pre-Task Protocol
 
-- [What to read and align before work]
+- [Preparation required by this project.]
 
-## 10. Task Completion Protocol
+## 10. Completion Protocol
 
-- [Validation, sync, and completion gates]
+- [Validation, context sync, and delivery gates.]
 ```
 
-### `BACKLOG.md`
+## BACKLOG
 
 ```markdown
 # Project Backlog
 
 ## Open Backlog
 
-- [ ] `[Slice]` [Concrete remaining work with truthful exit criteria]
+- [ ] `[Slice]` [Concrete remaining work with truthful exit criteria.]
 ```
 
-### `CHANGELOG.md`
+Keep only open, gated, or blocked work. Remove completed items after recording meaningful delivery in the canonical history surface.
+
+## CHANGELOG
 
 ```markdown
 # Changelog
 
 ## [Version or Current]
 
-- `[Area]` [Delivered slice]. Impact: [what changed].
+- `[Area]` [Delivered outcome]. Impact: [Meaningful user/operator/developer effect.]
 ```
 
-## AGENTS Restructuring Note
-
-Templates are not only for new projects.
-When an existing `AGENTS.md` has grown organically but lost hierarchy, use the lean or layered template as the target structure and migrate existing material into the appropriate sections instead of preserving the old flat shape.
-
-## Index File Entry Template
-
-For adding insights, conventions, or constraints to `AGENTS.md`:
+## Durable Convention Entry
 
 ```markdown
-- '[short label]': [description of insight or constraint]
-  - Trigger: [what caused this to be discovered]
-  - Action: [what to do when this applies]
+- `[Label]`: [Reusable constraint or insight.]
+  - Trigger: [Observed condition.]
+  - Action: [Future behavior.]
 ```
 
-## Subtree README Template
-
-For a real subsystem/workspace/package entrypoint:
+## Subtree README
 
 ```markdown
 # [Area Name]
 
-[One-sentence explanation of what lives here]
+[One-sentence responsibility.]
 
 ## What This Area Owns
 
-- [Responsibility]
+- [Responsibility.]
 
 ## Key Entry Points
 
 - [Relevant file or directory](./path)
-- [Related docs or parent navigation](../README.md)
+- [Parent or related documentation](../README.md)
 ```
 
-## Docs Index Template (`docs/README.md`)
+## Docs Index
 
 ```markdown
 # Documentation Index
 
-Living index of all documentation in the `/docs` directory.
+Living index of project documentation.
 
 ## Documents
 
-- [`filename.md`](./filename.md): Brief description of what this document
-  covers.
+- [`filename.md`](./filename.md): [Purpose.]
 ```
 
-## Project Document Template
-
-For new files in `/docs/`:
+## Project Document
 
 ```markdown
 # [Document Title]
 
 ## Overview
 
-[1-2 sentence summary of what this document covers and why it exists.]
+[What this document owns and why it exists.]
 
-## [Main Sections]
+## [Main Section]
 
-[Content organized general → specific, matching project conventions.]
+[Content organized from general contract to specific behavior.]
 
 ## Related
 
-- [Links to related documents within /docs or external references]
+- [Related document](./related.md)
 ```
 
-## Backlog Item Template
+## README Status Update
 
-```markdown
-- [ ] `[Slice]` [Concrete remaining work]
-```
-
-## README Insight Update Pattern
-
-When meaningful work happened inside a domain that already has a `README.md`, refresh that README with the local truth the next human needs first:
+Use when local entrypoint truth changed:
 
 ```markdown
 ## Current Status
 
-- [What this area now does or exposes]
-- [Any changed entrypoint, workflow, or boundary]
-```
-
-## Changelog Entry Template
-
-```markdown
-- `[Area]` [Delivered slice]. Impact: [what changed]. Insight: [lesson learned if needed].
+- [What this area now owns or exposes.]
+- [Changed entrypoint, workflow, compatibility, or boundary.]
 ```

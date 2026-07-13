@@ -2,7 +2,7 @@
 name: edge-tts
 description: Text-to-speech via Microsoft Edge TTS (free, neural voices).
 metadata:
-  version: 1.0.19
+  version: 1.0.20
 ---
 
 # Edge TTS

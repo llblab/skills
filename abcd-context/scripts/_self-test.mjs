@@ -16,29 +16,26 @@ const bashOutput = run('bash', [path.join(scriptDir, 'validate-context.sh')]);
 const nodeOutput = run(process.execPath, [path.join(scriptDir, 'validate-context.mjs')]);
 const bashPathOutput = run('bash', [path.join(scriptDir, 'validate-context.sh'), fixtureRoot], { withoutRootEnv: true });
 const nodePathOutput = run(process.execPath, [path.join(scriptDir, 'validate-context.mjs'), fixtureRoot], { withoutRootEnv: true });
+const bashSelfOutput = run('bash', [path.join(scriptDir, 'validate-context.sh'), skillDir], { withoutRootEnv: true });
+const nodeSelfOutput = run(process.execPath, [path.join(scriptDir, 'validate-context.mjs'), skillDir], { withoutRootEnv: true });
 const bashMissingPathOutput = run('bash', [path.join(scriptDir, 'validate-context.sh'), path.join(fixtureRoot, 'missing')], { withoutRootEnv: true });
 const nodeMissingPathOutput = run(process.execPath, [path.join(scriptDir, 'validate-context.mjs'), path.join(fixtureRoot, 'missing')], { withoutRootEnv: true });
 
-checkOutput('bash', bashOutput);
-checkOutput('node', nodeOutput);
-checkOutput('bash path arg', bashPathOutput);
-checkOutput('node path arg', nodePathOutput);
+checkOutput('bash fixture', bashOutput);
+checkOutput('node fixture', nodeOutput);
+checkOutput('bash fixture path arg', bashPathOutput);
+checkOutput('node fixture path arg', nodePathOutput);
+checkOutput('bash self', bashSelfOutput);
+checkOutput('node self', nodeSelfOutput);
 checkMissingPath('bash missing path', bashMissingPathOutput);
 checkMissingPath('node missing path', nodeMissingPathOutput);
 
-const bashWarnings = countSummary('bash', bashOutput.stdout, 'Warnings');
-const nodeWarnings = countSummary('node', nodeOutput.stdout, 'Warnings');
-const bashErrors = countSummary('bash', bashOutput.stdout, 'Errors');
-const nodeErrors = countSummary('node', nodeOutput.stdout, 'Errors');
-
-assert(bashWarnings === nodeWarnings, 'warning counts match');
-assert(bashErrors === nodeErrors, 'error counts match');
-assert(bashWarnings === '0', 'fixture warnings = 0');
-assert(bashErrors === '0', 'fixture errors = 0');
+checkParity('fixture', bashOutput, nodeOutput, true);
+checkParity('self', bashSelfOutput, nodeSelfOutput, true);
 
 process.stdout.write(bashOutput.stdout);
 process.stdout.write(nodeOutput.stdout);
-console.log(`PASS: validate-context fixture regression (bash + node parity)`);
+console.log(`PASS: validate-context fixture + self-reference regression (bash + node parity)`);
 console.log(`Self-test assertions: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
 
@@ -68,6 +65,19 @@ function checkOutput(runtime, result) {
 function checkMissingPath(runtime, result) {
   assert(result.status !== 0, `${runtime} rejects missing path`);
   assert(result.stderr.includes('Project root does not exist'), `${runtime} explains missing path`);
+}
+
+function checkParity(scope, bashResult, nodeResult, requireClean) {
+  const bashWarnings = countSummary(`${scope} bash`, bashResult.stdout, 'Warnings');
+  const nodeWarnings = countSummary(`${scope} node`, nodeResult.stdout, 'Warnings');
+  const bashErrors = countSummary(`${scope} bash`, bashResult.stdout, 'Errors');
+  const nodeErrors = countSummary(`${scope} node`, nodeResult.stdout, 'Errors');
+  assert(bashWarnings === nodeWarnings, `${scope} warning counts match`);
+  assert(bashErrors === nodeErrors, `${scope} error counts match`);
+  if (requireClean) {
+    assert(bashWarnings === '0', `${scope} warnings = 0`);
+    assert(bashErrors === '0', `${scope} errors = 0`);
+  }
 }
 
 function countSummary(name, output, key) {

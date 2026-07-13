@@ -14,22 +14,22 @@ This skill uses canonical terms so search, routing, and design language stay con
 
 ### Brutalism vs Neubrutalism
 
-- **Brutalism**: Raw, harsh, anti-polish, stark, often editorial/experimental.
-- **Neubrutalism**: Contemporary web/UI style with bold outlines, hard shadows, playful blocks, saturated color, and deliberately chunky interaction affordances.
+- `Brutalism`: Raw, harsh, anti-polish, stark, often editorial/experimental.
+- `Neubrutalism`: Contemporary web/UI style with bold outlines, hard shadows, playful blocks, saturated color, and deliberately chunky interaction affordances.
 
 Use **Neubrutalism** for modern colorful UI brutalism. Use **Brutalism** for raw anti-design or historically inspired harsh layouts.
 
 ### Glassmorphism vs Aurora UI
 
-- **Glassmorphism**: Translucent frosted surfaces and blur.
-- **Aurora UI**: Atmospheric mesh gradients and luminous color fields.
+- `Glassmorphism`: Translucent frosted surfaces and blur.
+- `Aurora UI`: Atmospheric mesh gradients and luminous color fields.
 
 They often combine, but they name different design moves.
 
 ### Neumorphism vs Soft UI Evolution
 
-- **Neumorphism**: Soft extruded surfaces with low-contrast shadows.
-- **Soft UI Evolution**: More accessible production-friendly soft UI with clearer contrast and focus states.
+- `Neumorphism`: Soft extruded surfaces with low-contrast shadows.
+- `Soft UI Evolution`: More accessible production-friendly soft UI with clearer contrast and focus states.
 
 Prefer **Soft UI Evolution** when accessibility and production readiness matter.
 

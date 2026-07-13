@@ -2,283 +2,175 @@
 name: frontend-design
 description: Integrated frontend design judgment for user-facing web and app interfaces plus visual frontend artifacts including landing pages, websites, homepages, pages, screens, dashboards, admin panels, forms, modals, components, cards, tables, heroes, banners, onboarding, slides, marketing sections, HTML and CSS layouts, Tailwind styling, themes, typography, palettes, spacing, motion, responsive behavior, accessibility, UX polish, visual redesign, frontend design review, and production-grade design systems. Relevant whenever work changes how an interface looks, feels, reads, or is operated, including small implementation tasks on visible UI. Uses a connected product surface system UX art direction validation lens rather than isolated styling advice.
 metadata:
-  version: 1.0.19
+  version: 1.0.20
 ---
 
 # Frontend Design
 
-Create frontend work that is visually distinctive, usable, accessible, responsive, maintainable, and coherent as a design system. Fit the current project stack and conventions. Treat technology as the delivery medium; the durable skill is art direction, UX judgment, interface craft, and systematic implementation.
+Create frontend work that feels authored, remains usable under pressure, adapts across devices, and extends as a coherent system. Fit the current project stack and conventions. Treat technology as delivery medium; the durable skill is connected product judgment, art direction, UX craft, systematic implementation, and visual proof.
 
 ## Use When
 
-Use for work that changes how an interface looks, feels, moves, reads, or is operated:
+Use for work that changes how a user-facing surface looks, feels, moves, reads, or operates:
 
 - Pages, components, layouts, navigation, dashboards, forms, modals, tables, cards, charts, landing pages, marketing sections, heroes, banners, slides, and app screens.
-- Visual redesign, UX improvement, accessibility fixes, responsive behavior, state design, dark mode, theming, tokenization, frontend polish, and design review.
+- Visual redesign, UX improvement, accessibility fixes, responsive behavior, states, dark mode, theming, tokenization, frontend polish, and design review.
 
-## Activation Heuristics
+Treat the skill as active even when the user frames visible UI work as a small coding task. Do not wait for the word "design."
 
-Treat this skill as active when the requested artifact is a user-facing surface, even if the user frames it as a small coding task.
+## Activation and Default Action
 
-Strong triggers:
+Strong triggers include:
 
-- Surface nouns: landing, website, homepage, page, screen, dashboard, admin, form, modal, component, card, table, banner, hero, slide, presentation, flow, onboarding.
-- Quality verbs: design, redesign, polish, improve, make beautiful, make professional, make responsive, make accessible, present, showcase, explain visually.
-- Implementation nouns that affect UX directly: HTML/CSS layout, Tailwind classes, theme, tokens, typography, palette, spacing, animation, dark mode, mobile layout.
+- `Surface nouns`: Landing, website, homepage, page, screen, dashboard, admin, form, modal, component, card, table, banner, hero, slide, flow, onboarding.
+- `Quality verbs`: Design, redesign, polish, improve, make beautiful, make professional, make responsive, make accessible, present, showcase, explain visually.
+- `UX implementation`: HTML/CSS layout, Tailwind classes, theme, tokens, typography, palette, spacing, animation, dark mode, mobile layout.
 
-Default action on trigger:
+On activation:
 
-1. Frame the smallest useful design brief before editing: purpose, audience, tone, differentiator, constraints.
-2. Load only the relevant catalog slices for the surface and risk.
-3. Implement with semantic markup, responsive behavior, accessible focus/contrast, and named visual decisions.
-4. Validate with the available local checks when files are changed.
+1. Frame the smallest useful brief: purpose, audience, tone, differentiator, constraints.
+2. Sweep the connected coverage model and load only relevant catalog slices.
+3. Choose one direction; do not dump unrelated style, palette, or typography candidates into the result.
+4. Implement semantic markup, responsive behavior, accessible interaction, complete states, and named system decisions.
+5. Run project-native checks, targeted heuristic evidence, and the visual proof loop when tools permit.
 
-Do not wait for the user to say "design" when the artifact itself is a design surface. Ask only when a visual direction is genuinely blocking; otherwise choose a coherent local direction and state it briefly.
+Ask only when a visual or product decision genuinely blocks safe progress. Otherwise choose a coherent local direction and state it briefly.
 
-## Catalog Index
+## Catalog Routing
 
-Load only the slices needed for the task. Treat this skill as a multidimensional index: route by **intent**, **surface**, **product category**, **design problem**, **artifact**, or **validation need**.
+Detailed reference, data, script, intent, surface, product, problem, and workflow routing lives in [`references/catalog-routing.md`](references/catalog-routing.md).
 
-### Reference Catalog
+Default tools:
 
-| Reference                               | Use For                                                                           |
-| --------------------------------------- | --------------------------------------------------------------------------------- |
-| `references/art-direction.md`           | Visual styles, typography, color, composition, material, motion, anti-slop craft  |
-| `references/ux-production-checklist.md` | Accessibility, interaction, responsive, performance, forms, navigation, states    |
-| `references/design-system.md`           | Tokens, themes, variants, component contracts, naming discipline                  |
-| `references/surface-patterns.md`        | Landing pages, dashboards, admin, forms, banners, slides, marketing surfaces      |
-| `references/component-patterns.md`      | Buttons, inputs, cards, dialogs, tables, navigation, badges, alerts, empty states |
-| `references/data-visualization.md`      | Charts, metrics, dashboards, comparison, forecast, realtime, accessible data UI   |
-| `references/brand-messaging.md`         | Voice, positioning, proof, CTA, persuasive UI copy                                |
-| `references/visual-identity-assets.md`  | Logo, palette, typography, icons, asset organization                              |
-| `references/responsive-layout.md`       | Breakpoint thinking, layout adaptation, overflow, mobile interaction              |
-| `references/production-handoff.md`      | Approval, asset governance, naming, metadata, release handoff                     |
-| `references/terminology.md`             | Canonical style/system terms and key distinctions                                 |
+```bash
+python scripts/generate_design_brief.py "<product surface constraints>"
+python scripts/search_frontend_design.py "<targeted uncertainty>"
+python scripts/validate_frontend_design.py <changed-frontend-path>
+python scripts/check_catalog.py
+```
 
-### Data Catalog
+Use `generate_design_brief.py` for meaningful new directions and redesigns. It must synthesize one chosen direction, not substitute search results for judgment. Specialist generators provide evidence for narrower decisions.
 
-| Data                                | Use For                                                                                                     |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `data/terminology.csv`              | Canonical terms, aliases, definitions, and naming notes for consistent search/output                        |
-| `data/style-matrix.csv`             | Curated compact style vocabulary, fit, core moves, risks, implementation checks                             |
-| `data/style-catalog.csv`            | Extended style catalog with colors, effects, accessibility, mobile, conversion, technical checks            |
-| `data/product-patterns.csv`         | Curated compact product-category pattern routing and must-have/avoid guidance                               |
-| `data/product-ui-patterns.csv`      | Extended product-type routing: style, landing pattern, dashboard style, palette, UX priorities              |
-| `data/product-reasoning.csv`        | Product category → recommended pattern, style priority, color mood, typography mood, effects, anti-patterns |
-| `data/ux-guidelines.csv`            | Detailed UX issue matrix: accessibility, touch, performance, layout, forms, navigation, motion              |
-| `data/app-interface-guidelines.csv` | App interface issues and platform behavior guidance                                                         |
-| `data/landing-patterns.csv`         | Landing page structures, section order, CTA placement, conversion optimization                              |
-| `data/copy-formulas.csv`            | Compact headline, section, CTA, persuasion, proof, urgency formulas                                         |
-| `data/slide-copy.csv`               | Extended slide/presentation copy formulas and emotion triggers                                              |
-| `data/banner-specs.csv`             | Social/web/banner dimensions, aspect ratios, safe zones                                                     |
-| `data/icon-styles.csv`              | Compact icon style vocabulary, stroke/fill rules, usage checks                                              |
-| `data/icon-library-map.csv`         | Icon categories, names, keywords, libraries, usage, best fit                                                |
-| `data/icon-generation-styles.csv`   | Icon generation style specs: stroke, fill, best fit, keywords                                               |
-| `data/color-psychology.csv`         | Compact color signals, industry fit, cautions, pairings                                                     |
-| `data/logo-styles.csv`              | Logo style vocabulary, symbols, colors, typography, effects                                                 |
-| `data/logo-color-palettes.csv`      | Logo palette candidates with primary/secondary/accent/background                                            |
-| `data/logo-industries.csv`          | Industry-specific logo style, symbols, mood, and color guidance                                             |
-| `data/identity-deliverables.csv`    | Identity/CIP deliverables, dimensions, formats, logo placement                                              |
-| `data/identity-industries.csv`      | Industry-specific identity package direction                                                                |
-| `data/identity-styles.csv`          | Identity style systems, materials, finishes, typography                                                     |
-| `data/identity-mockup-contexts.csv` | Mockup scene contexts, lighting, environment, props                                                         |
-| `data/product-color-palettes.csv`   | Product-type palettes with foreground/background/on-color roles                                             |
-| `data/typography-pairings.csv`      | Font pairings by mood, product fit, scale, weights, accessibility notes                                     |
-| `data/chart-selection.csv`          | Chart choice by data type, use case, volume, accessibility                                                  |
-| `data/slide-charts.csv`             | Presentation chart types and slide-specific chart guidance                                                  |
-| `data/slide-strategies.csv`         | Deck structures, audience, tone, emotion arc, slide order                                                   |
-| `data/slide-layouts.csv`            | Slide/page layout patterns, zones, visual weight, CTA placement                                             |
-| `data/slide-layout-logic.csv`       | Goal/emotion → layout direction, visual weight, pattern breaking                                            |
-| `data/slide-typography.csv`         | Typography scale by content type for presentation/hero surfaces                                             |
-| `data/slide-color-logic.csv`        | Emotion → background, text, accent, gradient, card style                                                    |
-| `data/slide-backgrounds.csv`        | Background image categories, overlays, text placement                                                       |
-
-Data layers are intentional, not accidental duplicates:
-
-- **Compact curated tables** (`*-matrix`, `*-patterns`, `copy-formulas`, `icon-styles`, `color-psychology`) are fast defaults for direct use.
-- **Extended catalogs** (`*-catalog`, `product-*`, `ux-guidelines`, `typography-pairings`) provide broader search space and edge cases.
-- **Surface-specific tables** (`slide-*`, `banner-specs`, `chart-selection`) specialize generic rules for exact artifacts.
-- **Identity tables** (`logo-*`, `identity-*`) support brand asset work without requiring generation tools.
-- Prefer generator scripts over manually juggling overlapping tables; scripts merge compact and extended layers where useful.
-
-### Script Catalog
-
-| Script                                                        | Use For                                                                                  |
-| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `scripts/search_frontend_design.py <query>`                   | Search all references/data quickly; expands terminology aliases                          |
-| `scripts/lookup_term.py <query>`                              | Lookup canonical term, aliases, definition, and naming notes                             |
-| `scripts/generate_design_brief.py <query>`                    | Route product/style into a compact implementation brief                                  |
-| `scripts/extract_brand_context.py <brand.md>`                 | Extract portable brand context from markdown guidelines                                  |
-| `scripts/generate_tokens.py --starter`                        | Generate CSS variables from starter or token JSON                                        |
-| `scripts/validate_frontend_design.py <path>`                  | Heuristic validation for accessibility, tokens, responsive, motion basics                |
-| `scripts/contrast_check.py <fg> <bg>`                         | WCAG contrast ratio check                                                                |
-| `scripts/generate_banner_brief.py <surface> <type> <message>` | Banner/hero brief from target surface and dimensions                                     |
-| `scripts/generate_copy_formula.py <query>`                    | Copy formula lookup for headlines, sections, CTAs, persuasion                            |
-| `scripts/generate_slide_brief.py <query>`                     | Slide, presentation, and section-layout brief from strategy/layout/copy/color/chart data |
-| `scripts/generate_palette_brief.py <query>`                   | Product palette, semantic colors, and color psychology guidance                          |
-| `scripts/generate_typography_brief.py <query>`                | Font pairing, mood, scale, and readability guidance                                      |
-| `scripts/generate_chart_brief.py <query>`                     | Chart/data visualization selection and accessibility guidance                            |
-| `scripts/generate_icon_brief.py <query>`                      | Icon style and icon-library candidate guidance                                           |
-| `scripts/generate_logo_brief.py <query>`                      | Logo style, palette, industry, symbol, and scalability guidance                          |
-| `scripts/generate_identity_brief.py <query>`                  | Identity package/CIP deliverables, style, mockup, and handoff guidance                   |
-| `scripts/generate_component_brief.py <component>`             | Component anatomy, variants, states, accessibility, and UX checks                        |
-| `scripts/generate_ux_checklist.py <query>`                    | Targeted UX checklist from UX/app-interface matrices                                     |
-
-## Routing Index
-
-### By Intent
-
-| User Intent                     | Load                                                                                  | Optional Script                                                                |
-| ------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Build a new UI/page/component   | `art-direction`, `ux-production-checklist`, `component-patterns`, `responsive-layout` | `generate_design_brief.py`                                                     |
-| Redesign or polish UI           | `art-direction`, `ux-production-checklist`, `design-system`                           | `search_frontend_design.py polish`                                             |
-| Create design direction         | `art-direction`, `brand-messaging`, `visual-identity-assets`                          | `generate_design_brief.py`                                                     |
-| Make it production-grade        | `ux-production-checklist`, `responsive-layout`, `component-patterns`                  | `validate_frontend_design.py`                                                  |
-| Build or refactor design system | `design-system`, `component-patterns`, `visual-identity-assets`                       | `generate_tokens.py`                                                           |
-| Brand-aware implementation      | `brand-messaging`, `visual-identity-assets`, `art-direction`                          | `extract_brand_context.py`                                                     |
-| Landing/marketing conversion    | `surface-patterns`, `brand-messaging`, `art-direction`                                | `generate_copy_formula.py`                                                     |
-| Dashboard/data UI               | `data-visualization`, `surface-patterns`, `component-patterns`                        | `generate_design_brief.py dashboard`                                           |
-| Banner/hero/social asset        | `surface-patterns`, `visual-identity-assets`, `art-direction`                         | `generate_banner_brief.py`                                                     |
-| Accessibility/responsive review | `ux-production-checklist`, `responsive-layout`                                        | `generate_ux_checklist.py`, `validate_frontend_design.py`, `contrast_check.py` |
-
-### By Surface
-
-| Surface                  | Primary References                                                               | Data                                                                                                 |
-| ------------------------ | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Landing page             | `surface-patterns`, `brand-messaging`, `art-direction`                           | `copy-formulas`, `style-matrix`, `product-patterns`                                                  |
-| Dashboard/admin          | `surface-patterns`, `data-visualization`, `component-patterns`                   | `product-patterns`, `style-matrix`                                                                   |
-| Form/flow                | `ux-production-checklist`, `component-patterns`, `responsive-layout`             | `product-patterns`                                                                                   |
-| Component library        | `component-patterns`, `design-system`, `ux-production-checklist`                 | `generate_component_brief.py`, `style-matrix`                                                        |
-| Hero/banner/social       | `visual-identity-assets`, `surface-patterns`, `art-direction`                    | `banner-specs`, `copy-formulas`, `color-psychology`                                                  |
-| Presentation/slides      | `surface-patterns`, `brand-messaging`, `data-visualization`                      | `slide-strategies`, `slide-layouts`, `slide-copy`, `slide-color-logic`, `slide-charts`               |
-| Chart/report             | `data-visualization`, `ux-production-checklist`, `brand-messaging`               | `product-patterns`, `color-psychology`                                                               |
-| Navigation/app shell     | `component-patterns`, `responsive-layout`, `ux-production-checklist`             | `product-patterns`                                                                                   |
-| Brand asset/icon/logo UI | `visual-identity-assets`, `art-direction`, `design-system`, `production-handoff` | `generate_logo_brief.py`, `generate_icon_brief.py`, `logo-styles`, `icon-styles`, `color-psychology` |
-| Identity package / CIP   | `visual-identity-assets`, `brand-messaging`, `production-handoff`                | `generate_identity_brief.py`, `identity-deliverables`, `identity-styles`, `identity-industries`      |
-
-### By Product Category
-
-Start with `data/product-patterns.csv`, then load references by pattern bias:
-
-- **SaaS / productivity / docs** → `surface-patterns`, `component-patterns`, `design-system`.
-- **Finance / crypto / legal / healthcare / public** → `ux-production-checklist`, `brand-messaging`, `data-visualization`, `visual-identity-assets`.
-- **E-commerce / marketplace / hospitality / restaurant** → `surface-patterns`, `brand-messaging`, `visual-identity-assets`.
-- **Analytics / monitoring / ops** → `data-visualization`, `surface-patterns`, `responsive-layout`.
-- **Creative / portfolio / games / entertainment** → `art-direction`, `surface-patterns`, `visual-identity-assets`.
-- **Education / wellness / nonprofit** → `ux-production-checklist`, `brand-messaging`, `art-direction`.
-
-### By Design Problem
-
-| Problem                      | Load                                                                      | Data/Script                                                                    |
-| ---------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Looks generic                | `art-direction`, `visual-identity-assets`                                 | `style-matrix`                                                                 |
-| Weak hierarchy               | `art-direction`, `surface-patterns`, `component-patterns`                 | `search_frontend_design.py hierarchy`                                          |
-| Poor conversion              | `brand-messaging`, `surface-patterns`                                     | `copy-formulas`, `generate_copy_formula.py`                                    |
-| Inconsistent UI              | `design-system`, `component-patterns`                                     | `generate_tokens.py`                                                           |
-| Accessibility risk           | `ux-production-checklist`, `responsive-layout`                            | `contrast_check.py`, `validate_frontend_design.py`                             |
-| Mobile breaks                | `responsive-layout`, `component-patterns`                                 | `validate_frontend_design.py`                                                  |
-| Data is confusing            | `data-visualization`, `brand-messaging`                                   | `search_frontend_design.py chart`                                              |
-| Brand mismatch               | `brand-messaging`, `visual-identity-assets`                               | `extract_brand_context.py`                                                     |
-| Asset crop/size uncertainty  | `visual-identity-assets`, `surface-patterns`                              | `banner-specs`, `generate_banner_brief.py`                                     |
-| Palette uncertainty          | `visual-identity-assets`, `art-direction`                                 | `generate_palette_brief.py`, `product-color-palettes`, `color-psychology`      |
-| Typography uncertainty       | `visual-identity-assets`, `art-direction`                                 | `generate_typography_brief.py`, `typography-pairings`                          |
-| Chart choice uncertainty     | `data-visualization`                                                      | `generate_chart_brief.py`, `chart-selection`, `slide-charts`                   |
-| Icon choice uncertainty      | `visual-identity-assets`, `component-patterns`                            | `generate_icon_brief.py`, `icon-styles`, `icon-library-map`                    |
-| Logo/identity uncertainty    | `visual-identity-assets`, `brand-messaging`, `production-handoff`         | `generate_logo_brief.py`, `generate_identity_brief.py`, `logo-*`, `identity-*` |
-| Handoff/approval uncertainty | `production-handoff`, `visual-identity-assets`, `ux-production-checklist` | `validate_frontend_design.py`                                                  |
-| Term/name uncertainty        | `terminology`                                                             | `terminology.csv`, `lookup_term.py`                                            |
-
-### By Workflow Stage
-
-1. **Discovery**: `lookup_term.py` when naming is ambiguous, then `generate_design_brief.py`, `product-patterns`, `style-matrix`.
-2. **Direction**: `art-direction`, `brand-messaging`, `visual-identity-assets`.
-3. **Structure**: `surface-patterns`, `responsive-layout`, `component-patterns`.
-4. **System**: `design-system`, `icon-styles`, `color-psychology`, `generate_tokens.py`.
-5. **Implementation**: Current project conventions plus relevant surface/component references.
-6. **Validation**: `ux-production-checklist`, `validate_frontend_design.py`, `contrast_check.py`.
-7. **Iteration**: Search targeted weak point with `search_frontend_design.py`.
+Catalog growth is frozen by default: do not add another catalog until existing data converges into useful decisions, schema checks pass, and the missing information cannot fit an existing layer.
 
 ## Core Contract
 
 Every result should be:
 
-- **Distinctive**: A clear aesthetic point of view, not generic UI.
-- **Usable**: The primary path is obvious, responsive, accessible, and recoverable.
-- **Production-grade**: Real states, edge cases, semantics, maintainable code, and project-native implementation.
-- **Systematic**: Intentional values, canonical terms, named patterns, reusable decisions, and consistent variants.
-- **Contextual**: Shaped by the product, audience, brand, task pressure, and device reality.
+- `Distinctive`: A clear product-specific point of view, not interchangeable UI.
+- `Usable`: The primary path is obvious, responsive, accessible, and recoverable.
+- `Production-grade`: Real states, semantics, edge cases, maintainable code, and project-native implementation.
+- `Systematic`: Intentional values, canonical terms, finite variants, reusable decisions, and consistent behavior.
+- `Contextual`: Shaped by product, audience, brand, task pressure, content, input mode, and device reality.
+- `Proven`: Checked statically and visually to the extent local tools allow; limitations are explicit.
 
-## Integrated Coverage Model
+## Connected Coverage Model
 
-This skill is one design intelligence with many lenses, not a pile of optional modules. For every meaningful task, run a quick coverage sweep across these lenses before choosing which references or scripts to load:
+Treat frontend design as one decision system. For every meaningful task, sweep these lenses before selecting references or scripts:
 
-1. **Product and audience**: Who is the surface for, what pressure are they under, and what outcome should happen next?
-2. **Surface pattern**: What kind of artifact is it, and what structure does that surface usually need?
-3. **Message and hierarchy**: What is the primary claim/action, what proof supports it, and how quickly can it be scanned?
-4. **Art direction and identity**: What memorable visual idea, palette, type mood, icon language, and material system make it authored?
-5. **Interaction and UX floor**: What states, accessibility, responsive behavior, input mode, motion, and feedback must not fail?
-6. **System and handoff**: What tokens, variants, naming, reusable pieces, validation, and edge cases keep it maintainable?
+1. `Product and audience`: Who uses the surface, under what pressure, and what outcome should happen next?
+2. `Surface and structure`: What artifact is this, what task order fits it, and what information must remain visible?
+3. `Message and hierarchy`: What is the primary claim or action, what proof/context supports it, and how quickly can users scan it?
+4. `Art direction and identity`: What one visual concept, memory hook, palette, type mood, icon language, material, and motion system make it authored?
+5. `Interaction and UX floor`: What states, semantics, accessibility, responsive behavior, input modes, performance, and feedback must not fail?
+6. `System and handoff`: What tokens, variants, naming, reusable contracts, edge cases, validation, and evidence keep it maintainable?
 
-Use the sweep to prevent blind spots. Load a slice when its lens affects the outcome or risk; skip it only when it is genuinely irrelevant and the omission is intentional. Prefer connected decisions over isolated improvements: a color choice should support the art direction, copy hierarchy, accessibility, and component system at once.
+Load a slice when its lens affects outcome or risk. Skip it only when genuinely irrelevant. Prefer connected decisions: color should support hierarchy, art direction, contrast, state semantics, and tokens at once.
+
+## Design Decision Chain
+
+A meaningful brief or implementation should resolve this chain:
+
+```text
+Context
+→ Primary user task
+→ Surface structure
+→ Message hierarchy
+→ One chosen art direction
+→ One memory hook
+→ Palette / type / material decisions
+→ Component and state contracts
+→ Responsive transformation
+→ Validation evidence
+```
+
+When alternatives matter, name why they were rejected. Do not blend multiple directions merely because the catalog returned them.
 
 ## Operating Flow
 
-1. **Frame**: Purpose, audience, tone, differentiator, constraints, success path.
-2. **Sweep**: Use the integrated coverage model to identify the lenses that matter and the likely blind spots.
-3. **Name precisely**: Use canonical terminology for styles, systems, surfaces, and artifacts.
-4. **Choose direction**: Select a coherent art direction and interaction language.
-5. **Set UX floor**: Accessibility, responsive behavior, performance, navigation, forms, states.
-6. **Systematize**: Use tokens, variants, component states, naming, and theme semantics.
-7. **Implement**: Use current project conventions and the smallest sufficient code.
-8. **Review**: Check concept, hierarchy, accessibility, responsive behavior, states, system consistency, craft, originality, maintainability.
+1. `Inspect`: Read project instructions, existing components, tokens, styles, brand assets, content, behavior, and relevant reference implementation.
+2. `Frame`: State purpose, audience, tone, differentiator, constraints, success path, and assumptions.
+3. `Sweep`: Use the coverage model to identify relevant lenses and likely blind spots.
+4. `Synthesize`: Choose one connected direction and memory hook; resolve conflicts among catalog candidates.
+5. `Set UX floor`: Define semantics, accessibility, responsive behavior, performance, navigation, forms, feedback, and required states.
+6. `Systematize`: Map repeated decisions to semantic tokens, finite variants, component contracts, and canonical names.
+7. `Implement`: Follow project-native architecture and use the smallest sufficient code.
+8. `Validate statically`: Run project type/lint/test commands and targeted heuristic evidence. Treat heuristics as review aids, not proof by themselves.
+9. `Prove visually`: Render representative compact and desktop widths plus important states; compare them against hierarchy, chosen direction, memory hook, component contracts, and responsive intent.
+10. `Iterate and hand off`: Correct visible drift, rerun affected checks, and report evidence, trade-offs, and unavailable validation.
 
 ## Design Brief
 
 Before building, identify the smallest useful brief:
 
-- **Purpose**: What problem does this UI solve, and what should the user do next?
-- **Audience**: Who uses it, how often, on what device, and under what pressure?
-- **Tone**: Choose a decisive direction: brutal minimalism, editorial, industrial, cybernetic, luxury, playful, utilitarian, retro-futuristic, organic, calm institutional, maximalist, etc.
-- **Differentiator**: What is the memorable visual or interaction idea?
-- **Constraints**: Existing stack, brand, accessibility, data density, performance, localization, responsive targets, and implementation scope.
+- `Purpose`: What problem does the surface solve, and what should the user do next?
+- `Audience`: Who uses it, how often, on what device, and under what pressure?
+- `Tone`: Choose one decisive direction such as editorial, industrial, cybernetic, refined, playful, utilitarian, organic, or calm institutional.
+- `Differentiator`: What single visual or interaction idea makes the result memorable?
+- `Constraints`: Existing stack, brand, accessibility, data density, performance, localization, responsive targets, content, and implementation scope.
 
-If brand guidance exists, obey it. If no brand exists, create a lightweight local direction: palette, typography mood, density, motion language, and visual metaphor.
+If brand guidance exists, obey it. If not, create a lightweight local direction: palette roles, typography mood, density, motion language, and one visual metaphor. Preserve existing behavior unless the task explicitly changes it.
 
-## Design Decisions Priority
+## Decision Priority
 
-1. **Accessibility**: Semantics, keyboard access, visible focus, contrast, labels, reduced motion, screen-reader meaning.
-2. **Touch and interaction**: Comfortable targets, clear pressed/loading/disabled states, no critical hover-only actions.
-3. **Performance**: Minimal unnecessary JS, reserved async space, optimized media, transform/opacity animation.
-4. **Style fit**: Visual language matches product, audience, and task seriousness.
-5. **Responsive layout**: Mobile-first behavior, no accidental horizontal scroll, robust wrapping, readable line lengths.
-6. **Typography and color**: Readable body scale, semantic color roles, accessible foreground/background pairs.
-7. **Animation**: Meaningful easing, interruptible transitions, reduced-motion support.
-8. **Forms and feedback**: Visible labels, helper text, inline errors, recovery paths, preserved input.
-9. **Navigation**: Predictable back behavior, current location clarity, preserved state, deep-linkable flows where relevant.
-10. **Charts and data**: Labels, legends, tooltips, accessible colors, truthful scale, no color-only meaning.
+1. `Accessibility`: Semantics, keyboard access, visible focus, contrast, labels, reduced motion, screen-reader meaning.
+2. `Task and interaction`: Clear primary path, comfortable targets, feedback, complete states, no critical hover-only behavior.
+3. `Performance`: Minimal unnecessary JS, stable async space, optimized media, transform/opacity motion.
+4. `Product and style fit`: Visual language matches audience, brand, task seriousness, and content.
+5. `Responsive transformation`: Priority survives compact layouts without accidental overflow or hidden essentials.
+6. `Typography and color`: Readable scales, semantic roles, accessible pairs, truthful data/status encoding.
+7. `Forms and recovery`: Visible labels, errors near cause, preserved input, retry/undo/escape paths.
+8. `Navigation and state`: Predictable back behavior, current location, preserved context, deep links where useful.
+9. `Motion`: Meaningful, interruptible, restrained, and reduced-motion aware.
+10. `Charts and data`: Question-led selection, direct labels, truthful scales, freshness, non-color meaning.
 
 ## Implementation Principles
 
-- Use the project's current framework, style system, file structure, and naming conventions.
-- Keep markup semantic: buttons are buttons, links are links, headings form a hierarchy, inputs have labels.
-- Prefer CSS for visual effects and simple motion; add JS for real behavior.
-- Design real states: loading, empty, error, success, disabled, overflow, long text, small screens, keyboard focus.
-- Keep icon language consistent; use SVG/icon sets for functional icons.
-- Make destructive actions visually and spatially distinct from primary actions.
-- For dense tools, prioritize scanning, grouping, alignment, and input efficiency over decoration.
-- For expressive surfaces, match implementation complexity to the aesthetic idea.
+- Use the project's current framework, component primitives, style system, file structure, and naming conventions.
+- Keep markup semantic: buttons are buttons, links are links, headings form a hierarchy, and inputs have labels.
+- Prefer CSS for visual effects and simple motion; add JS only for real behavior.
+- Design loading, empty, error, success, disabled, selected, stale/offline, overflow, long text, compact width, and keyboard focus where relevant.
+- Keep one icon language and use SVG or the project icon set for functional controls.
+- Separate destructive actions visually, spatially, and semantically from primary actions.
+- For dense tools, prioritize scanning, grouping, alignment, freshness, and input efficiency over decoration.
+- For expressive surfaces, match implementation complexity to the chosen idea and content reality.
+- Tokenize repeated semantic decisions; keep one-off artwork local.
+- Avoid adding a second metaphor, accent system, or motion language that weakens the chosen direction.
+
+## Visual Proof Loop
+
+When browser, preview, screenshot, or equivalent rendering tools are available:
+
+1. Render at representative compact and desktop widths; add tablet/wide views when layout behavior changes there.
+2. Exercise the primary flow plus loading, empty, error, disabled, long-content, overflow, focus, and reduced-motion states relevant to the change.
+3. Inspect hierarchy, alignment, spacing, typography, contrast, cropping, touch targets, overflow, state clarity, and motion.
+4. Compare the render with the chosen direction and memory hook. Remove generic or conflicting moves.
+5. Correct the strongest visible gap, rerender, and preserve screenshots or equivalent evidence when useful.
+
+If rendering tools or runnable project state are unavailable, say so explicitly. Do not imply visual validation from static inspection alone.
 
 ## Final Review
 
 Before presenting or committing, verify:
 
-1. **Concept**: Clear aesthetic idea, not default UI with decoration.
-2. **Fit**: Tone matches product, audience, and task seriousness.
-3. **Hierarchy**: Primary action and key information are obvious quickly.
-4. **Accessibility**: Semantics, focus, contrast, labels, reduced motion covered.
-5. **Responsive**: Content adapts without breaking or hiding essentials.
-6. **States**: Loading, empty, error, disabled, focus, hover/pressed, and long-content states considered.
-7. **System**: Repeated values are named or tokenized; variants are consistent.
-8. **Craft**: Spacing, alignment, typography, color, and motion are tuned.
-9. **Originality**: The result avoids interchangeable AI/SaaS clichés.
-10. **Maintainability**: The next maintainer can extend it naturally.
+1. `Concept`: One clear aesthetic idea and memory hook, not default UI with decoration.
+2. `Fit`: Tone and structure match product, audience, content, and task seriousness.
+3. `Hierarchy`: Primary action/status and key information become obvious quickly.
+4. `Accessibility`: Semantics, focus, contrast, labels, input modes, and reduced motion are covered.
+5. `Responsive`: Compact and desktop renders preserve task priority without accidental overflow.
+6. `States`: Relevant loading, empty, error, disabled, success, focus, stale, long-content, and overflow states work.
+7. `System`: Repeated values are semantic tokens; variants and component contracts remain finite and consistent.
+8. `Craft`: Rendered spacing, alignment, typography, color, imagery, and motion support the chosen direction.
+9. `Originality`: The result avoids interchangeable AI/SaaS clichés and conflicting visual metaphors.
+10. `Maintainability`: The next maintainer can extend the implementation naturally.
+11. `Evidence`: Project checks ran; heuristic findings were reviewed; representative visual proof exists or its absence is explicit.

@@ -1,6 +1,6 @@
 {
   "name": "@llblab/skills",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "private": false,
   "description": "Dream Skills",
   "keywords": [
@@ -32,8 +32,7 @@
     "frontend-design/",
     "groq-stt/",
     "mistral-stt/",
-    "re-review/",
-    "while-true/"
+    "re-review/"
   ],
   "publishConfig": {
     "access": "public"

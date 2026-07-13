@@ -2,7 +2,7 @@
 name: groq-stt
 description: Transcribe audio files using Groq API (Whisper).
 metadata:
-  version: 1.0.19
+  version: 1.0.20
 ---
 
 # Groq STT Skill

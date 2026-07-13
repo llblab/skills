@@ -1,50 +1,44 @@
-# AGENTS.md (abcd-context)
+# ABCd Context Project Context
 
-## Knowledge & Conventions
+## Meta-Protocol Principles
 
-### Meta-Protocol Principles
+- `Self-Reference`: This skill validates its own context graph with its own runtimes and regression fixture.
+- `Root State Separation`: Durable protocol, open work, completed delivery, README entrypoints, and subsystem docs keep distinct ownership.
+- `Constraint-Driven Evolution`: Structure grows from observed coordination pressure, not template ceremony.
+- `Project Neutrality`: Portable rules remain independent of repository stacks and local overlays.
+- `Dual-Runtime Parity`: Bash and Node validators should produce the same pass/fail class and warning/error counts.
+- `Cross-Platform`: Validator behavior supports Linux and macOS; Node provides the portable runtime path for other environments.
 
-- 'Self-Reference': This skill must validate its own documentation using its own scripts.
-- 'Root State Separation': Durable protocol belongs in `AGENTS.md`, open work belongs in `BACKLOG.md`, and completed delivery belongs in `CHANGELOG.md`.
-- 'Hybrid Context Coverage': The protocol serves ABC + README entrypoints + `/docs` as one coordinated context graph.
-- 'Cross-Platform': Scripts must support both Linux and MacOS.
-- 'Self-Enhancement': Protocols anticipate and facilitate their own evolution.
-- 'Workflow Stratification': Preparation → execution → reflection → documentation.
+## Operating Principles
 
-### Operating Principles
+- Keep `SKILL.md` as the operating kernel; place resolution, lifecycle, and consolidation detail in `docs/protocols.md`.
+- Keep `BACKLOG.md` limited to real open, gated, or blocked work and `CHANGELOG.md` limited to completed outcomes.
+- Keep root `README.md` connected to `AGENTS.md`, `BACKLOG.md`, `CHANGELOG.md`, and `docs/README.md` when those surfaces exist.
+- Keep subtree README entrypoints reachable once they become real human starting points.
+- Use `scripts/validate-context.sh` or `scripts/validate-context.mjs` for audits and `scripts/_self-test.mjs` for runtime parity/regression.
+- Treat warnings as evidence requiring judgment, not as automatic failure or automatic approval.
 
-- Use `validate-context.sh` for all documentation audits.
-- Prefer the ABC root control plane: `README.md` + `AGENTS.md` + `BACKLOG.md` + `CHANGELOG.md`, with subtree `README.md` files as human entrypoints and `docs/README.md` + `/docs` as the knowledge plane.
-- SKILL.md stays compact; `docs/protocols.md` contains only what SKILL.md does not.
-- `BACKLOG.md` keeps only remaining open, gated, or blocked work; close or narrow items in the same pass that changed reality.
-- Keep root `README.md` connected to `AGENTS.md`, `BACKLOG.md`, and `docs/README.md`.
-- Keep subtree `README.md` files reachable from parent/root/docs navigation once they become real human entrypoints.
+## Protocol Constraints
 
-### Discovered Constraints
+- `Farmville Guard`: Skip context mutation when it would not preserve truth, prevent drift, record meaningful delivery, or repair discoverability.
+- `Activation Symmetry`: Default post-task activation performs post-task reconciliation; it must not imply retroactive pre-task ceremony.
+- `Template Proportionality`: Lean projects receive lean structure; mature hierarchy requires real complexity.
+- `State Ownership`: The same reality must not remain simultaneously durable, open, and completed.
+- `README Continuity`: Setup, usage, topology, ownership, and same-domain entrypoint knowledge belong in the nearest relevant README.
+- `Impact-Oriented History`: Delivery history records outcomes and impact rather than iteration bookkeeping.
+- `Natural-Language Operation`: Do not introduce fictional YAML tracking or formalize obvious senior-engineer behavior without a non-obvious contract.
+- `Local Overlay Boundary`: Project-specific release, architecture, security, and stack gates remain in local overlays.
 
-- 'Farmville Trap': If the protocol generates more documentation updates than actually prevented mistakes, it has become a Tool Shaped Object. Measure value by errors avoided, not files touched.
-  - Trigger: Post-task protocol fires but produces no actionable insight.
-  - Action: Skip the update. Silence is a valid output.
-- 'Progressive Disclosure over Always-On': ALWAYS_ON mode costs agent attention on every turn even when irrelevant. Prefer POST_TASK as default.
-  - Trigger: Agent tracking overhead exceeds insight value.
-  - Action: Default to POST_TASK; use ALWAYS_ON only when explicitly requested.
-- 'A2 applies to templates': Context templates must start minimal — imposing principles and ceremony on a new project violates Axiom A2. Template is a skeleton that grows with the project, not a manifesto.
-- 'Self-contradiction kills trust': Absolute rules must survive contact with every other rule in the system. "Mandatory" + "skip if empty" is a contradiction — use conditional language.
-- 'Durable/open/completed state must not collapse': If the same reality is tracked simultaneously in `AGENTS.md`, `BACKLOG.md`, and `CHANGELOG.md`, the protocol loses truthfulness. Route each fact to exactly one root file.
-- 'README tree is part of context, not decoration': Root and subtree `README.md` files are human-facing entrypoints and must be updated when setup, usage, topology, or same-domain insight truth changes.
-- 'Per-iteration delivery history belongs in CHANGELOG': Once a project keeps `CHANGELOG.md`, `AGENTS.md` should store reusable constraints, not rolling delivery bullets.
-- 'Minimal starter != permanent ceiling': Minimal AGENTS templates are acceptable for early projects, but mature repositories should grow a layered hierarchy when constraints justify it.
-- 'LLM YAML tracking is fictional': LLMs reason in natural language, not structured YAML. Tracking schemas in prompts create illusion of process. Post-task evaluation does the actual work.
-- 'Ceremonial formalization': If pseudocode describes what an experienced developer would do by default, the formalization adds no value. Formalize only non-obvious protocols.
-- `stat` command differs between Linux (`-c %Y`) and MacOS (`-f %m`).
-- `grep -P` is unavailable on macOS BSD grep — use `grep -oE` + `sed` instead.
-- `heading_to_anchor` must preserve underscores `_` to match GitHub's anchor generation.
-- `[[ cond ]] && action` in a function with `set -e` exits on false — use `if/fi` or `|| true`.
-- `\$[^$]+\$` regex false-positives on shell variables — check for LaTeX commands specifically.
-- "Core structure" check now accepts both `## 1.` project sections and skill-style key sections.
-- Scripts use no file extension — shebangs (`#!/usr/bin/env bash`) define the interpreter.
-- `realpath --relative-to` is GNU-specific — prefer path-prefix stripping for docs-relative paths.
-- UTF-8 locales differ by platform (`en_US.UTF-8`, `C.UTF-8`, `C.utf8`) — include safe `C` fallback.
-- Validation logs may be consumed by CI or other agents — honor `NO_COLOR` whenever output is not meant for a terminal.
-- Table width validation is opt-in because vendored/API reference docs often contain intentionally wide tables; require an explicit threshold such as `--table-width 120` before warning on width.
-- Large Markdown reference dumps should not dominate link validation; skip link scanning above a bounded byte threshold while still validating the surrounding context graph.
+## Validator Constraints
+
+- `Portable File Metadata`: Use Linux/macOS-compatible `stat` fallbacks.
+- `Portable Grep`: Avoid `grep -P`; use portable extended regex and text processing.
+- `Anchor Parity`: Preserve underscores while normalizing GitHub-style heading anchors.
+- `Safe Shell Conditions`: Under `set -e`, use `if`/`fi` or `|| true` where a false condition is expected.
+- `LaTeX Precision`: Detect LaTeX commands rather than broad dollar-delimited patterns that catch shell variables.
+- `Path Portability`: Avoid GNU-only `realpath --relative-to`; strip known root prefixes where safe.
+- `Locale Portability`: Prefer available UTF-8 locales with a safe `C` fallback.
+- `Machine Output`: Honor `NO_COLOR`; preserve stable JSON and summary fields.
+- `Bounded Scanning`: Skip link scanning above the configured byte threshold while validating the surrounding graph.
+- `Opt-In Width`: Warn about Markdown table width only when the caller supplies a threshold.
+- `Core Shape Flexibility`: Accept both numbered mature-project sections and compact skill-style durable sections.

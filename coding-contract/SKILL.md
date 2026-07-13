@@ -2,7 +2,7 @@
 name: coding-contract
 description: Default senior-engineer execution and safety contract for software work covering coding, implementation, refactoring, debugging, tests, validation, repository maintenance, file edits, and technical investigation. Provides implementation discipline, inspection, safe file mutation, validation, and maintainability practices without claiming ownership of every artifact domain.
 metadata:
-  version: 1.0.19
+  version: 1.0.20
 ---
 
 # Coder Contract
