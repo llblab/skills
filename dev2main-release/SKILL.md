@@ -2,7 +2,7 @@
 name: dev2main-release
 description: Manage a guarded release flow that commits prepared release work on dev, opens a dev-to-main pull request with a release-focused PR summary, waits for checks, merges on success, tags, creates the matching GitHub Release, and optionally publishes an existing npm package. Use when the user asks to prepare or execute a dev→main release PR, hotfix release PR, or Dev2Main PR Summary workflow.
 metadata:
-  version: 1.0.20
+  version: 1.0.21
 ---
 
 # Dev2Main Release
@@ -20,32 +20,41 @@ Run release actions only when all criteria are true:
 
 If any criterion fails, reject the flow and stop. Do not stage, commit, push, create PRs, merge, tag, create a GitHub Release, publish, or modify files from this plan.
 
+## Direct-Main Boundary
+
+This skill owns only the guarded `dev` → `main` release path. A request to commit, tag, release, or publish directly from `main` does not satisfy the hard gate and must not be reinterpreted as this flow.
+
+Direct-main publishing remains a separate explicit owner override outside this skill. It requires its own current-state audit, validation, and confirmation of every external action; prior use, urgency, a missing `dev` branch, or a small hotfix does not make it the fallback path here. Do not provide or execute a partial direct-main variant from this plan.
+
+A hotfix handled by this skill must still start from `dev`, contain prepared uncommitted release files and an already-bumped version, and pass through a `dev` → `main` pull request. If repository policy requires a direct-main exception, stop and hand the request back as an out-of-scope owner decision before changing repository or release state.
+
 ## Release Flow
 
 After the hard gate passes:
 
 1. Inspect `git status --short --branch` and confirm the repository is on `dev` with uncommitted release files.
 2. Identify the project version source and confirm it is already bumped to the intended release version. Prefer the repository's primary manifest or release metadata, such as `package.json`, `pyproject.toml`, `Cargo.toml`, app config, or a documented version file. Do not assume npm unless the project is an npm package.
-3. Read the relevant version section in `CHANGELOG.md`.
-4. Confirm release-note freshness: the intended version section must exist, describe the release being shipped, and not leave those same shipped changes stranded under `Unreleased`. Stop and ask if the changelog shape is ambiguous or the intended version section is missing.
-5. Run the smallest meaningful validation first. Prefer the project release validation command when available.
-6. Stage only intentional release files.
-7. Inspect the repository's recent commit-message style before writing the release commit message:
+3. Locate and read the intended version section and any `Unreleased` section in `CHANGELOG.md`; do not load the complete changelog by default. For topmost sections, begin with the first 50 lines and expand each relevant section only to its boundary when necessary.
+4. Before consolidating, inspect the actual release diff against the PR base, including staged and unstaged changes, and consult relevant tests or documentation when they establish shipped behavior. Then group repeated development evidence and intermediate implementation chronology into outcome-focused bullets while preserving user-visible behavior, safety and compatibility contracts, migrations, known limitations, and meaningful operator evidence. Remove fixed-then-reworked mechanics, repeated gate runs, superseded findings, and other pre-release process residue that does not describe the shipped state. Do not rewrite older release history as part of this step.
+5. Confirm release-note freshness: the intended version section must exist, describe the release being shipped, and not leave those same shipped changes stranded under `Unreleased`. Stop and ask if the changelog shape is ambiguous, the intended version section is missing, the changelog conflicts with release-diff evidence, or safe consolidation would require guessing which behavior actually ships.
+6. Run the smallest meaningful validation first. Prefer the project release validation command when available.
+7. Stage only intentional release files.
+8. Inspect the repository's recent commit-message style before writing the release commit message:
 
 ```bash
 git log -5 --pretty=%s
 ```
 
-8. Create one release commit whose format matches the discovered local style. If the recent history shows a stable release-commit pattern, adapt that pattern to the intended version and release theme. If the style is mixed or too sparse to infer confidently, use the latest relevant commit subject as the fallback style template rather than imposing this skill's example format.
-9. Push `dev` to `origin/dev`.
-10. Open a pull request from `dev` to `main`.
-11. Build the PR body from `CHANGELOG.md`, not from memory only.
-12. Watch PR checks until they finish.
-13. If all required checks pass, merge the PR using the repository's established merge method. Prefer the repository default when available; otherwise infer from recent merged PRs or project convention. If no convention is discoverable, use a normal merge commit rather than squash/rebase because it preserves the dev release commit and release audit trail.
-14. After a successful merge, switch the local repository to `main`.
-15. Pull the latest `main` changes.
-16. Confirm the version on `main` matches the intended release version.
-17. Create and push exactly one release tag for the confirmed version on the current `main` commit:
+9. Create one release commit whose format matches the discovered local style. If the recent history shows a stable release-commit pattern, adapt that pattern to the intended version and release theme. If the style is mixed or too sparse to infer confidently, use the latest relevant commit subject as the fallback style template rather than imposing this skill's example format.
+10. Push `dev` to `origin/dev`.
+11. Open a pull request from `dev` to `main`.
+12. Build the PR body from the consolidated release section in `CHANGELOG.md`, not from memory or pre-consolidation notes.
+13. Watch PR checks until they finish.
+14. If all required checks pass, merge the PR using the repository's established merge method. Prefer the repository default when available; otherwise infer from recent merged PRs or project convention. If no convention is discoverable, use a normal merge commit rather than squash/rebase because it preserves the dev release commit and release audit trail.
+15. After a successful merge, switch the local repository to `main`.
+16. Pull the latest `main` changes.
+17. Confirm the version on `main` matches the intended release version.
+18. Create and push exactly one release tag for the confirmed version on the current `main` commit:
 
 ```bash
 git tag v<version>
@@ -54,7 +63,7 @@ git push origin v<version>
 
 If the tag already exists locally or remotely, verify it points to the current `main` commit before continuing. If an existing `v<version>` tag points anywhere else, stop and report the mismatch. Do not move, delete, or force-push tags.
 
-18. Create exactly one published GitHub Release for the confirmed tag. First determine whether the intended version is stable or a prerelease from the version and changelog, then check whether a release already exists:
+19. Create exactly one published GitHub Release for the confirmed tag. First determine whether the intended version is stable or a prerelease from the version and changelog, then check whether a release already exists:
 
 ```bash
 gh release view v<version> --json tagName,isDraft,isPrerelease,publishedAt,url
@@ -86,13 +95,13 @@ gh api repos/{owner}/{repo}/releases/latest --jq .tag_name
 
 For a prerelease, confirm that the endpoint does not resolve to the prerelease tag. A missing latest stable release is acceptable for a prerelease-only repository.
 
-19. Before publishing, check whether the package already exists on npm:
+20. Before publishing, check whether the package already exists on npm:
 
 ```bash
 npm view <package-name> version
 ```
 
-20. Publish only when both conditions are true:
+21. Publish only when both conditions are true:
 
 - The package already exists on npm.
 - The `main` version matches the intended release version and is newer than the npm version.
@@ -110,6 +119,8 @@ If the package does not exist on npm, do not publish. New packages must never be
 The version source is project-local. For npm packages use `package.json` and lockfiles when present. For Python, Rust, mobile, or custom apps, use the manifest or release metadata that the repository treats as authoritative. If multiple version files exist, they must agree before release actions continue.
 
 The changelog must have a section for the intended version before the release flow starts. The section should contain the release changes being shipped. `Unreleased` may remain as an empty placeholder, but it must not still contain the same shipped changes after they have been assigned to the version section.
+
+Treat the intended release section as a pre-release working set until the release gate. Development may accumulate focused implementation findings, smoke evidence, and corrective iterations there, but the release flow must consolidate them into the smallest truthful set of outcome-focused entries before commit, PR, tag, and release-note generation. Preserve distinct shipped domains and safety guarantees; remove chronology and superseded intermediate state. Consolidation means semantic compression, not vague summarization.
 
 ## GitHub Release Contract
 

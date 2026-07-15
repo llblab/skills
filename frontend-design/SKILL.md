@@ -2,175 +2,143 @@
 name: frontend-design
 description: Integrated frontend design judgment for user-facing web and app interfaces plus visual frontend artifacts including landing pages, websites, homepages, pages, screens, dashboards, admin panels, forms, modals, components, cards, tables, heroes, banners, onboarding, slides, marketing sections, HTML and CSS layouts, Tailwind styling, themes, typography, palettes, spacing, motion, responsive behavior, accessibility, UX polish, visual redesign, frontend design review, and production-grade design systems. Relevant whenever work changes how an interface looks, feels, reads, or is operated, including small implementation tasks on visible UI. Uses a connected product surface system UX art direction validation lens rather than isolated styling advice.
 metadata:
-  version: 1.0.20
+  version: 1.0.21
 ---
 
 # Frontend Design
 
-Create frontend work that feels authored, remains usable under pressure, adapts across devices, and extends as a coherent system. Fit the current project stack and conventions. Treat technology as delivery medium; the durable skill is connected product judgment, art direction, UX craft, systematic implementation, and visual proof.
+Create frontend work that feels authored, presents information in task-shaped form, adapts intrinsically to content and containers, remains usable under pressure, and extends as a coherent system. Fit the current project stack and conventions.
 
-## Use When
+## Activate
 
-Use for work that changes how a user-facing surface looks, feels, moves, reads, or operates:
+Use this skill whenever work changes how a user-facing surface looks, feels, reads, moves, or operates. This includes pages, components, navigation, dashboards, forms, dialogs, tables, charts, landing pages, banners, slides, accessibility, responsive behavior, themes, states, design systems, and visual review. Treat visible UI coding as design work even when the request sounds small.
 
-- Pages, components, layouts, navigation, dashboards, forms, modals, tables, cards, charts, landing pages, marketing sections, heroes, banners, slides, and app screens.
-- Visual redesign, UX improvement, accessibility fixes, responsive behavior, states, dark mode, theming, tokenization, frontend polish, and design review.
+On activation, start unless a product or visual decision blocks every safe path. Preserve existing behavior and brand unless the task explicitly changes them.
 
-Treat the skill as active even when the user frames visible UI work as a small coding task. Do not wait for the word "design."
+## Outcome Contract
 
-## Activation and Default Action
+Every meaningful result should be:
 
-Strong triggers include:
+- `Comprehensible`: The governing question, hierarchy, evidence, uncertainty, and next action form a clear scan path.
+- `Distinctive`: One product-specific art direction and memory hook replace interchangeable UI.
+- `Usable`: The primary path remains semantic, accessible, intrinsically adaptive, state-complete, and recoverable.
+- `Systematic`: Repeated decisions use canonical terms, semantic tokens, finite variants, and reusable contracts.
+- `Production-grade`: Implementation follows project architecture, handles real content and edge states, and carries proportional proof.
 
-- `Surface nouns`: Landing, website, homepage, page, screen, dashboard, admin, form, modal, component, card, table, banner, hero, slide, flow, onboarding.
-- `Quality verbs`: Design, redesign, polish, improve, make beautiful, make professional, make responsive, make accessible, present, showcase, explain visually.
-- `UX implementation`: HTML/CSS layout, Tailwind classes, theme, tokens, typography, palette, spacing, animation, dark mode, mobile layout.
+## Sequential Operating Kernel
 
-On activation:
+Resolve these stages in order. The first unresolved stage is the next design decision. Do not reopen an upstream decision unless project evidence invalidates it.
 
-1. Frame the smallest useful brief: purpose, audience, tone, differentiator, constraints.
-2. Sweep the connected coverage model and load only relevant catalog slices.
-3. Choose one direction; do not dump unrelated style, palette, or typography candidates into the result.
-4. Implement semantic markup, responsive behavior, accessible interaction, complete states, and named system decisions.
-5. Run project-native checks, targeted heuristic evidence, and the visual proof loop when tools permit.
+### 1. Inspect
 
-Ask only when a visual or product decision genuinely blocks safe progress. Otherwise choose a coherent local direction and state it briefly.
+Read project instructions, the changed surface, adjacent components, tokens, styles, brand assets, content, behavior, and available runtime. Reuse the current framework, primitives, naming, and architecture.
 
-## Catalog Routing
+Output: known constraints and relevant existing decisions.
 
-Detailed reference, data, script, intent, surface, product, problem, and workflow routing lives in [`references/catalog-routing.md`](references/catalog-routing.md).
+### 2. Frame
 
-Default tools:
+State the smallest useful brief:
 
-```bash
-python scripts/generate_design_brief.py "<product surface constraints>"
-python scripts/search_frontend_design.py "<targeted uncertainty>"
-python scripts/validate_frontend_design.py <changed-frontend-path>
-python scripts/check_catalog.py
-```
+- `Purpose and audience`: The outcome, user, frequency, device/context, and task pressure.
+- `Governing question`: What the surface must help the user understand, decide, or do.
+- `Constraints`: Brand, stack, accessibility, performance, localization, data/content extremes, container contexts, and scope.
+- `Success`: The observable primary path and proof required.
 
-Use `generate_design_brief.py` for meaningful new directions and redesigns. It must synthesize one chosen direction, not substitute search results for judgment. Specialist generators provide evidence for narrower decisions.
+Output: context → primary task → governing question.
 
-Catalog growth is frozen by default: do not add another catalog until existing data converges into useful decisions, schema checks pass, and the missing information cannot fit an existing layer.
+### 3. Present Information
 
-## Core Contract
+Choose the primary `operational`, `analytical`, `transactional`, `narrative`, `reference`, or `exploratory` mode. Classify orientation, status, priority, evidence, uncertainty, freshness, action, risk, recovery, and supporting detail. Decide:
 
-Every result should be:
+- What appears first and remains visible.
+- What groups, sequences, or compares on shared structure.
+- What can move behind progressive disclosure without hiding trust or safety context.
+- How density changes with task pressure.
+- How loading, empty, partial, stale, error, permission, and long/localized content preserve orientation and recovery.
 
-- `Distinctive`: A clear product-specific point of view, not interchangeable UI.
-- `Usable`: The primary path is obvious, responsive, accessible, and recoverable.
-- `Production-grade`: Real states, semantics, edge cases, maintainable code, and project-native implementation.
-- `Systematic`: Intentional values, canonical terms, finite variants, reusable decisions, and consistent behavior.
-- `Contextual`: Shaped by product, audience, brand, task pressure, content, input mode, and device reality.
-- `Proven`: Checked statically and visually to the extent local tools allow; limitations are explicit.
+Prefer tables for aligned comparison, lists for sequences and queues, timelines for ordered events, split views for browse-and-inspect, and cards only for genuinely bounded units.
 
-## Connected Coverage Model
+Output: presentation mode → first scan → persistent context → evidence/disclosure/recovery contract.
 
-Treat frontend design as one decision system. For every meaningful task, sweep these lenses before selecting references or scripts:
+Deep detail: [`references/information-presentation.md`](references/information-presentation.md).
 
-1. `Product and audience`: Who uses the surface, under what pressure, and what outcome should happen next?
-2. `Surface and structure`: What artifact is this, what task order fits it, and what information must remain visible?
-3. `Message and hierarchy`: What is the primary claim or action, what proof/context supports it, and how quickly can users scan it?
-4. `Art direction and identity`: What one visual concept, memory hook, palette, type mood, icon language, material, and motion system make it authored?
-5. `Interaction and UX floor`: What states, semantics, accessibility, responsive behavior, input modes, performance, and feedback must not fail?
-6. `System and handoff`: What tokens, variants, naming, reusable contracts, edge cases, validation, and evidence keep it maintainable?
+### 4. Direct the Experience
 
-Load a slice when its lens affects outcome or risk. Skip it only when genuinely irrelevant. Prefer connected decisions: color should support hierarchy, art direction, contrast, state semantics, and tokens at once.
+Choose one visual concept and one memory hook. Make typography, palette, composition, material, icon language, imagery, and motion express that direction while supporting the information contract. Name meaningful rejected alternatives when evidence exposes a real trade-off; never blend catalog candidates by default.
 
-## Design Decision Chain
+Output: chosen direction → memory hook → visual-system implications.
 
-A meaningful brief or implementation should resolve this chain:
+Deep detail: [`references/art-direction.md`](references/art-direction.md).
+
+### 5. Set the UX and Intrinsic Floor
+
+Protect, in order:
+
+1. Semantics, keyboard access, visible focus, labels, contrast, non-color meaning, and reduced motion.
+2. Task order, comfortable targets, feedback, preserved state, and recovery.
+3. Content/container constraints: useful minimum, preferred, and maximum sizes; flow, wrap, fixed, overflow, and semantic phase-change behavior.
+4. Performance: stable async space, optimized media, minimal JS, and transform/opacity motion.
+5. Forms, navigation, data displays, and interaction states relevant to the task.
+
+Let reusable components adapt to their containers. Use viewport breakpoints for page/environment behavior and only where continuous adaptation no longer preserves meaning. Never infer successful responsive behavior from desktop and mobile snapshots alone.
+
+Output: accessibility/state contract → intrinsic layout contract → exact failure points that require phase changes.
+
+Deep detail: [`references/ux-production-checklist.md`](references/ux-production-checklist.md) and [`references/responsive-layout.md`](references/responsive-layout.md).
+
+### 6. Systematize and Implement
+
+Map repeated decisions to semantic tokens, finite variants, component contracts, and canonical names. Keep one-off artwork local. Use semantic markup and the smallest sufficient project-native code. Add JavaScript only for real behavior; prefer CSS for layout, visual effects, and simple motion.
+
+Keep destructive actions spatially and semantically separate. Do not introduce a second metaphor, accent system, icon language, or motion language that weakens the chosen direction.
+
+Output: maintainable implementation whose structure expresses the prior contracts.
+
+Deep detail: [`references/design-system.md`](references/design-system.md) and [`references/component-patterns.md`](references/component-patterns.md).
+
+### 7. Prove
+
+Run project-native type, lint, test, and build checks first; use heuristic scripts as evidence, never as visual proof. When rendering tools exist:
+
+1. Render the narrowest supported, intermediate, desktop/wide, and relevant narrow/wide component-container contexts.
+2. Exercise the primary flow and relevant loading, empty, partial, stale, error, permission, disabled, focus, zoom, reduced-motion, overflow, and localized/long-content states.
+3. Run a five-second comprehension pass: identify orientation, primary status or claim, next action, evidence, uncertainty, and recovery without designer explanation.
+4. Inspect scan path, comparison, disclosure, spacing, typography, contrast, cropping, targets, motion, and the chosen memory hook.
+5. Correct the strongest comprehension or craft gap, rerender, and preserve useful evidence.
+
+State explicitly when runnable or visual proof remains unavailable. Static inspection cannot prove rendered quality or intrinsic behavior.
+
+Output: static evidence → comprehension evidence → visual evidence → known limitations.
+
+### 8. Hand Off
+
+Report the chosen direction, meaningful trade-offs, changed contracts, checks run, visual evidence, and unavailable validation. The work is complete only when a maintainer can extend it naturally and users retain task clarity across real states and content pressure.
+
+## Decision Ledger
+
+For meaningful new work or redesigns, keep this compact ledger in reasoning or the generated brief:
 
 ```text
-Context
-→ Primary user task
-→ Surface structure
-→ Message hierarchy
-→ One chosen art direction
-→ One memory hook
-→ Palette / type / material decisions
-→ Component and state contracts
-→ Responsive transformation
-→ Validation evidence
+Context: <product, audience, pressure, constraints>
+Information: <question, mode, first scan, persistent evidence/action>
+Direction: <concept, memory hook, rejected conflict>
+UX/layout: <accessibility, states, intrinsic constraints, phase changes>
+System: <tokens, variants, component ownership>
+Proof: <static, comprehension, visual, limitations>
+Next: <first unresolved stage>
 ```
 
-When alternatives matter, name why they were rejected. Do not blend multiple directions merely because the catalog returned them.
+## Catalog and Tool Routing
 
-## Operating Flow
+Detailed routing lives in [`references/catalog-routing.md`](references/catalog-routing.md). Load the smallest useful context: use the operating kernel, then the primary reference for the unresolved decision; add a second reference or specialist generator only when a material cross-domain risk requires it.
 
-1. `Inspect`: Read project instructions, existing components, tokens, styles, brand assets, content, behavior, and relevant reference implementation.
-2. `Frame`: State purpose, audience, tone, differentiator, constraints, success path, and assumptions.
-3. `Sweep`: Use the coverage model to identify relevant lenses and likely blind spots.
-4. `Synthesize`: Choose one connected direction and memory hook; resolve conflicts among catalog candidates.
-5. `Set UX floor`: Define semantics, accessibility, responsive behavior, performance, navigation, forms, feedback, and required states.
-6. `Systematize`: Map repeated decisions to semantic tokens, finite variants, component contracts, and canonical names.
-7. `Implement`: Follow project-native architecture and use the smallest sufficient code.
-8. `Validate statically`: Run project type/lint/test commands and targeted heuristic evidence. Treat heuristics as review aids, not proof by themselves.
-9. `Prove visually`: Render representative compact and desktop widths plus important states; compare them against hierarchy, chosen direction, memory hook, component contracts, and responsive intent.
-10. `Iterate and hand off`: Correct visible drift, rerun affected checks, and report evidence, trade-offs, and unavailable validation.
+```bash
+node scripts/generate_design_brief.mjs "<product surface constraints>"
+node scripts/search_frontend_design.mjs "<targeted uncertainty>"
+node scripts/validate_frontend_design.mjs <changed-frontend-path>
+node scripts/check_catalog.mjs
+```
 
-## Design Brief
+Use the design brief generator for a meaningful new direction or redesign. It should synthesize one direction with evidence, conflicts, uncertainty, rejected alternatives, and the canonical decision ledger rather than return ranked options. Specialist generators support narrower decisions.
 
-Before building, identify the smallest useful brief:
-
-- `Purpose`: What problem does the surface solve, and what should the user do next?
-- `Audience`: Who uses it, how often, on what device, and under what pressure?
-- `Tone`: Choose one decisive direction such as editorial, industrial, cybernetic, refined, playful, utilitarian, organic, or calm institutional.
-- `Differentiator`: What single visual or interaction idea makes the result memorable?
-- `Constraints`: Existing stack, brand, accessibility, data density, performance, localization, responsive targets, content, and implementation scope.
-
-If brand guidance exists, obey it. If not, create a lightweight local direction: palette roles, typography mood, density, motion language, and one visual metaphor. Preserve existing behavior unless the task explicitly changes it.
-
-## Decision Priority
-
-1. `Accessibility`: Semantics, keyboard access, visible focus, contrast, labels, reduced motion, screen-reader meaning.
-2. `Task and interaction`: Clear primary path, comfortable targets, feedback, complete states, no critical hover-only behavior.
-3. `Performance`: Minimal unnecessary JS, stable async space, optimized media, transform/opacity motion.
-4. `Product and style fit`: Visual language matches audience, brand, task seriousness, and content.
-5. `Responsive transformation`: Priority survives compact layouts without accidental overflow or hidden essentials.
-6. `Typography and color`: Readable scales, semantic roles, accessible pairs, truthful data/status encoding.
-7. `Forms and recovery`: Visible labels, errors near cause, preserved input, retry/undo/escape paths.
-8. `Navigation and state`: Predictable back behavior, current location, preserved context, deep links where useful.
-9. `Motion`: Meaningful, interruptible, restrained, and reduced-motion aware.
-10. `Charts and data`: Question-led selection, direct labels, truthful scales, freshness, non-color meaning.
-
-## Implementation Principles
-
-- Use the project's current framework, component primitives, style system, file structure, and naming conventions.
-- Keep markup semantic: buttons are buttons, links are links, headings form a hierarchy, and inputs have labels.
-- Prefer CSS for visual effects and simple motion; add JS only for real behavior.
-- Design loading, empty, error, success, disabled, selected, stale/offline, overflow, long text, compact width, and keyboard focus where relevant.
-- Keep one icon language and use SVG or the project icon set for functional controls.
-- Separate destructive actions visually, spatially, and semantically from primary actions.
-- For dense tools, prioritize scanning, grouping, alignment, freshness, and input efficiency over decoration.
-- For expressive surfaces, match implementation complexity to the chosen idea and content reality.
-- Tokenize repeated semantic decisions; keep one-off artwork local.
-- Avoid adding a second metaphor, accent system, or motion language that weakens the chosen direction.
-
-## Visual Proof Loop
-
-When browser, preview, screenshot, or equivalent rendering tools are available:
-
-1. Render at representative compact and desktop widths; add tablet/wide views when layout behavior changes there.
-2. Exercise the primary flow plus loading, empty, error, disabled, long-content, overflow, focus, and reduced-motion states relevant to the change.
-3. Inspect hierarchy, alignment, spacing, typography, contrast, cropping, touch targets, overflow, state clarity, and motion.
-4. Compare the render with the chosen direction and memory hook. Remove generic or conflicting moves.
-5. Correct the strongest visible gap, rerender, and preserve screenshots or equivalent evidence when useful.
-
-If rendering tools or runnable project state are unavailable, say so explicitly. Do not imply visual validation from static inspection alone.
-
-## Final Review
-
-Before presenting or committing, verify:
-
-1. `Concept`: One clear aesthetic idea and memory hook, not default UI with decoration.
-2. `Fit`: Tone and structure match product, audience, content, and task seriousness.
-3. `Hierarchy`: Primary action/status and key information become obvious quickly.
-4. `Accessibility`: Semantics, focus, contrast, labels, input modes, and reduced motion are covered.
-5. `Responsive`: Compact and desktop renders preserve task priority without accidental overflow.
-6. `States`: Relevant loading, empty, error, disabled, success, focus, stale, long-content, and overflow states work.
-7. `System`: Repeated values are semantic tokens; variants and component contracts remain finite and consistent.
-8. `Craft`: Rendered spacing, alignment, typography, color, imagery, and motion support the chosen direction.
-9. `Originality`: The result avoids interchangeable AI/SaaS clichés and conflicting visual metaphors.
-10. `Maintainability`: The next maintainer can extend the implementation naturally.
-11. `Evidence`: Project checks ran; heuristic findings were reviewed; representative visual proof exists or its absence is explicit.
+Catalog growth remains frozen by default. Improve synthesis or an existing data layer before adding another catalog.

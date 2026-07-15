@@ -21,11 +21,11 @@ Bits UI uses `DateValue` objects from `@internationalized/date` to represent dat
 
 We use the `DateValue` objects provided by `@internationalized/date` to represent dates and times in a consistent way. These objects are immutable and provide information about the type of date they represent. The `DateValue` is a union of the following three types:
 
-| Type               | Description                 | Example                                          |
-| ------------------ | --------------------------- | ------------------------------------------------ |
-| `CalendarDate`     | Date without time component | `2024-07-10`                                     |
-| `CalendarDateTime` | Date with time              | `2024-07-10T12:30:00`                            |
-| `ZonedDateTime`    | Date with time and timezone | `2024-07-10T21:00:00:00-04:00[America/New_York]` |
+| Type | Description | Example |
+| --- | --- | --- |
+| `CalendarDate` | Date without time component | `2024-07-10` |
+| `CalendarDateTime` | Date with time | `2024-07-10T12:30:00` |
+| `ZonedDateTime` | Date with time and timezone | `2024-07-10T21:00:00:00-04:00[America/New_York]` |
 
 Using these strongly-typed objects allows components to adapt appropriately to the date type you provide.
 

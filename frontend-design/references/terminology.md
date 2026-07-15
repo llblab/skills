@@ -8,7 +8,7 @@ This skill uses canonical terms so search, routing, and design language stay con
 - Treat aliases as input/search terms, not preferred output terms.
 - Capitalize style names used as named design movements: `Neubrutalism`, `Glassmorphism`, `Aurora UI`.
 - Do not merge related but distinct styles unless the term record says so.
-- Use `scripts/lookup_term.py` when uncertain.
+- Use `node scripts/lookup_term.mjs` when uncertain.
 
 ## Key Distinctions
 

@@ -28,16 +28,18 @@ This is the production floor for frontend design. Art direction can be bold; the
 - Disabled controls should explain unavailable actions when the reason is not obvious.
 - Gesture actions need visible alternatives.
 
-## Responsive Layout
+## Intrinsic and Responsive Layout
 
-- Design mobile-first, then expand density and navigation for larger screens.
-- Prevent unintended horizontal scroll.
-- Use fluid widths, `minmax`, `clamp`, wrapping, and container-aware layouts where possible.
-- Preserve primary actions on small screens.
+- Start from content, container, and task-order constraints rather than a desktop or device snapshot.
+- Define useful minimum, preferred, and maximum sizes for important regions and components.
+- Decide explicitly what flows, stays fixed, wraps, overflows, or triggers a semantic phase change.
+- Use `min-content`, `max-content`, `fit-content()`, `minmax()`, `clamp()`, wrapping, and bounded measures where they encode the contract.
+- Let reusable components respond to their containers; reserve viewport queries for page- and environment-level behavior.
+- Add breakpoints where hierarchy or operation actually fails, not because a device taxonomy prescribes them.
+- Prevent unintended horizontal scroll without hiding evidence of a broken layout through blanket clipping.
 - Avoid fixed pixel heights for content that can localize, wrap, or grow.
-- Use safe-area spacing for mobile fixed bars and notches.
-- For desktop, limit reading width; do not stretch prose across the viewport.
-- Test long words, translated strings, empty data, and overflow lists.
+- Preserve primary actions, readable measure, safe areas, and touch operation under narrow conditions.
+- Test intermediate widths, narrow and wide component containers, zoom, long words, translated strings, empty data, and overflow lists.
 
 ## Performance
 
