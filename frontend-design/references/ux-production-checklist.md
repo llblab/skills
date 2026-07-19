@@ -1,6 +1,6 @@
 # UX Production Checklist
 
-This is the production floor for frontend design. Art direction can be bold; the interface still has to work under pressure.
+This is the production floor for frontend design. Art direction can be bold; the interface still has to work under pressure. Use [`responsive-layout.md`](responsive-layout.md) for intrinsic/container failures, [`component-patterns.md`](component-patterns.md) for local state ownership, and [`motion-recipes.md`](motion-recipes.md) for animation lifecycle and runtime risk.
 
 ## Accessibility
 

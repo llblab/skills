@@ -1,6 +1,6 @@
 # Data Visualization
 
-Data UI should answer a question, not merely display a chart. Start from the decision the user must make.
+Data UI should answer a question, not merely display a chart. Start from the decision the user must make. Use [`information-presentation.md`](information-presentation.md) for hierarchy and disclosure, and [`ux-production-checklist.md`](ux-production-checklist.md) for interaction, state, accessibility, and performance checks.
 
 ## Chart Selection
 

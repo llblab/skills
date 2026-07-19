@@ -1,6 +1,6 @@
 # Brand Messaging and Voice
 
-Frontend design communicates through copy, hierarchy, labels, CTAs, visual proof, and interaction tone. Brand is not a separate layer; it is the reason the interface sounds and looks like itself.
+Frontend design communicates through copy, hierarchy, labels, CTAs, visual proof, and interaction tone. Brand is not a separate layer; it is the reason the interface sounds and looks like itself. Coordinate message hierarchy with [`information-presentation.md`](information-presentation.md), visual expression with [`visual-identity-assets.md`](visual-identity-assets.md), and claim/provenance review with [`visual-craft.md`](visual-craft.md).
 
 ## Message Architecture
 

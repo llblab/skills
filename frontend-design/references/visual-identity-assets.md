@@ -1,6 +1,6 @@
 # Visual Identity and Assets
 
-Use visual identity rules to keep frontend surfaces coherent across logo, colors, typography, imagery, icons, and generated assets.
+Use visual identity rules to keep frontend surfaces coherent across logo, colors, typography, imagery, icons, and generated assets. Align strategic voice through [`brand-messaging.md`](brand-messaging.md), composition through [`art-direction.md`](art-direction.md), and governed delivery through [`production-handoff.md`](production-handoff.md).
 
 ## Identity Elements
 
@@ -37,20 +37,7 @@ Useful ratio for brand-heavy surfaces:
 - Secondary/support: 20-30%.
 - Accent: 5-10%.
 
-Functional UI may use lower accent ratios; dashboards should reserve strong color for status and exception.
-
-## Color Psychology Quick Map
-
-| Color | Signals | Common Fit | Caution |
-|---|---|---|---|
-| Blue | Trust, stability, professionalism | Finance, healthcare, tech, corporate | Can feel generic |
-| Red | Energy, urgency, danger | Food, sports, alerts, sales | Avoid casual use in healthcare/finance |
-| Green | Growth, health, sustainability | Eco, wellness, finance growth, success | Red/green alone fails accessibility |
-| Gold/Yellow | Warmth, luxury, optimism, attention | Premium, food, energy | Low contrast on white |
-| Purple | Creativity, mystery, premium | Beauty, creative, AI/tech | Overused in generic AI UI |
-| Orange | Friendly, active, confident | Retail, sport, food, youth | Can feel cheap if overused |
-| Black | Sophistication, power, authority | Luxury, fashion, premium tech | Heavy if no contrast rhythm |
-| White | Clarity, simplicity, cleanliness | Healthcare, modern, spacious UI | Empty if hierarchy is weak |
+Functional UI may use lower accent ratios; dashboards should reserve strong color for status and exception. Use the palette generator and color-psychology catalog for contextual candidates; brand, culture, semantics, contrast, and rendered evidence outrank universal color associations.
 
 ## Typography Specs
 
@@ -65,20 +52,9 @@ Functional UI may use lower accent ratios; dashboards should reserve strong colo
 
 ## Icon System
 
-| Style | Best For |
-|---|---|
-| Outlined | General UI, settings, navigation |
-| Filled/Glyph | Compact nav, active states |
-| Duotone | Marketing, onboarding, feature cards |
-| Thin | Luxury, editorial |
-| Bold | Hero areas, high-impact actions |
-| Rounded | Friendly, health, education |
-| Sharp | Technical, finance, enterprise |
-| Pixel | Retro/gaming |
-| Hand-drawn | Artisan/creative |
-| Isometric | Docs, explainers, infographics |
+Use the icon generator and style/library catalogs to compare candidates against product role, density, brand grammar, platform, and available dependencies.
 
-Icon rules:
+Production rules:
 
 - Standard viewBox: 24×24 unless compact system uses 16×16.
 - Use `currentColor` for inline SVG where possible.
@@ -87,39 +63,6 @@ Icon rules:
 - Functional icons need accessible names or adjacent labels.
 - Decorative icons stay hidden from assistive tech.
 
-## Asset Organization
+## Asset Governance
 
-```text
-assets/
-  logos/
-    full-horizontal/
-    icon-only/
-    monochrome/
-  icons/
-  images/
-    hero/
-    product/
-    avatars/
-  social/
-  presentations/
-```
-
-Naming:
-
-`{purpose}-{variant}-{size}.{ext}`
-
-Examples:
-
-- `logo-full-color.svg`
-- `hero-dashboard-dark-1920x1080.webp`
-- `banner-linkedin-cybernetic-1584x396.png`
-
-## Asset Review
-
-- Correct format and dimensions.
-- Accessible contrast with overlaid text.
-- Logo clear space and minimum size preserved.
-- Image crop works at responsive breakpoints.
-- File size appropriate for web delivery.
-- Alt text or decorative handling defined.
-- Style matches brand voice and surface purpose.
+Use [`production-handoff.md`](production-handoff.md) for organization, naming, metadata, approval, platform deliverables, and release review. Identity review still verifies logo usage, palette/type/imagery coherence, responsive crop, contrast, and accessible asset treatment.

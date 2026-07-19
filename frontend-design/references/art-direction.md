@@ -1,6 +1,6 @@
 # Art Direction
 
-Use art direction to make an interface feel authored rather than assembled. Choose one concept, then let typography, color, composition, material, and motion express the same idea.
+Use art direction to make an interface feel authored rather than assembled. Choose one concept, then let typography, color, composition, material, and motion express the same idea. Ground expression in [`brand-messaging.md`](brand-messaging.md) and [`visual-identity-assets.md`](visual-identity-assets.md) when product voice or approved identity governs the direction.
 
 ## Direction Brief
 
@@ -9,6 +9,29 @@ Use art direction to make an interface feel authored rather than assembled. Choo
 - `Density`: Sparse, editorial, operational, information-dense, immersive, kiosk-like.
 - `Energy`: Static, restrained, tactile, cinematic, kinetic, real-time.
 - `Memory hook`: One thing the user remembers: a layout move, material, type treatment, animation, icon language, or interaction.
+
+## Style Grammar Contract
+
+A style family is a connected grammar, not a preset bundle or list of fashionable values. Translate the chosen concept across these axes:
+
+- `Substrate and material`: Flat field, paper, glass, metal, ink, light, soft volume, terminal, or image-led atmosphere.
+- `Geometry`: Sharp, restrained, rounded, pill, modular, irregular, layered, or visibly gridded forms.
+- `Typography`: Role contrast, weight, measure, case, tracking, numeral treatment, and display/body relationship.
+- `Composition and density`: Alignment, grid visibility, whitespace, compartmentalization, overlap, and information pressure.
+- `Color and contrast`: Dominant surfaces, accent scarcity, semantic color, tonal range, and non-color meaning.
+- `Depth and detail`: Border, elevation, texture, grain, dividers, icon language, and image treatment.
+- `Motion`: Static restraint, tactile feedback, mechanical transition, soft continuity, or cinematic choreography with reduced-motion behavior.
+
+For each axis, record:
+
+1. `Invariant`: The smallest decision required for the direction to remain recognizable.
+2. `Range`: Legitimate variation needed by hierarchy, state, content, and responsive pressure.
+3. `Contradiction`: A move that would introduce a competing visual language.
+4. `Functional override`: Accessibility, semantics, performance, platform, or task evidence that outranks the aesthetic rule.
+
+Use one dominant grammar. A secondary dialect may appear only at a real boundary such as marketing versus product, editorial content versus controls, or a deliberate campaign moment. Share semantic tokens and identity across that boundary; do not alternate styles section by section.
+
+Implement the grammar through roles and relationships rather than copied hex values, fonts, radii, or animation recipes. Existing brand and project tokens win when they can express the intended relationship. A named style never grants permission to replace the stack, invent assets or data, weaken focus, hide state, or force decoration onto every component.
 
 ## Style Families
 
@@ -24,6 +47,41 @@ Use art direction to make an interface feel authored rather than assembled. Choo
 | Playful / Clay | Learning, onboarding, consumer fun | Rounded volume, pastel contrast, bouncy feedback, friendly icons | Childish if used for serious domains |
 | Glass / Aurora | Hero surfaces, premium dashboards | Translucency, mesh gradients, layered blur, luminous accents | Contrast/performance issues |
 | Data-dense | Analytics, monitoring, admin | Compact cards, tables, filters, sparklines, status hierarchy | Decoration competes with data |
+
+## Focused Grammar Boundaries
+
+### Minimal and Editorial Restraint
+
+Minimalism removes decisions that do not help comprehension, identity, or action; it does not prescribe white backgrounds, a particular serif, enormous spacing, or visual emptiness.
+
+- Let typography, alignment, measure, and whitespace carry hierarchy before adding containers or effects.
+- Give every remaining line, label, border, card, and accent a clear role.
+- Use sparse color and depth intentionally, but preserve semantic states and visible interaction boundaries.
+- Scale whitespace from content relationships and task pressure rather than applying one oversized section rhythm everywhere.
+- A minimal surface still needs complete states, evidence, imagery when the product requires it, and enough character to belong to this product.
+
+### Brutalist and Industrial Expression
+
+Rawness should reveal structure or express a credible product metaphor, not simulate importance through arbitrary noise.
+
+- Choose the substrate and operational metaphor coherently, such as print-like structure, exposed web construction, or telemetry, instead of mixing every brutalist signifier.
+- Use strong grid, type, border, and contrast relationships while preserving reading order, keyboard operation, target size, and responsive reflow.
+- Keep dense metadata real and useful. Do not invent coordinates, revision strings, system status, legal marks, warning symbols, or machine labels as decoration.
+- Texture, scanlines, dithering, and degradation remain optional atmosphere. They must not obscure content, create false state, or impose continuous rendering cost.
+- Sharp geometry and abrupt motion can support the grammar, but focus, feedback, error, and recovery must remain unmistakable.
+
+### Soft and Tactile Depth
+
+Softness comes from coherent light, tonal separation, comfortable geometry, and calm motion rather than maximum blur, nested shells, or rounded treatment everywhere.
+
+- Define one light direction and a small elevation scale; shadows and highlights should explain layer ownership or interaction.
+- Preserve contrast with borders, tonal steps, focus rings, labels, and state changes. Never rely on shadow alone to communicate a control boundary.
+- Reserve nested enclosures for real containment or material metaphor. Avoid card-inside-card depth that obscures information hierarchy.
+- Let radius follow component role and nesting while sharing a clear family relationship.
+- Use tactile motion for cause, feedback, and continuity. Do not animate every element merely to make the interface feel expensive.
+- Blur, grain, and translucent material require performance, fallback, and reduced-transparency consideration.
+
+Concrete construction details and bounded value examples: [`style-recipes.md`](style-recipes.md).
 
 ## Typography
 
@@ -68,6 +126,8 @@ Use art direction to make an interface feel authored rather than assembled. Choo
 - Exit should usually be faster than enter.
 - Stagger lists by small increments; avoid slow ornamental sequences that block reading.
 - Respect reduced motion. Provide instant or subtle alternatives.
+
+Concrete engine selection, continuous-input, reveal, press, magnetic, shared-layout, sticky-stack, horizontal-pan, overlay, ambient, transparency, lifecycle, and performance recipes: [`motion-recipes.md`](motion-recipes.md).
 
 ## Anti-Slop Checklist
 

@@ -1,6 +1,6 @@
 # Intrinsic and Responsive Layout
 
-Intrinsic design treats layout as a law of emergence rather than a set of viewport snapshots. Content, container, and constraints should determine composition while art direction supplies deliberate hierarchy and character.
+Intrinsic design treats layout as a law of emergence rather than a set of viewport snapshots. Content, container, and constraints should determine composition while art direction supplies deliberate hierarchy and character. Apply local anatomy through [`component-patterns.md`](component-patterns.md) and verify interaction/accessibility pressure through [`ux-production-checklist.md`](ux-production-checklist.md).
 
 ## Core Model
 

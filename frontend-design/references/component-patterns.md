@@ -1,6 +1,6 @@
 # Component Patterns
 
-Reusable component decisions should be explicit: anatomy, variants, sizes, states, accessibility, content behavior, and responsive behavior.
+Reusable component decisions should be explicit: anatomy, variants, sizes, states, accessibility, content behavior, and responsive behavior. Place ownership and tokens in [`design-system.md`](design-system.md), derive hierarchy from [`information-presentation.md`](information-presentation.md), and verify functional states through [`ux-production-checklist.md`](ux-production-checklist.md).
 
 ## Button
 

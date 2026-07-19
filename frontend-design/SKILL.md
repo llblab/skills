@@ -2,7 +2,7 @@
 name: frontend-design
 description: Integrated frontend design judgment for user-facing web and app interfaces plus visual frontend artifacts including landing pages, websites, homepages, pages, screens, dashboards, admin panels, forms, modals, components, cards, tables, heroes, banners, onboarding, slides, marketing sections, HTML and CSS layouts, Tailwind styling, themes, typography, palettes, spacing, motion, responsive behavior, accessibility, UX polish, visual redesign, frontend design review, and production-grade design systems. Relevant whenever work changes how an interface looks, feels, reads, or is operated, including small implementation tasks on visible UI. Uses a connected product surface system UX art direction validation lens rather than isolated styling advice.
 metadata:
-  version: 1.0.21
+  version: 1.1.0
 ---
 
 # Frontend Design
@@ -33,7 +33,11 @@ Resolve these stages in order. The first unresolved stage is the next design dec
 
 Read project instructions, the changed surface, adjacent components, tokens, styles, brand assets, content, behavior, and available runtime. Reuse the current framework, primitives, naming, and architecture.
 
-Output: known constraints and relevant existing decisions.
+For an existing surface, classify the work as targeted evolution or an explicitly approved overhaul before editing. Establish the baseline and mark meaningful product, brand, behavior, accessibility, integration, and technical contracts as preserve, evolve, replace, or unknown. Do not treat a visual improvement request as silent permission to change routes, information architecture, analytics, form contracts, content voice, or proven behavior.
+
+Output: known constraints → relevant existing decisions → preservation boundary and redesign mode when applicable.
+
+Deep detail: [`references/redesign.md`](references/redesign.md).
 
 ### 2. Frame
 
@@ -66,9 +70,11 @@ Deep detail: [`references/information-presentation.md`](references/information-p
 
 Choose one visual concept and one memory hook. Make typography, palette, composition, material, icon language, imagery, and motion express that direction while supporting the information contract. Name meaningful rejected alternatives when evidence exposes a real trade-off; never blend catalog candidates by default.
 
-Output: chosen direction → memory hook → visual-system implications.
+When supplied, captured, or generated imagery governs the direction, name each reference's role and provenance before implementation. Extract observed, inferred, and unknown decisions into a reference contract; use focused frames when compression hides detail, maintain a continuity ledger across a set, and never let an image silently invent behavior, content truth, responsive rules, or technical architecture.
 
-Deep detail: [`references/art-direction.md`](references/art-direction.md).
+Output: chosen direction → memory hook → visual-system implications → reference contract when applicable.
+
+Deep detail: [`references/art-direction.md`](references/art-direction.md) and [`references/visual-reference-workflow.md`](references/visual-reference-workflow.md).
 
 ### 5. Set the UX and Intrinsic Floor
 
@@ -92,9 +98,11 @@ Map repeated decisions to semantic tokens, finite variants, component contracts,
 
 Keep destructive actions spatially and semantically separate. Do not introduce a second metaphor, accent system, icon language, or motion language that weakens the chosen direction.
 
-Output: maintainable implementation whose structure expresses the prior contracts.
+When decisions must transfer across agents, design tools, surfaces, or implementation phases, encode them as a scoped design specification. Pair descriptive intent with semantic roles, bounded constraints, authoritative values only when established, and an explicit proof path. Keep tool-specific syntax subordinate to project-owned contracts.
 
-Deep detail: [`references/design-system.md`](references/design-system.md) and [`references/component-patterns.md`](references/component-patterns.md).
+Output: maintainable implementation whose structure expresses the prior contracts → portable design specification when the decisions require durable transfer.
+
+Deep detail: [`references/design-system.md`](references/design-system.md), [`references/design-specification.md`](references/design-specification.md), and [`references/component-patterns.md`](references/component-patterns.md).
 
 ### 7. Prove
 
@@ -104,11 +112,14 @@ Run project-native type, lint, test, and build checks first; use heuristic scrip
 2. Exercise the primary flow and relevant loading, empty, partial, stale, error, permission, disabled, focus, zoom, reduced-motion, overflow, and localized/long-content states.
 3. Run a five-second comprehension pass: identify orientation, primary status or claim, next action, evidence, uncertainty, and recovery without designer explanation.
 4. Inspect scan path, comparison, disclosure, spacing, typography, contrast, cropping, targets, motion, and the chosen memory hook.
-5. Correct the strongest comprehension or craft gap, rerender, and preserve useful evidence.
+5. Run an authenticity sweep across repeated layout grammar, decorative labels, CTA intent, visible copy, factual-looking data, proof, assets, and product previews. Remove unsupported specificity and distinguish verified, derived, sample, placeholder, and unsupported content.
+6. Correct the strongest comprehension, authenticity, or craft gap, rerender, and preserve useful evidence.
 
-State explicitly when runnable or visual proof remains unavailable. Static inspection cannot prove rendered quality or intrinsic behavior.
+State explicitly when runnable, visual, or provenance proof remains unavailable. Static inspection cannot prove rendered quality, intrinsic behavior, or factual authenticity.
 
-Output: static evidence → comprehension evidence → visual evidence → known limitations.
+Output: static evidence → comprehension evidence → authenticity evidence → visual evidence → known limitations.
+
+Deep detail: [`references/visual-craft.md`](references/visual-craft.md).
 
 ### 8. Hand Off
 

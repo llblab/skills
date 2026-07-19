@@ -1,6 +1,6 @@
 # Production Handoff and Asset Governance
 
-Frontend design work often produces artifacts beyond code: tokens, screenshots, banners, logos, copy, presentation surfaces, icons, and image assets. Treat handoff as part of design quality.
+Frontend design work often produces artifacts beyond code: tokens, screenshots, banners, logos, copy, presentation surfaces, icons, and image assets. Treat handoff as part of design quality. Package durable decisions through [`design-specification.md`](design-specification.md), reference evidence through [`visual-reference-workflow.md`](visual-reference-workflow.md), identity assets through [`visual-identity-assets.md`](visual-identity-assets.md), and functional proof through [`ux-production-checklist.md`](ux-production-checklist.md).
 
 ## Approval Checklist
 
@@ -87,6 +87,7 @@ Useful manifest fields:
 | Surface | Minimum Handoff |
 |---|---|
 | Web UI | Code, tokens, state notes, responsive notes, accessibility notes |
+| Agent/design-tool transfer | Scoped design specification, authority/owner, semantic roles and values, component/state contracts, references/provenance, validation and known unknowns |
 | Banner/social | PNG/WebP export, source markup/design, dimensions, safe-zone note |
 | Icon | SVG, size test at 16/24/48px, accessibility role/name guidance |
 | Logo usage | Variant, clear space, min size, background compatibility |

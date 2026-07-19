@@ -1,6 +1,6 @@
 # Information Presentation
 
-Information presentation turns raw content, data, state, evidence, uncertainty, and available actions into a task-shaped interface before visual styling begins.
+Information presentation turns raw content, data, state, evidence, uncertainty, and available actions into a task-shaped interface before visual styling begins. Use [`data-visualization.md`](data-visualization.md) for quantitative relationships and [`brand-messaging.md`](brand-messaging.md) when narrative claims, proof, or persuasion shape the information.
 
 ```text
 raw information → user question → decision or action → hierarchy → scan path → disclosure → composition
