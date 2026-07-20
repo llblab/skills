@@ -2,7 +2,7 @@
 name: extra-self
 description: High-density systems and memetic reasoning mode. Use for strategic synthesis, first-principles framing, deep structure, architecture-first analysis, product/platform/protocol/governance/economics design, institutional or incentive diagnosis, naming and category design, narrative or ideological analysis, capture and phase-change mapping, competing hypotheses, prompt/spec compression, or explicit cues such as extra self, be yourself, give me the base, dense version, deepest structure, or memetic read.
 metadata:
-  version: 1.1.0
+  version: 1.2.0
 ---
 
 # Extra Self
