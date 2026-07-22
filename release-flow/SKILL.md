@@ -2,7 +2,7 @@
 name: release-flow
 description: Select and run a guarded release flow for a GitHub repository administered by the authenticated user, including organization repositories and independently maintained historical forks, using a dev-to-main pull request when a local or origin dev branch exists and otherwise releasing directly from main before coordinating repository-owned tag automation or creating the matching GitHub Release and optionally publishing an existing npm package. Use when the user explicitly asks to release and GitHub reports ADMIN permission; do not use for contribution forks, feature-branch integration, or non-GitHub workflows.
 metadata:
-  version: 1.2.0
+  version: 1.2.1
 ---
 
 # Release Flow
@@ -44,11 +44,12 @@ On the PR route, fetch `origin/main` and `origin/dev` before the hard gate, then
 
 1. Require local `dev` to equal `origin/dev` unless the only difference is the intentional release commit created later in this flow. Stop on pre-existing local/remote `dev` divergence.
 2. Compare the committed trees of `dev` and `origin/main` before interpreting ahead/behind counts. Identical tree ids mean the code and version baseline already match, even when GitHub's merge commit leaves `main` one or more commits ahead of its merged `dev` parent. Keep `dev` unchanged; do not fast-forward, merge, rebase, or stash merely to copy merge-only topology back into the source branch.
-3. When the trees differ:
+3. When the trees differ and `origin/main` is not an ancestor of `dev`, inspect the direct parents of `origin/main` before classifying divergence. If one direct parent is an ancestor of `dev` and that parent's tree equals `origin/main^{tree}`, classify `origin/main` as a content-neutral PR merge wrapper around a baseline already contained in `dev`. Keep `dev` unchanged: the source branch may correctly continue from the merged PR parent without copying GitHub's merge commit back after every release.
+4. When neither tree equality nor content-neutral merge-wrapper equivalence applies:
    - If `origin/main` is an ancestor of `dev`, the release branch already contains the main baseline plus newer work.
    - If `dev` is an ancestor of `origin/main`, `dev` is genuinely behind in content and must be safely aligned before release work continues.
    - If both branches contain unique commits, stop and report divergence; do not infer equivalence from versions or commit counts.
-4. Tree equality proves baseline content equivalence, not release readiness. Version, changelog, validation, worktree intent, and all other hard gates still apply.
+5. Tree and merge-wrapper equivalence prove baseline content equivalence, not release readiness. Version, changelog, validation, worktree intent, and all other hard gates still apply.
 
 ## Wrong-Branch Recovery
 
@@ -63,9 +64,10 @@ Before moving changes, ask for explicit confirmation because the operation chang
 5. When `origin/dev` exists, bring local `dev` to it only with a fast-forward. Stop if local and remote `dev` have diverged; do not discard either history.
 6. Compare the committed tree ids before ancestry:
    - If `dev^{tree}` equals `origin/main^{tree}`, keep `dev` unchanged. This is the normal GitHub PR merge topology where `main` contains the merged dev commit plus a merge commit but no newer code; do not fast-forward merge-only history back into `dev`.
+   - Otherwise, if one direct parent of `origin/main` is an ancestor of `dev` and that parent tree equals `origin/main^{tree}`, keep `dev` unchanged. The latest main commit is a content-neutral PR merge wrapper around a baseline already contained in the continuing dev line.
    - Otherwise, if `origin/main` is already an ancestor of `dev`, keep `dev` unchanged.
    - Otherwise, if `dev` is an ancestor of `origin/main`, fast-forward `dev` to `origin/main` because the content genuinely differs.
-   - If both branches contain unique commits and their trees differ, classify them as diverged. Do not rebase automatically.
+   - If both branches contain unique commits and neither equivalence rule applies, classify them as diverged. Do not rebase automatically.
 7. For diverged branches, report the commit ranges and ask separately before rebasing `dev` onto `origin/main`. Create a temporary backup ref first. Never force-push rewritten `dev` history as an implicit part of release approval; require separate explicit authorization and use only `--force-with-lease` if approved.
 8. Apply the saved stash with index state preserved. Stop on conflicts, leave the stash intact, and report recovery instructions rather than attempting broad conflict resolution.
 9. Verify that the transferred diff matches the saved release work and that no unrelated files appeared. Continue only when the worktree now represents the intended release on `dev`.
@@ -80,7 +82,7 @@ Run release actions only when all criteria are true:
 1. Repository eligibility, authenticated `ADMIN` permission, and explicit release intent were verified without ambiguity.
 2. Route selection completed without ambiguity.
 3. The current branch matches the selected route: `dev` for the PR route or `main` for the direct-main route.
-4. PR-route baseline alignment passes by committed-tree equality or by `origin/main` ancestry of `dev`; commit-count-only merge topology never fails this gate.
+4. PR-route baseline alignment passes by committed-tree equality, content-neutral merge-wrapper equivalence, or `origin/main` ancestry of `dev`; commit-count-only merge topology never fails this gate.
 5. Repository-owned tag automation has been inspected and its ownership of GitHub Release creation and npm publication is classified as automated, manual, or absent without ambiguity. Every automation-owned npm publication passes the pre-tag package-existence and version-eligibility checks below.
 6. There are uncommitted files intended for the release.
 7. The package or application version is already bumped to the intended release version.
