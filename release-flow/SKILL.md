@@ -1,8 +1,6 @@
 ---
 name: release-flow
 description: Select and run a guarded release flow for a GitHub repository administered by the authenticated user, including organization repositories and independently maintained historical forks, using a dev-to-main pull request when a local or origin dev branch exists and otherwise releasing directly from main before coordinating repository-owned tag automation or creating the matching GitHub Release and optionally publishing an existing npm package. Use when the user explicitly asks to release and GitHub reports ADMIN permission; do not use for contribution forks, feature-branch integration, or non-GitHub workflows.
-metadata:
-  version: 1.2.1
 ---
 
 # Release Flow

@@ -1,8 +1,6 @@
 ---
 name: brain-storm
 description: Collaborative idea-to-design and inquiry protocol. Use for product/architecture exploration, research-style question shaping, feature design, standards, specs, UX concepts, module boundaries, and non-trivial behavior changes when uncertainty matters.
-metadata:
-  version: 1.2.1
 ---
 
 # Brain Storm
