@@ -48,11 +48,12 @@ Apply this section only on the version PR route, after release files and validat
 2. Require no existing open PR from the version branch. Never rewrite history already under PR review; stop and require an explicit close/recreate decision instead.
 3. Fetch `origin/main` and the version branch. Require local and remote source tips to match, except for clearly identified intentional release work. Reject conflicts, merge/rebase/cherry-pick state, dirty submodules, unrelated work, or unknown remote state.
 4. Require `origin/main` to be an ancestor of the version branch. If `main` moved in content, align the version branch through a separately reviewed rebase or merge before squashing; never hide divergence inside the release commit.
-5. Record the old source OID, remote source OID, source tree OID, and `origin/main` OID. Create a local safety ref named `archive/<sanitized-version-branch>-pre-squash-<short-oid>` at the old tip. Do not push the archive unless the operator explicitly requests a remote archive.
-6. Stage only intentional release files, then soft-reset the version branch to `origin/main` and create exactly one repository-style release commit from the complete prepared tree. The resulting commit must have `origin/main` as its sole parent.
-7. Verify that the new commit tree exactly equals the recorded prepared source tree, inspect the full `origin/main..HEAD` diff, rerun the release validation required for the final tree, and require a clean worktree.
-8. If the version branch already exists on `origin`, update only that source branch with `--force-with-lease=<branch>:<recorded-remote-oid>`. Never use a broad `--force`, never rewrite `main`, and never move a tag.
-9. Open the release PR only after the remote version branch resolves to the one-commit release tip. The PR must show exactly one commit and the expected release diff against `main`.
+5. Record the old source OID, remote source OID, and `origin/main` OID. Create a local safety ref named `archive/<sanitized-version-branch>-pre-squash-<short-oid>` at the old tip. Do not push the archive unless the operator explicitly requests a remote archive.
+6. Stage only intentional release files, inspect the complete staged diff, and reject any remaining unstaged or unintended untracked content. Record the exact prepared tree from the index with `git write-tree`. `HEAD^{tree}` is not a substitute because it omits staged or unstaged release changes that are not in the old commit.
+7. Soft-reset the version branch to `origin/main` without changing the prepared index, then create exactly one repository-style release commit. The resulting commit must have `origin/main` as its sole parent.
+8. Verify that `HEAD^{tree}` exactly equals the recorded prepared-tree OID and that `HEAD^` equals the recorded `origin/main` OID. Inspect the full `origin/main..HEAD` diff, rerun the release validation required for the final tree, and require a clean worktree.
+9. If the version branch already exists on `origin`, update only that source branch with `--force-with-lease=<branch>:<recorded-remote-oid>`. Never use a broad `--force`, never rewrite `main`, and never move a tag.
+10. Open the release PR only after the remote version branch resolves to the one-commit release tip. The PR must show exactly one commit and the expected release diff against `main`.
 
 After a release PR merges, history cleanup is too late. This skill must never squash or force-rewrite `main` to make a completed release look cleaner. A post-merge mistake receives a new reviewed correction/hotfix; a release tag, published Release, or downstream consumption makes history rewriting categorically forbidden.
 
@@ -407,7 +408,7 @@ Report:
 - Eligibility evidence: GitHub repository, authenticated account, `ADMIN` permission, explicit release request, fork topology, and—when applicable—the independent-fork workflow classification
 - Selected route and branch-detection evidence
 - Release-narrative source: canonical changelog section or temporary diff-derived notes, including changelog-absence confirmation when applicable
-- Version-route squash evidence when applicable: baseline/source old/new OIDs, local archive ref, tree equality, one-parent topology, exact force-with-lease result, and post-merge main topology
+- Version-route squash evidence when applicable: baseline/source old/new OIDs, local archive ref, index-derived prepared-tree OID, final tree equality, one-parent topology, exact force-with-lease result, and post-merge main topology
 - Wrong-branch transfer, branch-alignment, stash cleanup, and any approved rebase/force-with-lease result when recovery ran
 - PR URL, checks result, and merge status for either PR route; `Not applicable — direct-main route` otherwise
 - `main` version confirmation
