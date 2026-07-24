@@ -62,7 +62,7 @@ A feature deserves an FMOS when it forms a coherent outcome with its own recurri
 - Recurring reasoning that would otherwise be reconstructed;
 - A working model richer than one backlog item but smaller than a project-wide method.
 
-Skip only obvious one-shot edits, isolated mechanical changes, unactionable ideas, and work already fully governed by an existing organ or capability skill. Uncertainty favors a small FMOS, not a permission prompt.
+Materialize an FMOS when independent slices, sessions, or agents would otherwise need to reconstruct the same feature-specific context. Complexity or multi-step work alone is not enough. Skip obvious one-shot edits, isolated mechanical changes, unactionable ideas, and work already fully governed by an existing organ or capability skill.
 
 Before materialization, name the loop in one sentence. Its material identity is:
 
