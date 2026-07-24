@@ -1,11 +1,11 @@
 ---
 name: release-flow
-description: Select and run a guarded release flow for a GitHub repository administered by the authenticated user, including organization repositories and independently maintained historical forks, using a dev-to-main pull request when a local or origin dev branch exists and otherwise releasing directly from main before coordinating repository-owned tag automation or creating the matching GitHub Release and optionally publishing an existing npm package. Use when the user explicitly asks to release and GitHub reports ADMIN permission; do not use for contribution forks, feature-branch integration, or non-GitHub workflows.
+description: Select and run a guarded GitHub release flow for an administered repository, using a pre-PR squashed dedicated version branch, a dev-to-main pull request, or direct main as repository topology requires, then coordinating tags, GitHub Releases, and optional existing npm publication. Use only with explicit release intent and ADMIN permission; exclude contribution forks, ordinary feature integration, and non-GitHub workflows.
 ---
 
 # Release Flow
 
-Use this skill to select and run the release path that matches an eligible GitHub repository administered by the authenticated user: a guarded `dev` → `main` pull request when `dev` exists, or a guarded direct-`main` release when it does not. Release notes and PR text come from the canonical project changelog when one already exists; otherwise they come from a verified, outcome-focused release narrative derived from the actual release diff. This skill never creates a changelog.
+Use this skill to select and run the release path that matches an eligible GitHub repository administered by the authenticated user: a dedicated version branch squashed to one commit before its `main` PR, a guarded `dev` → `main` PR, or direct `main` when neither PR source applies. Release notes and PR text come from the canonical project changelog when one exists; otherwise they come from a verified outcome-focused narrative derived from the release diff. This skill never creates a changelog.
 
 ## Eligibility Boundary
 
@@ -18,7 +18,7 @@ Establish eligibility before selecting a branch route or changing repository sta
 5. Require the repository to be either not a fork, or explicitly classified as an independently maintained historical fork with its own release line rather than a contribution fork whose changes should flow through an upstream pull request.
 6. Treat `isFork` as a topology fact, not an automatic permission failure. For a fork, require explicit workflow classification in the current conversation before any release mutation; repository age, divergence, package identity, prior releases, or permission level cannot establish whether work should ship independently or flow upstream. Record that classification in the final eligibility evidence.
 7. Stop when the authenticated user lacks `ADMIN`, repository access cannot be verified, or a fork remains unclassified or serves an upstream-contribution workflow. Do not add a separate ownership or organization-maintainership confirmation gate after an explicit release request.
-8. Exclude feature, staging, release-candidate, and other integration-branch workflows. This skill may operate only from `dev` or `main`; it never promotes an arbitrary current branch. On the PR route, `main` is allowed only as the source of the guarded wrong-branch recovery below, and all release actions must ultimately run from `dev`.
+8. Exclude ordinary feature, staging, and arbitrary integration branches. This skill may operate from `main`, long-lived `dev`, or a dedicated version branch whose name exactly identifies the intended version: bare SemVer (`0.7.2`), `v`-prefixed SemVer (`v0.7.2`), or `release/<semver>`. A version branch is a release source only when the current branch matches the intended manifest/changelog version; naming alone never promotes a feature branch. On a `dev` PR route, release actions run from `dev`; on a version PR route, they run from that version branch.
 
 These boundaries do not gain an automatic override. An ineligible repository needs its own project-specific release process.
 
@@ -26,19 +26,39 @@ These boundaries do not gain an automatic override. An ineligible repository nee
 
 Select the route before staging, committing, pushing, opening a PR, tagging, creating a GitHub Release, publishing, or modifying release files.
 
-1. Confirm that the repository has an `origin` remote.
-2. Check for a local `dev` branch with `git show-ref --verify refs/heads/dev`. If it exists, select the PR route; remote `dev` detection cannot make the route less strict.
-3. Only when local `dev` is absent, query `origin` directly for `refs/heads/dev`, for example with `git ls-remote --exit-code --heads origin refs/heads/dev`. Do not infer remote absence from a missing or stale `origin/dev` remote-tracking ref.
-4. For `git ls-remote --exit-code`, treat exit status `2` with no matching ref as authoritative absence. Treat exit status `0` with the ref as presence. Authentication, authorization, network, repository-resolution, and other failures make route selection unknown; stop instead of choosing direct-main.
-5. Select exactly one route:
-   - **PR route:** Local `dev` exists, or local `dev` is absent and `origin/dev` exists.
-   - **Direct-main route:** Local `dev` is absent and the authoritative query confirms that `origin/dev` is absent.
+1. Confirm that the repository has an `origin` remote and read the current branch.
+2. If the current branch is a dedicated version branch matching the intended manifest/changelog version, select the **version PR route**. This route takes precedence over `dev` detection because the version branch owns the prepared release tree.
+3. Otherwise, check for a local `dev` branch with `git show-ref --verify refs/heads/dev`. If it exists, select the **dev PR route**; remote `dev` detection cannot make the route less strict.
+4. Only when neither a version route nor local `dev` applies, query `origin` directly for `refs/heads/dev`, for example with `git ls-remote --exit-code --heads origin refs/heads/dev`. Do not infer remote absence from a missing or stale `origin/dev` remote-tracking ref.
+5. For `git ls-remote --exit-code`, treat exit status `2` with no matching ref as authoritative absence. Treat exit status `0` with the ref as presence. Authentication, authorization, network, repository-resolution, and other failures make route selection unknown; stop instead of choosing direct-main.
+6. Select exactly one route:
+   - **Version PR route:** Current branch is a dedicated version branch for the intended release.
+   - **Dev PR route:** No version route applies, and local or remote `dev` exists.
+   - **Direct-main route:** No version route applies, local `dev` is absent, and the authoritative query confirms `origin/dev` is absent.
 
-Once selected, keep that route for the entire run. A branch-state change, inconvenience, conflict, failed check, or failed PR action must not trigger fallback to the other route.
+Once selected, keep that route for the entire run. A branch-state change, inconvenience, conflict, failed check, or failed PR action must not trigger fallback to another route.
+
+## Dedicated Version Branch Pre-PR Squash
+
+A dedicated version branch may contain many atomic development commits while work remains in progress. Those commits support review, bisecting, selective removal, and recovery during development. The release PR must nevertheless expose one release commit directly above the verified `main` baseline.
+
+Apply this section only on the version PR route, after release files and validation are complete but before opening the PR:
+
+1. Require explicit confirmation that the operator authorizes rewriting the dedicated version branch with `--force-with-lease`. Release intent alone does not authorize rewriting a shared source branch.
+2. Require no existing open PR from the version branch. Never rewrite history already under PR review; stop and require an explicit close/recreate decision instead.
+3. Fetch `origin/main` and the version branch. Require local and remote source tips to match, except for clearly identified intentional release work. Reject conflicts, merge/rebase/cherry-pick state, dirty submodules, unrelated work, or unknown remote state.
+4. Require `origin/main` to be an ancestor of the version branch. If `main` moved in content, align the version branch through a separately reviewed rebase or merge before squashing; never hide divergence inside the release commit.
+5. Record the old source OID, remote source OID, source tree OID, and `origin/main` OID. Create a local safety ref named `archive/<sanitized-version-branch>-pre-squash-<short-oid>` at the old tip. Do not push the archive unless the operator explicitly requests a remote archive.
+6. Stage only intentional release files, then soft-reset the version branch to `origin/main` and create exactly one repository-style release commit from the complete prepared tree. The resulting commit must have `origin/main` as its sole parent.
+7. Verify that the new commit tree exactly equals the recorded prepared source tree, inspect the full `origin/main..HEAD` diff, rerun the release validation required for the final tree, and require a clean worktree.
+8. If the version branch already exists on `origin`, update only that source branch with `--force-with-lease=<branch>:<recorded-remote-oid>`. Never use a broad `--force`, never rewrite `main`, and never move a tag.
+9. Open the release PR only after the remote version branch resolves to the one-commit release tip. The PR must show exactly one commit and the expected release diff against `main`.
+
+After a release PR merges, history cleanup is too late. This skill must never squash or force-rewrite `main` to make a completed release look cleaner. A post-merge mistake receives a new reviewed correction/hotfix; a release tag, published Release, or downstream consumption makes history rewriting categorically forbidden.
 
 ## PR Baseline Alignment
 
-On the PR route, fetch `origin/main` and `origin/dev` before the hard gate, then distinguish commit topology from code state:
+On the dev PR route, fetch `origin/main` and `origin/dev` before the hard gate, then distinguish commit topology from code state. The version PR route instead uses the stricter ancestry and one-parent contract in the pre-PR squash section:
 
 1. Require local `dev` to equal `origin/dev` unless the only difference is the intentional release commit created later in this flow. Stop on pre-existing local/remote `dev` divergence.
 2. Compare the committed trees of `dev` and `origin/main` before interpreting ahead/behind counts. Identical tree ids mean the code and version baseline already match, even when GitHub's merge commit leaves `main` one or more commits ahead of its merged `dev` parent. Keep `dev` unchanged; do not fast-forward, merge, rebase, or stash merely to copy merge-only topology back into the source branch.
@@ -51,13 +71,13 @@ On the PR route, fetch `origin/main` and `origin/dev` before the hard gate, then
 
 ## Wrong-Branch Recovery
 
-Use this recovery only when the PR route was selected, the current branch is `main`, and all uncommitted changes are confirmed as intentional release work. Never use it from a feature, staging, release-candidate, detached-HEAD, conflicted, rebasing, merging, or cherry-picking state.
+Use this recovery only when the dev PR route was selected, the current branch is `main`, and all uncommitted changes are confirmed as intentional release work. Never use it for a version PR route or from a feature, staging, detached-HEAD, conflicted, rebasing, merging, or cherry-picking state.
 
 Before moving changes, ask for explicit confirmation because the operation changes the worktree and may expose branch divergence. Then use the smallest reversible sequence:
 
 1. Reject mixed unrelated work, unresolved conflicts, dirty submodules, or untracked files that should not enter the release.
 2. Save tracked and intended untracked changes in one uniquely named stash with `--include-untracked`. Use `git stash apply`, not `pop`, so the recovery copy remains available until transfer verification completes.
-3. Fetch `origin/main` and query `origin/dev`. Require `origin/main`; stop on authentication, network, repository-resolution, or fetch failure. A missing `origin/dev` remains valid when local `dev` selected the PR route.
+3. Fetch `origin/main` and query `origin/dev`. Require `origin/main`; stop on authentication, network, repository-resolution, or fetch failure. A missing `origin/dev` remains valid when local `dev` selected the dev PR route.
 4. Switch to local `dev`, or create it to track `origin/dev` when only the remote branch exists.
 5. When `origin/dev` exists, bring local `dev` to it only with a fast-forward. Stop if local and remote `dev` have diverged; do not discard either history.
 6. Compare the committed tree ids before ancestry:
@@ -79,16 +99,16 @@ Run release actions only when all criteria are true:
 
 1. Repository eligibility, authenticated `ADMIN` permission, and explicit release intent were verified without ambiguity.
 2. Route selection completed without ambiguity.
-3. The current branch matches the selected route: `dev` for the PR route or `main` for the direct-main route.
-4. PR-route baseline alignment passes by committed-tree equality, content-neutral merge-wrapper equivalence, or `origin/main` ancestry of `dev`; commit-count-only merge topology never fails this gate.
+3. The current branch matches the selected route: the exact dedicated version branch for the version PR route, `dev` for the dev PR route, or `main` for the direct-main route.
+4. Baseline alignment passes for the selected PR route: the version branch satisfies the strict `origin/main` ancestry contract before its one-parent squash, or `dev` satisfies committed-tree equality, content-neutral merge-wrapper equivalence, or `origin/main` ancestry. Commit-count-only topology never proves alignment.
 5. Repository-owned tag automation has been inspected and its ownership of GitHub Release creation and npm publication is classified as automated, manual, or absent without ambiguity. Every automation-owned npm publication passes the pre-tag package-existence and version-eligibility checks below.
-6. There are uncommitted files intended for the release.
+6. Release intent is materialized safely for the route: dev/direct-main has intentional uncommitted release files to commit, while a version branch has a complete validated prepared tree and explicit source-history rewrite approval before the pre-PR squash.
 7. The package or application version is already bumped to the intended release version.
 8. The user explicitly asked to run the release flow, including its external actions such as pushing, opening and merging a PR when applicable, tagging, creating a GitHub Release, or publishing.
 
 If any criterion fails, reject the flow and stop. Do not stage, commit, push, create PRs, merge, tag, create a GitHub Release, publish, or modify release files.
 
-If the PR route was selected while release work sits on `main`, do not bypass the branch gate. Run the guarded wrong-branch recovery only after its explicit confirmation; otherwise stop without moving the changes.
+If the dev PR route was selected while release work sits on `main`, do not bypass the branch gate. Run the guarded wrong-branch recovery only after its explicit confirmation; otherwise stop without moving the changes. Version-branch work never uses wrong-branch recovery.
 
 ## Direct-Main Boundary
 
@@ -130,30 +150,37 @@ When no workflow owns an action, retain the manual path below. Automation detect
 
 After the hard gate passes:
 
-1. Inspect `git status --short --branch`, confirm the selected route, and confirm that the repository is on its required branch with uncommitted release files.
+1. Inspect `git status --short --branch`, confirm the selected route, and confirm that the repository is on its required branch with only route-appropriate release state.
 2. Identify the project version source and confirm it is already bumped to the intended release version. Prefer the repository's primary manifest or release metadata, such as `package.json`, `pyproject.toml`, `Cargo.toml`, app config, or a documented version file. Do not assume npm unless the project is an npm package.
 3. Detect whether the repository already owns a canonical project-level changelog, normally at the root or at a documented release-history path. If it exists, read only the intended version section and any `Unreleased` section, beginning with the first 50 lines and expanding to section boundaries as needed. If no canonical project changelog exists, record that fact and continue without creating one. A nested subsystem changelog does not become the package release source merely because it exists; update it only when that subsystem has meaningful shipped changes and repository convention assigns history there. A synchronized version bump alone does not require a subsystem changelog entry.
-4. Inspect the actual release diff. For the PR route, compare `dev` with the `main` PR base and include staged and unstaged changes. For the direct-main route, inspect all staged and unstaged changes against the verified `main` HEAD. Group repeated development evidence and intermediate chronology into outcome-focused bullets while preserving user-visible behavior, safety and compatibility contracts, migrations, known limitations, and meaningful operator evidence. Remove fixed-then-reworked mechanics, repeated gate runs, superseded findings, and other process residue that does not describe the shipped state. When a canonical changelog exists, consolidate its intended release section without rewriting older history. When none exists, create only a temporary release narrative or notes file for the PR/GitHub Release; do not add a changelog to the repository.
+4. Inspect the actual release diff. For a version PR route, compare the complete version-branch tree with `origin/main` before and after the squash. For a dev PR route, compare `dev` with the `main` PR base and include staged/unstaged release files. For direct-main, inspect staged/unstaged changes against verified `main`. Group development chronology into outcome-focused bullets while preserving behavior, safety, compatibility, migrations, limitations, and operator evidence. Remove fixed-then-reworked mechanics, repeated gates, superseded findings, and process residue. When a canonical changelog exists, consolidate its intended section without rewriting older history; otherwise create only temporary release notes.
 5. Confirm release-note freshness. When a canonical changelog exists, its intended version section must describe the release and must not leave the same shipped changes under `Unreleased`; stop if the section is missing, ambiguous, or conflicts with diff evidence. When no canonical changelog exists, its absence is not a blocker; instead verify that the temporary release narrative covers every meaningful shipped outcome. In either case, stop if safe consolidation would require guessing which behavior ships.
 6. Run the smallest meaningful validation first. Prefer the project release validation command when available.
-7. Stage only intentional release files.
+7. Stage only intentional release files. On a version PR route, complete all release files first and then execute the dedicated pre-PR squash section; do not create a preliminary PR or a second release commit.
 8. Inspect the repository's recent commit-message style before writing the release commit message:
 
 ```bash
 git log -5 --pretty=%s
 ```
 
-9. Create one release commit whose format matches the discovered local style. If the recent history shows a stable release-commit pattern, adapt that pattern to the intended version and release theme. If the style is mixed or too sparse to infer confidently, use the latest relevant commit subject as the fallback style template rather than imposing this skill's example format.
+9. Create exactly one release commit whose format matches local style. On a version PR route this is the one-parent commit produced by the pre-PR squash; on dev/direct-main it is the normal release commit. If history shows a stable release pattern, adapt it to the intended version/theme; otherwise use the latest relevant subject as the style template.
 10. Continue only through the selected route:
 
-**PR route**
+**Version PR route**
 
-1.  Push `dev` to `origin/dev`.
-2.  Open a pull request from `dev` to `main`.
-3.  Build the PR body from the verified release narrative, using the consolidated canonical changelog section when one exists and the diff-derived temporary narrative otherwise.
-4.  Watch PR checks until they finish.
-5.  If all required checks pass, merge the PR using the repository's established merge method. Prefer the repository default when available; otherwise infer from recent merged PRs or project convention. If no convention is discoverable, use a normal merge commit rather than squash/rebase because it preserves the dev release commit and release audit trail.
-6.  After a successful merge, switch the local repository to `main` and pull the latest `main` changes.
+1. Complete the dedicated pre-PR squash and verify the remote version branch exposes exactly one release commit above `origin/main`.
+2. Open a pull request from the version branch to `main`. Build the PR body from the verified release narrative and watch all checks.
+3. Merge with a repository-supported method that leaves exactly one release commit directly above the verified baseline on `main`. Prefer fast-forward/rebase when it preserves the prepared commit; otherwise use squash merge, which may replace its OID but must preserve the exact prepared tree. Do not create a merge-wrapper commit for a dedicated version release.
+4. After merge, switch to `main`, pull the latest state, and verify parent OID, tree OID, version, and release narrative before tagging. If repository policy cannot produce the one-commit topology, stop before merge rather than rewriting `main` afterward.
+
+**Dev PR route**
+
+1. Push `dev` to `origin/dev`.
+2. Open a pull request from `dev` to `main`.
+3. Build the PR body from the verified release narrative, using the consolidated canonical changelog section when one exists and the diff-derived temporary narrative otherwise.
+4. Watch PR checks until they finish.
+5. If all required checks pass, merge using the repository's established method. Prefer the repository default; if no convention is discoverable, use a normal merge commit rather than squash/rebase because it preserves the dev release commit and audit trail.
+6. After merge, switch to `main` and pull the latest state.
 
 **Direct-main route**
 
@@ -363,8 +390,9 @@ Stop further release actions and report the state already completed when:
 - On the direct-main route, local `main` does not initially equal `origin/main` or either `dev` branch appears before push.
 - The version source cannot be identified safely or multiple version files disagree.
 - A canonical project changelog exists but its intended version section is missing, ambiguous, conflicts with release evidence, or remains duplicated under `Unreleased`.
+- Version-branch pre-PR squash lacks explicit rewrite approval, finds an existing open PR, loses tree equality, cannot prove `origin/main` ancestry, or fails its exact `--force-with-lease` update.
 - Validation fails and cannot be fixed safely inside the release scope.
-- PR checks fail on the PR route.
+- PR checks fail on either PR route.
 - The released `main` version or commit does not match the intended local and `origin/main` state.
 - The release tag exists on a different commit.
 - Repository-owned tag automation fails, creates incomplete or conflicting external state, or cannot be correlated to the exact tag and released commit.
@@ -379,8 +407,9 @@ Report:
 - Eligibility evidence: GitHub repository, authenticated account, `ADMIN` permission, explicit release request, fork topology, and—when applicable—the independent-fork workflow classification
 - Selected route and branch-detection evidence
 - Release-narrative source: canonical changelog section or temporary diff-derived notes, including changelog-absence confirmation when applicable
+- Version-route squash evidence when applicable: baseline/source old/new OIDs, local archive ref, tree equality, one-parent topology, exact force-with-lease result, and post-merge main topology
 - Wrong-branch transfer, branch-alignment, stash cleanup, and any approved rebase/force-with-lease result when recovery ran
-- PR URL, checks result, and merge status for the PR route; `Not applicable — direct-main route` otherwise
+- PR URL, checks result, and merge status for either PR route; `Not applicable — direct-main route` otherwise
 - `main` version confirmation
 - Release tag push/result
 - Repository release-automation classification and, for every owner, the workflow/run URL, responsibility, correlation evidence, and terminal result

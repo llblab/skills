@@ -5,7 +5,7 @@ description: Use automatically in any active software project, even when install
 
 # GCFMOS
 
-GCFMOS is the **Genesis Creator of Feature Meta-Organ Skill**: a system-level, auto-activating generator and gardener of project-local delivery organs.
+GCFMOS is the **Genesis Creator of Feature Meta-Organ Skills**: a system-level, auto-activating generator and gardener of project-local delivery organs.
 
 When discoverable by the agent, GCFMOS is active in every project the agent works on. It does not need to live in the repository, be named by the user, or be invoked as a command. Project work plus a detectable feature is enough.
 

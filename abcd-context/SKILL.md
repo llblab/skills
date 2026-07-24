@@ -31,16 +31,29 @@ Skip the skill for conversational work, trivial changes, or tasks that produced 
 
 Detailed resolution, adaptation, consolidation, and overlay rules live in [`docs/protocols.md`](./docs/protocols.md). Templates live in [`docs/templates.md`](./docs/templates.md).
 
+## Hierarchical Backlog Batching
+
+For non-trivial work, model the plan as `outcome or epic → acceptance checkpoint → owned work item`, not one long flat sequence.
+
+- Create a checkpoint only when several compatible changes share one meaningful integration boundary and can form a compiling, bisectable candidate. Keep one-shot work flat.
+- Group by coupled invariant, ownership boundary, or acceptance evidence rather than file proximity or arbitrary item count. Keep conflicting transitions, unrelated domains, and externally gated work in separate checkpoints.
+- Give every work item one focused falsification route: a named test family, filter, audit, or explicit evidence owner. A shared test names the smallest item set whose interaction it proves.
+- During edits, prefer focused item validation. Run aggregate package/runtime checks once when the checkpoint candidate forms; reserve full release validation for the highest boundary that actually needs it.
+- Keep dependency order inside a checkpoint only where correctness requires it. Independent items may proceed in parallel without turning the backlog into a false linear pipeline.
+- Treat the checkpoint as an acceptance and context boundary, not a second source of task truth. Child items own concrete remaining work; the checkpoint owns only the shared exit condition.
+- Close or narrow children as reality changes. Remove the checkpoint when its aggregate exit condition passes, and move meaningful impact to delivery history.
+
 ## Invariants
 
 1. `Single source of truth`: Do not track the same state across durable protocol, open work, completed history, and docs.
 2. `Reality before prose`: Inspect the implementation, diff, plans, and existing conventions before updating context.
 3. `Constraint-driven structure`: Add hierarchy only when discovered constraints justify it; restructure inherited context when accidental shape hides truth.
-4. `Human entrypoint continuity`: Keep root and relevant subtree README files reachable and current when setup, usage, topology, or ownership changes.
-5. `Backlog truth`: A completed or narrowed slice must not remain falsely open.
-6. `Impact-oriented history`: Record meaningful delivered outcomes, not bookkeeping or duplicated commit logs.
-7. `Local convention compatibility`: Cooperate with stricter project overlays; do not copy project-specific gates into this portable protocol.
-8. `Farmville guard`: If an edit would not preserve durable wisdom, correct open-work truth, record meaningful delivery, or repair discoverability, skip it. Silence is valid.
+4. `Hierarchical execution`: Group compatible non-trivial work under acceptance checkpoints with attributable item-level evidence; do not force independent work into a false sequence or replay broad gates after every edit.
+5. `Human entrypoint continuity`: Keep root and relevant subtree README files reachable and current when setup, usage, topology, or ownership changes.
+6. `Backlog truth`: A completed or narrowed slice must not remain falsely open.
+7. `Impact-oriented history`: Record meaningful delivered outcomes, not bookkeeping or duplicated commit logs.
+8. `Local convention compatibility`: Cooperate with stricter project overlays; do not copy project-specific gates into this portable protocol.
+9. `Farmville guard`: If an edit would not preserve durable wisdom, correct open-work truth, record meaningful delivery, or repair discoverability, skip it. Silence is valid.
 
 ## POST_TASK Flow
 
