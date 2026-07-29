@@ -94,8 +94,9 @@ Shape checks remain heuristic and project-tunable.
 
 ## Machine Output
 
-- `--json` returns `passed`, `errors`, `warnings`, and ordered `items`.
-- `NO_COLOR=1` removes ANSI output from human-readable logs.
+- JSON is the default and returns `passed`, `errors`, `warnings`, and ordered `items`.
+- `--json` remains an explicit compatibility alias for the default.
+- `--text` selects human-readable logs; `NO_COLOR=1` removes ANSI output from them.
 - Summary keys and exit behavior form compatibility surfaces for CI and agent callers.
 
 ## Regression Contract
@@ -119,7 +120,10 @@ node /path/to/skill/scripts/validate-context.mjs
 bash /path/to/skill/scripts/validate-context.sh /path/to/project
 node /path/to/skill/scripts/validate-context.mjs /path/to/project
 
-# Machine output
+# Explicit human-readable output
+bash /path/to/skill/scripts/validate-context.sh --text /path/to/project
+
+# Explicit JSON compatibility alias
 bash /path/to/skill/scripts/validate-context.sh --json /path/to/project
 
 # Optional table width evidence

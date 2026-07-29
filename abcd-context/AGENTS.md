@@ -38,7 +38,7 @@
 - `LaTeX Precision`: Detect LaTeX commands rather than broad dollar-delimited patterns that catch shell variables.
 - `Path Portability`: Avoid GNU-only `realpath --relative-to`; strip known root prefixes where safe.
 - `Locale Portability`: Prefer available UTF-8 locales with a safe `C` fallback.
-- `Machine Output`: Honor `NO_COLOR`; preserve stable JSON and summary fields.
+- `Machine Output`: Emit stable JSON by default for agent and CI consumption; preserve explicit human-readable output and summary fields.
 - `Bounded Scanning`: Skip link scanning above the configured byte threshold while validating the surrounding graph.
 - `Opt-In Width`: Warn about Markdown table width only when the caller supplies a threshold.
 - `Core Shape Flexibility`: Accept both numbered mature-project sections and compact skill-style durable sections.

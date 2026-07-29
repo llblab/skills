@@ -37,13 +37,16 @@ else
 fi
 
 # Configuration
-OUTPUT_JSON=false
+OUTPUT_JSON=true
 TABLE_WIDTH_WARN_THRESHOLD_ARG=""
 TARGET_ROOT="${VALIDATE_CONTEXT_ROOT:-$(pwd)}"
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --json)
             OUTPUT_JSON=true
+            ;;
+        --text)
+            OUTPUT_JSON=false
             ;;
         --table-width|--table-max-width)
             if [[ $# -lt 2 || "$2" == --* ]]; then
@@ -59,10 +62,11 @@ while [[ $# -gt 0 ]]; do
             ;;
         --help|-h)
             cat <<'EOF'
-Usage: validate-context.sh [--json] [--table-width N] [project-root]
+Usage: validate-context.sh [--json|--text] [--table-width N] [project-root]
 
 Validates the current directory by default, VALIDATE_CONTEXT_ROOT when set,
-or the explicit project-root argument when provided.
+or the explicit project-root argument when provided. Output defaults to JSON;
+pass --text for human-readable logs.
 
 Markdown table width warnings are disabled by default. Pass --table-width N
 to warn when a table row exceeds N characters.

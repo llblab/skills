@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
-let outputJson = false;
+let outputJson = true;
 let explicitRoot;
 let tableWidthWarnArg;
 const args = process.argv.slice(2);
@@ -12,6 +12,10 @@ for (let index = 0; index < args.length; index += 1) {
   const arg = args[index];
   if (arg === "--json") {
     outputJson = true;
+    continue;
+  }
+  if (arg === "--text") {
+    outputJson = false;
     continue;
   }
   if (arg === "--table-width" || arg === "--table-max-width") {
@@ -32,10 +36,11 @@ for (let index = 0; index < args.length; index += 1) {
   if (arg === "--help" || arg === "-h") {
     console.log(
       [
-        "Usage: validate-context.mjs [--json] [--table-width N] [project-root]",
+        "Usage: validate-context.mjs [--json|--text] [--table-width N] [project-root]",
         "",
         "Validates the current directory by default, VALIDATE_CONTEXT_ROOT when set,",
-        "or the explicit project-root argument when provided.",
+        "or the explicit project-root argument when provided. Output defaults to JSON;",
+        "pass --text for human-readable logs.",
         "",
         "Markdown table width warnings are disabled by default. Pass --table-width N",
         "to warn when a table row exceeds N characters.",

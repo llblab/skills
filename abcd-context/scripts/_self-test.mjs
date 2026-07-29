@@ -18,6 +18,8 @@ const bashPathOutput = run('bash', [path.join(scriptDir, 'validate-context.sh'),
 const nodePathOutput = run(process.execPath, [path.join(scriptDir, 'validate-context.mjs'), fixtureRoot], { withoutRootEnv: true });
 const bashSelfOutput = run('bash', [path.join(scriptDir, 'validate-context.sh'), skillDir], { withoutRootEnv: true });
 const nodeSelfOutput = run(process.execPath, [path.join(scriptDir, 'validate-context.mjs'), skillDir], { withoutRootEnv: true });
+const bashTextOutput = run('bash', [path.join(scriptDir, 'validate-context.sh'), '--text']);
+const nodeTextOutput = run(process.execPath, [path.join(scriptDir, 'validate-context.mjs'), '--text']);
 const bashMissingPathOutput = run('bash', [path.join(scriptDir, 'validate-context.sh'), path.join(fixtureRoot, 'missing')], { withoutRootEnv: true });
 const nodeMissingPathOutput = run(process.execPath, [path.join(scriptDir, 'validate-context.mjs'), path.join(fixtureRoot, 'missing')], { withoutRootEnv: true });
 
@@ -27,14 +29,14 @@ checkOutput('bash fixture path arg', bashPathOutput);
 checkOutput('node fixture path arg', nodePathOutput);
 checkOutput('bash self', bashSelfOutput);
 checkOutput('node self', nodeSelfOutput);
+checkTextOutput('bash text', bashTextOutput);
+checkTextOutput('node text', nodeTextOutput);
 checkMissingPath('bash missing path', bashMissingPathOutput);
 checkMissingPath('node missing path', nodeMissingPathOutput);
 
 checkParity('fixture', bashOutput, nodeOutput, true);
 checkParity('self', bashSelfOutput, nodeSelfOutput, true);
 
-process.stdout.write(bashOutput.stdout);
-process.stdout.write(nodeOutput.stdout);
 console.log(`PASS: validate-context fixture + self-reference regression (bash + node parity)`);
 console.log(`Self-test assertions: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
@@ -57,9 +59,15 @@ function run(cmd, argv, options = {}) {
 
 function checkOutput(runtime, result) {
   assert(result.status === 0, `${runtime} exits 0`);
-  assert(result.stdout.includes('Context validation PASSED'), `${runtime} passes`);
-  assert(result.stdout.includes('Markdown shape checks passed'), `${runtime} runs markdown shape check`);
-  assert(result.stdout.includes('No obvious BACKLOG/CHANGELOG drift detected'), `${runtime} runs root drift check`);
+  const output = parseJson(runtime, result.stdout);
+  assert(output?.passed === 1, `${runtime} passes`);
+  assert(output?.items.some((item) => item.message === 'Markdown shape checks passed'), `${runtime} runs markdown shape check`);
+  assert(output?.items.some((item) => item.message === 'No obvious BACKLOG/CHANGELOG drift detected'), `${runtime} runs root drift check`);
+}
+
+function checkTextOutput(runtime, result) {
+  assert(result.status === 0, `${runtime} exits 0`);
+  assert(result.stdout.includes('Context validation PASSED'), `${runtime} provides human-readable output`);
 }
 
 function checkMissingPath(runtime, result) {
@@ -68,27 +76,25 @@ function checkMissingPath(runtime, result) {
 }
 
 function checkParity(scope, bashResult, nodeResult, requireClean) {
-  const bashWarnings = countSummary(`${scope} bash`, bashResult.stdout, 'Warnings');
-  const nodeWarnings = countSummary(`${scope} node`, nodeResult.stdout, 'Warnings');
-  const bashErrors = countSummary(`${scope} bash`, bashResult.stdout, 'Errors');
-  const nodeErrors = countSummary(`${scope} node`, nodeResult.stdout, 'Errors');
-  assert(bashWarnings === nodeWarnings, `${scope} warning counts match`);
-  assert(bashErrors === nodeErrors, `${scope} error counts match`);
+  const bashOutput = parseJson(`${scope} bash`, bashResult.stdout);
+  const nodeOutput = parseJson(`${scope} node`, nodeResult.stdout);
+  assert(bashOutput?.warnings === nodeOutput?.warnings, `${scope} warning counts match`);
+  assert(bashOutput?.errors === nodeOutput?.errors, `${scope} error counts match`);
   if (requireClean) {
-    assert(bashWarnings === '0', `${scope} warnings = 0`);
-    assert(bashErrors === '0', `${scope} errors = 0`);
+    assert(bashOutput?.warnings === 0, `${scope} warnings = 0`);
+    assert(bashOutput?.errors === 0, `${scope} errors = 0`);
   }
 }
 
-function countSummary(name, output, key) {
-  const re = new RegExp(`^${key}:\\s*(\\d+)`, 'm');
-  const match = output.match(re);
-  if (!match) {
-    assert(false, `${name} has summary key ${key}`);
-    return '';
+function parseJson(name, output) {
+  try {
+    const parsed = JSON.parse(output);
+    assert(true, `${name} returns JSON`);
+    return parsed;
+  } catch {
+    assert(false, `${name} returns JSON`);
+    return undefined;
   }
-  assert(true, `${name} has summary key ${key}`);
-  return match[1];
 }
 
 function assert(ok, label) {

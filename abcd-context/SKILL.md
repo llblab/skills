@@ -103,9 +103,9 @@ bash "${SKILL_DIR}/scripts/validate-context.sh" /path/to/project
 node "${SKILL_DIR}/scripts/validate-context.mjs" /path/to/project
 ```
 
-Useful options:
+Output defaults to JSON for reliable agent and CI consumption. Useful options:
 
-- `--json` for machine-readable output.
+- `--text` for human-readable logs; `--json` remains an explicit compatibility alias for the default.
 - `--table-width N` for opt-in Markdown table-width warnings.
 - `VALIDATE_CONTEXT_ROOT=/path` as an environment fallback.
 - `NO_COLOR=1` for logs consumed by CI or agents.
