@@ -5,6 +5,7 @@
 ### Meta-Protocol Principles
 
 - 'Pragmatic HGT (Occam's Razor)': Transfer genes only when they add real value.
+- 'Minimum Sufficient Change': After tracing the real flow, choose the first sufficient option and stop; transfer the decision rule without copying donor branding, modes, status UI, or command machinery.
 - 'Gene == Meme': In cross-evolution, a gene is a transmissible meme. It must carry meaning, change behavior, survive transport, and have a recognizable absent failure mode. This equivalence is itself a gene-meme: a transmissible standard for deciding what counts as evolutionary material.
 - 'Memetic Recombination': Any gene-meme can be decomposed, recombined, and composed to seek emergent properties and new gene-memes; prefer this over blind copying when patterns interact.
 - 'Horizontal Gene Transfer Mode': In soft proactivity, transfer at most one gene-meme from one donor to one recipient before stopping, unless the user explicitly asks for broader propagation. This mode is itself a gene-meme.

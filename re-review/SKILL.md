@@ -1,6 +1,6 @@
 ---
 name: re-review
-description: Evidence-grounded review for code, diffs, PRs, documents, plans, specs, and architecture. Use for evidence review, review, code review, quick review, sanity check, quality check, architecture review, production readiness, security review, scaling review, document review, evaluate, or check.
+description: Evidence-grounded review for code, diffs, PRs, documents, plans, specs, and architecture. Use for evidence review, review, code review, quick review, sanity check, quality check, architecture review, production readiness, security review, scaling review, document review, over-engineering review, simplification review, what can be deleted, bloat, evaluate, or check.
 ---
 
 # Re-Review
@@ -66,6 +66,8 @@ For code, inspect:
 - Simplicity, YAGNI, one-use abstractions, dead branches, duplicated logic, and misleading names.
 - Maintainability, dependency direction, coupling, ownership, public contracts, and migration safety.
 - Performance, N plus one behavior, blocking work, memory growth, query shape, and hot paths.
+
+When the request centers on simplification or over-engineering, apply a minimum-sufficient-change, deletion-first lens after tracing the real flow: remove unnecessary work, inline one-use indirection, reuse an established local path, prefer standard-library or native capabilities, and use an already-installed dependency before proposing custom machinery. Report each surviving finding as the exact cut plus its simpler replacement. Do not flag complexity that demonstrably pays for safety, correctness, operability, accessibility, or an explicit requirement.
 
 For documents, inspect:
 

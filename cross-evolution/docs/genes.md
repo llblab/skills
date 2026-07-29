@@ -57,6 +57,14 @@ The skill starts with the smallest useful contract and adds ceremony only when d
 
 Absent failure mode: the skill becomes overdesigned, hard to activate, and slower than the work it was meant to improve.
 
+### `minimum-sufficient-change`
+
+After tracing the real flow, the skill chooses the first sufficient rung: omit speculative work, reuse an established path, prefer standard-library or native capability, use a fitting installed dependency, then write minimal custom behavior without weakening explicit requirements or safety.
+
+Absent failure mode: the skill adds speculative code, abstractions, dependencies, or scattered symptom patches even though a smaller root-cause change would fully solve the problem.
+
+Recommendation mode: optional/reward-only. Adopt it in execution and review skills where solution size is a real decision; do not copy the ladder into unrelated domain skills or expose it as user-facing mode machinery.
+
 ### `graceful-degradation`
 
 The skill defines how to narrow, defer, stop, or degrade without leaving dead ceremony or false success.

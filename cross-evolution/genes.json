@@ -62,6 +62,21 @@
       ]
     },
     {
+      "id": "minimum-sufficient-change",
+      "name": "Minimum sufficient change",
+      "lifecycle": "active",
+      "weight": 3,
+      "recommend": "none",
+      "meaning": "After tracing the real flow, the skill chooses the first sufficient rung: omit speculative work, reuse an established path, prefer standard-library or native capability, use a fitting installed dependency, then write minimal custom behavior without weakening explicit requirements or safety.",
+      "failureMode": "The skill adds speculative code, abstractions, dependencies, or scattered symptom patches even though a smaller root-cause change would fully solve the problem.",
+      "detect": [
+        {
+          "type": "grep_docs",
+          "args": "Minimum-Sufficient-Change|minimum sufficient|first.*sufficient|standard library.*native|smallest custom|root cause.*shared"
+        }
+      ]
+    },
+    {
       "id": "graceful-degradation",
       "name": "Graceful degradation",
       "lifecycle": "active",

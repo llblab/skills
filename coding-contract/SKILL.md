@@ -39,6 +39,18 @@ Use this skill as the default operating contract for software engineering work.
 - Do not let generic implementation readiness override the user's actual surface.
 - Keep skills atomically independent: compose through general roles, handoff shape, and validation criteria, not by hard-coding sibling skill names.
 
+## Minimum-Sufficient-Change Gate
+
+After tracing the affected flow, stop at the first option that fully satisfies the request:
+
+1. Skip work that serves only a speculative future need.
+2. Reuse an established local path, helper, type, or pattern.
+3. Prefer the standard library or a native platform capability.
+4. Use an already-installed dependency when it fits without widening risk or public surface.
+5. Write the smallest custom implementation that preserves correctness and maintainability.
+
+For bug fixes, inspect callers and sibling paths before editing, then fix the narrowest shared owner of the root cause instead of patching each symptom. Never trade away trust-boundary validation, data safety, security, accessibility, required error handling, or an explicit user requirement for a smaller diff.
+
 ## Ask First
 
 Ask before doing any of these:
@@ -73,6 +85,9 @@ Ask before doing any of these:
 
 - Write the simplest correct code.
 - Avoid unnecessary abstractions, defensive boilerplate, and enterprise-style indirection.
+- Extract only when real reuse, ownership, or testing pressure earns the boundary; do not scaffold hypothetical flexibility.
+- For changed non-trivial behavior, leave the smallest project-native regression check that would have caught the failure; do not create test infrastructure for trivial one-liners.
+- When an intentional shortcut has a known ceiling, comment the ceiling and the concrete condition that would justify a stronger design; do not annotate routine simplicity.
 - Do not use exceptions for routine control flow when explicit checks are available.
 - Use exceptions only when the API exposes failure through exceptions and recovery is explicit.
 - Prefer early returns for clarity.

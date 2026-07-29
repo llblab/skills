@@ -6,6 +6,7 @@
     "portability-lens",
     "observation-over-score",
     "progressive-disclosure",
+    "minimum-sufficient-change",
     "graceful-degradation",
     "context-scoped-naming",
     "portable-standards",
@@ -55,7 +56,11 @@
     {
       "kind": "hgt",
       "text": "Soft proactivity has a bounded Horizontal Gene Transfer Mode: one donor, one gene-meme, one recipient, one expected behavior change, then stop."
+    },
+    {
+      "kind": "recombination",
+      "text": "Transfer minimum-sufficient-change as a neutral decision rule; discard donor branding, persistent modes, status UI, and command machinery when recipients already own execution and review surfaces."
     }
   ],
-  "lastReviewed": "2026-05-07"
+  "lastReviewed": "2026-07-29"
 }
