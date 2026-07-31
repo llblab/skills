@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.2
+
+- `Human-First Validation`: The validator now has one Node implementation and prints classic readable logs by default; JSON output and the Bash runtime are removed. Impact: direct local use and agent calls receive the same concise report without format switches.
+- `Line-Reference Validation`: GitHub-style line-reference links now fail when their target line is absent. Impact: broken Markdown references cannot silently pass validation.
+
 ## 1.5.1
 
 - `JSON-First Validation`: Bash and Node validators now emit stable JSON by default while preserving explicit `--text` output and the existing `--json` alias. Impact: agent, recipe, and CI callers receive machine-readable results without extra flags.

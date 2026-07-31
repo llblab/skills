@@ -6,8 +6,8 @@
 - `Root State Separation`: Durable protocol, open work, completed delivery, README entrypoints, and subsystem docs keep distinct ownership.
 - `Constraint-Driven Evolution`: Structure grows from observed coordination pressure, not template ceremony.
 - `Project Neutrality`: Portable rules remain independent of repository stacks and local overlays.
-- `Dual-Runtime Parity`: Bash and Node validators should produce the same pass/fail class and warning/error counts.
-- `Cross-Platform`: Validator behavior supports Linux and macOS; Node provides the portable runtime path for other environments.
+- `Single Runtime`: The Node validator provides one authoritative behavior and supported execution path.
+- `Cross-Platform`: Validator behavior runs wherever the supported Node runtime runs.
 
 ## Operating Principles
 
@@ -15,7 +15,7 @@
 - Keep `BACKLOG.md` limited to real open, gated, or blocked work and `CHANGELOG.md` limited to completed outcomes.
 - Keep root `README.md` connected to `AGENTS.md`, `BACKLOG.md`, `CHANGELOG.md`, and `docs/README.md` when those surfaces exist.
 - Keep subtree README entrypoints reachable once they become real human starting points.
-- Use `scripts/validate-context.sh` or `scripts/validate-context.mjs` for audits and `scripts/_self-test.mjs` for runtime parity/regression.
+- Use `scripts/validate-context.mjs` for audits and `scripts/_self-test.mjs` for regression.
 - Treat warnings as evidence requiring judgment, not as automatic failure or automatic approval.
 
 ## Protocol Constraints
@@ -31,14 +31,11 @@
 
 ## Validator Constraints
 
-- `Portable File Metadata`: Use Linux/macOS-compatible `stat` fallbacks.
-- `Portable Grep`: Avoid `grep -P`; use portable extended regex and text processing.
-- `Anchor Parity`: Preserve underscores while normalizing GitHub-style heading anchors.
-- `Safe Shell Conditions`: Under `set -e`, use `if`/`fi` or `|| true` where a false condition is expected.
+- `Single Runtime`: Keep `validate-context.mjs` as the only supported validator implementation.
+- `Anchor Validation`: Preserve underscores while normalizing GitHub-style heading anchors and validate line-reference bounds.
 - `LaTeX Precision`: Detect LaTeX commands rather than broad dollar-delimited patterns that catch shell variables.
-- `Path Portability`: Avoid GNU-only `realpath --relative-to`; strip known root prefixes where safe.
-- `Locale Portability`: Prefer available UTF-8 locales with a safe `C` fallback.
-- `Machine Output`: Emit stable JSON by default for agent and CI consumption; preserve explicit human-readable output and summary fields.
+- `Path Portability`: Resolve paths through Node rather than platform-specific shell utilities.
+- `Human Output`: Emit concise readable logs and a summary; `NO_COLOR=1` suppresses color.
 - `Bounded Scanning`: Skip link scanning above the configured byte threshold while validating the surrounding graph.
 - `Opt-In Width`: Warn about Markdown table width only when the caller supplies a threshold.
 - `Core Shape Flexibility`: Accept both numbered mature-project sections and compact skill-style durable sections.

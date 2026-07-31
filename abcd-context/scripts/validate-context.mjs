@@ -4,20 +4,11 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
-let outputJson = true;
 let explicitRoot;
 let tableWidthWarnArg;
 const args = process.argv.slice(2);
 for (let index = 0; index < args.length; index += 1) {
   const arg = args[index];
-  if (arg === "--json") {
-    outputJson = true;
-    continue;
-  }
-  if (arg === "--text") {
-    outputJson = false;
-    continue;
-  }
   if (arg === "--table-width" || arg === "--table-max-width") {
     const value = args[index + 1];
     if (
@@ -36,11 +27,10 @@ for (let index = 0; index < args.length; index += 1) {
   if (arg === "--help" || arg === "-h") {
     console.log(
       [
-        "Usage: validate-context.mjs [--json|--text] [--table-width N] [project-root]",
+        "Usage: validate-context.mjs [--table-width N] [project-root]",
         "",
         "Validates the current directory by default, VALIDATE_CONTEXT_ROOT when set,",
-        "or the explicit project-root argument when provided. Output defaults to JSON;",
-        "pass --text for human-readable logs.",
+        "or the explicit project-root argument when provided.",
         "",
         "Markdown table width warnings are disabled by default. Pass --table-width N",
         "to warn when a table row exceeds N characters.",
@@ -135,7 +125,6 @@ const skipDirs = new Set([
 
 let errors = 0;
 let warnings = 0;
-const items = [];
 const colors = noColor
   ? { g: "", y: "", r: "", c: "", n: "" }
   : {
@@ -149,8 +138,6 @@ const colors = noColor
 function add(level, msg) {
   if (level === "warn") warnings++;
   if (level === "fail") errors++;
-  items.push({ level, message: msg });
-  if (outputJson) return;
   const tag =
     level === "pass"
       ? `${colors.g}[PASS]${colors.n}`
@@ -165,9 +152,7 @@ const pass = (msg) => add("pass", msg);
 const warn = (msg) => add("warn", msg);
 const fail = (msg) => add("fail", msg);
 const info = (msg) => add("info", msg);
-const progress = (msg) => {
-  if (!outputJson) console.log(msg);
-};
+const progress = (msg) => console.log(msg);
 
 function exists(rel) {
   return fs.existsSync(path.join(root, rel));
@@ -341,7 +326,22 @@ for (const file of mdFiles) {
     }
     if (target !== file) targets.add(path.resolve(target));
     if (anchor && fs.statSync(target).isFile()) {
-      if (/^L\d+(-L\d+)?$/.test(anchor)) continue;
+      const lineRef = anchor.match(/^L([1-9]\d*)(?:-L([1-9]\d*))?$/);
+      if (lineRef) {
+        const startLine = Number(lineRef[1]);
+        const endLine = Number(lineRef[2] || lineRef[1]);
+        const targetText = read(target);
+        const totalLines = targetText
+          ? targetText.split(/\r?\n/).length - (targetText.endsWith("\n") ? 1 : 0)
+          : 0;
+        if (startLine > totalLines || endLine > totalLines || endLine < startLine) {
+          fail(
+            `Line ref out of range: #${anchor} (file has ${totalLines} lines) in ${rel(target)} (from ${rel(file)})`,
+          );
+          broken = true;
+        }
+        continue;
+      }
       const anchors = read(target)
         .split(/\r?\n/)
         .filter((l) => /^#{1,6} /.test(l))
@@ -529,25 +529,15 @@ if (fs.existsSync(docsDir) && fs.existsSync(docsIndex)) {
   if (!orphan && !phantom) pass("Docs index coverage: 0 orphans, 0 phantoms");
 }
 
-if (outputJson) {
+console.log("\n--- VALIDATION SUMMARY ---\n");
+console.log(`Warnings: ${warnings}`);
+console.log(`Errors: ${errors}\n`);
+if (!errors)
   console.log(
-    JSON.stringify(
-      { passed: errors === 0 ? 1 : 0, errors, warnings, items },
-      null,
-      2,
-    ),
+    `${colors.g}✓ Context validation PASSED${colors.n}`,
   );
-} else {
-  console.log("\n--- VALIDATION SUMMARY ---\n");
-  console.log(`Warnings: ${warnings}`);
-  console.log(`Errors: ${errors}\n`);
-  if (!errors)
-    console.log(
-      `${colors.g}✓ Context validation PASSED${colors.n}\nReady for Task Completion Protocol`,
-    );
-  else
-    console.log(
-      `${colors.r}✗ Context validation FAILED${colors.n}\nManual intervention required`,
-    );
-}
+else
+  console.log(
+    `${colors.r}✗ Context validation FAILED${colors.n}\nManual intervention required`,
+  );
 process.exit(errors > 0 ? 1 : 0);

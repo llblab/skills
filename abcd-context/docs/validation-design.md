@@ -4,12 +4,9 @@
 
 `validate-context` supplies structural evidence for the ABCd graph. It checks ownership surfaces, navigation, links, drift signals, and Markdown shape. It cannot prove that documentation claims match implementation; the full audit keeps that manual responsibility explicit.
 
-## Runtimes
+## Runtime
 
-- `scripts/validate-context.sh`: Inspectable Bash implementation for Linux and macOS.
-- `scripts/validate-context.mjs`: Node implementation and portable path for environments without Bash.
-
-Given the same root and environment, both runtimes should return the same pass/fail class and warning/error counts. Any unexplained difference in a core check is a parity bug.
+`scripts/validate-context.mjs` is the single supported implementation. It runs on the supported Node runtime and prints classic human-readable validation logs by default.
 
 ## Root Resolution
 
@@ -24,13 +21,13 @@ A missing or non-directory root fails before validation.
 ## Checks
 
 1. `Durable file detection — Error`: Finds `AGENTS.md`, `CLAUDE.md`, `CODEX.md`, `GEMINI.md`, or `CONTEXT.md`.
-2. `Root README connectivity — Warning`: Checks links/references to the durable file, canonical open work, completed history, and docs index when present.
+2. `Root README connectivity — Warning`: Checks references to the durable file, canonical open work, completed history, and docs index when present.
 3. `Core durable structure — Warning`: Accepts numbered mature-project sections or compact skill-style meta/operating sections.
 4. `Root state split — Warning`: Detects the canonical plan, completed-history surface, delivery history inside the durable file, and obvious backlog/changelog label drift.
-5. `Relative links and anchors — Error`: Validates Markdown links outside fenced code blocks.
+5. `Relative links and anchors — Error`: Validates Markdown links outside fenced code blocks, including heading anchors and GitHub-style line-reference bounds.
 6. `README reachability — Warning`: Finds subtree README files with no inbound Markdown link.
 7. `Meta-protocol presence — Warning`: Checks the durable file for `Meta-Protocol Principles`.
-8. `Bloat signals — Mixed`: Reports information density, disproportionate sections, and sparse structure.
+8. `Bloat signals — Warning`: Reports low information density or sparse structure in the durable file.
 9. `LaTeX in docs — Error`: Flags LaTeX commands unsupported by ordinary GitHub Markdown rendering.
 10. `Markdown shape — Warning`: Detects definition-list tables and optional over-width table rows.
 11. `Freshness — Warning`: Reports durable files older than 30 days.
@@ -48,12 +45,11 @@ Exit `0` never means the context is factually correct. It means automated checks
 
 ## Link Validation
 
-- Scans Markdown under the project root while excluding common generated, dependency, cache, and vendor directories.
-- Ignores links inside fenced code blocks.
-- Handles anchor-only, relative file, file-plus-anchor, and GitHub line-reference links.
-- Normalizes headings to GitHub-style anchors while preserving underscores.
-- Records linked files to evaluate subtree README reachability.
-- Skips files larger than `ABCD_MARKDOWN_LINK_SCAN_MAX_BYTES`, default `262144`, and emits an info item instead of spending unbounded time on generated/reference dumps.
+The validator scans Markdown under the project root while excluding common generated, dependency, cache, and vendor directories. It ignores links inside fenced code blocks.
+
+It handles anchor-only, relative-file, file-plus-anchor, and GitHub line-reference links. Heading anchors use GitHub-style normalization while preserving underscores. Line references must point to existing lines.
+
+Files larger than `ABCD_MARKDOWN_LINK_SCAN_MAX_BYTES`, default `262144`, skip link scanning and emit an info item instead of spending unbounded time on generated or reference dumps.
 
 ## Root State Drift
 
@@ -68,17 +64,12 @@ These checks identify suspicious duplication; they do not prove semantic complet
 
 ## Bloat Signals
 
-The validator avoids a hard file-length limit. It counts independent signals:
+The validator avoids a hard file-length limit. It checks independent signals:
 
 - `Low information density`: Structural elements make up less than 40% of nonblank lines.
-- `Disproportionate section`: A section exceeds twice the average section size and 20 lines.
 - `Sparse structure`: The file averages more than 15 lines per heading.
 
-Interpretation:
-
-- Zero signals: No automated bloat concern.
-- One or two signals: Consolidation recommended.
-- Three or more signals: Validation error; garbage collection needed.
+Signals suggest consolidation; they do not replace judgment.
 
 ## Markdown Shape
 
@@ -92,42 +83,36 @@ Shape checks remain heuristic and project-tunable.
 - Each contiguous table emits at most one width warning.
 - Common two-column definition-table headers trigger a recommendation to use label bullets.
 
-## Machine Output
+## Human-Readable Output
 
-- JSON is the default and returns `passed`, `errors`, `warnings`, and ordered `items`.
-- `--json` remains an explicit compatibility alias for the default.
-- `--text` selects human-readable logs; `NO_COLOR=1` removes ANSI output from them.
-- Summary keys and exit behavior form compatibility surfaces for CI and agent callers.
+Validation prints each check and a summary by default. `NO_COLOR=1` disables ANSI color for CI or captured logs. There is no JSON output mode.
 
 ## Regression Contract
 
-`scripts/_self-test.mjs` runs both runtimes against:
+`scripts/_self-test.mjs` verifies the Node validator against:
 
-1. `fixtures/abcd-project`, which should produce zero warnings and zero errors.
-2. The `abcd-context` skill root, which should validate the protocol's own context graph with zero warnings and zero errors.
-3. A missing path, which both runtimes must reject clearly.
+1. `fixtures/abcd-project`, through both environment and explicit-root resolution.
+2. The `abcd-context` skill root.
+3. A missing path, which must fail clearly.
+4. The removed `--json` option, which must fail clearly.
+5. A temporary fixture with an out-of-range line reference, which must fail clearly.
 
-The test asserts runtime exit status, key checks, warning/error parity, and self-reference. The fixture remains linked from [its README](../fixtures/abcd-project/README.md).
+The fixture remains linked from [its README](../fixtures/abcd-project/README.md).
 
 ## Usage
 
 ```bash
 # Current project
-bash /path/to/skill/scripts/validate-context.sh
 node /path/to/skill/scripts/validate-context.mjs
 
 # Explicit root
-bash /path/to/skill/scripts/validate-context.sh /path/to/project
 node /path/to/skill/scripts/validate-context.mjs /path/to/project
 
-# Explicit human-readable output
-bash /path/to/skill/scripts/validate-context.sh --text /path/to/project
-
-# Explicit JSON compatibility alias
-bash /path/to/skill/scripts/validate-context.sh --json /path/to/project
-
 # Optional table width evidence
-bash /path/to/skill/scripts/validate-context.sh --table-width 120 /path/to/project
+node /path/to/skill/scripts/validate-context.mjs --table-width 120 /path/to/project
+
+# Skill regression suite
+node /path/to/skill/scripts/_self-test.mjs
 ```
 
 ## Related

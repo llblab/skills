@@ -1,6 +1,6 @@
 # ABC Fixture Project
 
-Small fixture for `validate-context.sh` regression tests.
+Small fixture for `validate-context.mjs` regression tests.
 
 ## Start Here
 

@@ -12,10 +12,9 @@ Portable context protocol for keeping durable rules, open work, completed delive
 
 ## Validation
 
-Both runtimes implement the same core checks on Linux and macOS; Node provides the portable runtime path elsewhere.
+The Node validator prints human-readable results wherever the supported Node runtime runs.
 
 ```bash
-bash ./scripts/validate-context.sh /path/to/project
 node ./scripts/validate-context.mjs /path/to/project
 node ./scripts/_self-test.mjs
 ```
