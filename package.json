@@ -1,6 +1,6 @@
 {
   "name": "@llblab/skills",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "private": false,
   "description": "Dream Skills",
   "keywords": [
@@ -11,7 +11,6 @@
     "stt"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/llblab/skills#readme",
   "bugs": {
     "url": "https://github.com/llblab/skills/issues"
   },
@@ -24,7 +23,6 @@
     "bits-ui/",
     "brain-storm/",
     "coding-contract/",
-    "cross-evolution/",
     "domain-dag/",
     "edge-tts/",
     "extra-self/",
