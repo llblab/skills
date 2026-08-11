@@ -105,17 +105,22 @@ async function transcribe({ file, language, model }) {
   form.append("model", model);
   form.append("response_format", "json");
   if (language) form.append("language", language);
-  const response = await fetch(DEFAULTS.endpoint, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${env.MISTRAL_API_KEY}` },
-    body: form,
-  });
-  if (!response.ok)
-    throw new Error(
-      `Mistral API error: ${response.status} ${response.statusText}`,
-    );
-  const data = await response.json();
+  try {
+	const response = await fetch(DEFAULTS.endpoint, {
+	  method: "POST",
+	  headers: { Authorization: `Bearer ${env.MISTRAL_API_KEY}` },
+	  body: form,
+	});
+	if (!response.ok) {
+	  const errorText = await response.text().catch(() => "Unknown API Error");
+      throw new Error(`Mistral API error: ${response.status} - ${errorText}`);
+	}
+    const data = await response.json();
   return data.text ?? "";
+  } catch (err) {
+	console.error("Network or script error:", err);
+	throw err;
+  }
 }
 
 function isDirectCliEntrypoint(metaUrl, entryPath) {
