@@ -68,13 +68,13 @@ function parseArgs(args) {
   }
   options.file ||= positional[0] ?? "";
   options.language ||= positional[1] ?? "";
-  options.diarize = positional[2] ?? false;
+  options.diarize = positional[3] ?? false;
   options.diarize = options.diarize === true || String(options.diarize).toLowerCase() === "true";
 
   if (options.diarize) {
     options.model = "voxtral-mini-latest"; // works with diarization, so use it
   } else if (options.model === DEFAULTS.model) {
-    options.model = positional[3] ?? options.model;
+    options.model = positional[2] ?? options.model;
   }
 
   return options;

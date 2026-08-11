@@ -5,7 +5,7 @@
     "file:path",
     "lang:string=ru",
     "model:string=voxtral-mini-latest",
-	"diarize:bool=true"
+	"diarize:bool=false"
   ],
   "defaults": {
     "skill_dir": "~/.pi/agent/skills/mistral-stt"
