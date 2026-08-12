@@ -4,10 +4,9 @@
   "args": [
     "file:path",
     "lang:string=ru",
-    "model:string=whisper-large-v3-turbo"
+    "model:string=whisper-large-v3-turbo",
+    "diarize:bool=false",
+    "skill_dir:path=~/.agents/skills/groq-stt"
   ],
-  "defaults": {
-    "skill_dir": "~/.pi/agent/skills/groq-stt"
-  },
-  "template": "{skill_dir}/scripts/transcribe.sh {file} {lang} {model}"
+  "template": "{skill_dir}/scripts/transcribe.sh {file} {lang} {model} {diarize}"
 }
