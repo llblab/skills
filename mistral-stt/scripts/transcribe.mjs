@@ -23,6 +23,8 @@ const CLI_VALUES = new Map([
   ["-l", "language"],
   ["--model", "model"],
   ["-m", "model"],
+  ["--diarize", "diarize"],
+  ["-d", "diarize"],
 ]);
 
 // --- CLI ---
@@ -30,8 +32,8 @@ const CLI_VALUES = new Map([
 function usage() {
   return [
     "Usage:",
-    `  MISTRAL_API_KEY=xxx ${argv[1]} audio.ogg [language] [model]`,
-    `  MISTRAL_API_KEY=xxx ${argv[1]} --file audio.ogg [--lang ru] [--model ${DEFAULTS.model}]`,
+    `  MISTRAL_API_KEY=xxx ${argv[1]} audio.ogg [language] [model] [diarize]`,
+    `  MISTRAL_API_KEY=xxx ${argv[1]} --file audio.ogg [--lang ru] [--model ${DEFAULTS.model}] [--diarize true]`,
     "",
     "Outputs only transcription text on stdout.",
   ].join("\n");
@@ -41,6 +43,7 @@ function parseArgs(args) {
   const options = {
     file: "",
     language: "",
+	diarize: false,
     model: DEFAULTS.model,
     help: false,
   };
@@ -65,10 +68,15 @@ function parseArgs(args) {
   }
   options.file ||= positional[0] ?? "";
   options.language ||= positional[1] ?? "";
-  options.model =
-    options.model === DEFAULTS.model
-      ? (positional[2] ?? options.model)
-      : options.model;
+  options.diarize = positional[3] ?? false;
+  options.diarize = options.diarize === true || String(options.diarize).toLowerCase() === "true";
+
+  if (options.diarize) {
+    options.model = "voxtral-mini-latest"; // works with diarization, so use it
+  } else if (options.model === DEFAULTS.model) {
+    options.model = positional[2] ?? options.model;
+  }
+
   return options;
 }
 
@@ -96,7 +104,7 @@ function guessMimeType(file) {
   return "application/octet-stream";
 }
 
-async function transcribe({ file, language, model }) {
+async function transcribe({ file, language, model, diarize }) {
   await assertReadableFile(file);
   if (!env.MISTRAL_API_KEY) throw new Error("MISTRAL_API_KEY is required");
   const audio = await readFile(file);
@@ -105,17 +113,133 @@ async function transcribe({ file, language, model }) {
   form.append("model", model);
   form.append("response_format", "json");
   if (language) form.append("language", language);
-  const response = await fetch(DEFAULTS.endpoint, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${env.MISTRAL_API_KEY}` },
-    body: form,
-  });
-  if (!response.ok)
-    throw new Error(
-      `Mistral API error: ${response.status} ${response.statusText}`,
-    );
-  const data = await response.json();
-  return data.text ?? "";
+  if (diarize) { // 
+    // Pass diarize and the mandatory timestamp granularities
+	form.append("diarize", "true");
+    form.append("timestamp_granularities", "segment"); 
+  }
+  try {
+	const response = await fetch(DEFAULTS.endpoint, {
+	  method: "POST",
+	  headers: { Authorization: `Bearer ${env.MISTRAL_API_KEY}` },
+	  body: form,
+	});
+	if (!response.ok) {
+	  const errorText = await response.text().catch(() => "Unknown API Error");
+      throw new Error(`Mistral API error: ${response.status} - ${errorText}`);
+	}
+    const data = await response.json();
+
+    if (data.segments && data.segments.length > 0) {
+	  // Performing diarization
+      const timeline = data.segments
+        .map(s => {
+          const text = (s.text ?? "").trim();
+          if (!text) return null;
+
+          let rawId = s.speaker_id !== undefined ? s.speaker_id : (s.speaker_index ?? "0");
+          rawId = String(rawId).toLowerCase().replace("speaker_", "").trim();
+
+          return {
+            id: rawId,
+            text: text,
+            start: Number(s.start),
+            end: Number(s.end)
+          };
+        })
+        .filter(Boolean);
+
+      if (timeline.length === 0) return data.text ?? "";
+
+      // 1. Calculating text volume for every raw ID
+      const speakerVolume = {};
+      let totalConversationalWeight = 0;
+      timeline.forEach(item => {
+        speakerVolume[item.id] = (speakerVolume[item.id] || 0) + item.text.length;
+        totalConversationalWeight += item.text.length;
+      });
+
+      // Noise threshold (2%)
+      const strictNoiseThreshold = totalConversationalWeight * 0.02;
+
+      // 2. Splitting IDs to stable (base voices) and unstable (micro-fragments)
+      const stableIds = Object.keys(speakerVolume).filter(id => speakerVolume[id] >= strictNoiseThreshold);
+      const unstableIds = Object.keys(speakerVolume).filter(id => speakerVolume[id] < strictNoiseThreshold);
+
+      // 3. Local clustering
+      const aliasMap = {};
+      stableIds.forEach(id => {
+        aliasMap[id] = id;
+      });
+
+      unstableIds.forEach(unstableId => {
+        let bestTargetId = null;
+        let minDistance = Infinity;
+
+        const unstableSegments = timeline.filter(item => item.id === unstableId);
+
+        unstableSegments.forEach(unstableSeg => {
+          timeline.forEach(stableSeg => {
+            if (!stableIds.includes(stableSeg.id)) return;
+
+            const distance = Math.max(0, unstableSeg.start - stableSeg.end) + Math.max(0, stableSeg.start - unstableSeg.end);
+
+            if (distance < minDistance) {
+              minDistance = distance;
+              bestTargetId = stableSeg.id;
+            }
+          });
+        });
+
+        aliasMap[unstableId] = bestTargetId || unstableId;
+      });
+
+      // 4. Indexing stable clusters
+      const canonicalLabels = {};
+      let speakerCounter = 0;
+
+      timeline.forEach(item => {
+        const rootId = aliasMap[item.id] || item.id;
+        if (!canonicalLabels[rootId]) {
+          speakerCounter++;
+          canonicalLabels[rootId] = `Speaker ${speakerCounter}`;
+        }
+      });
+
+      // 5. Formatting output text
+      const finalLines = [];
+      let lastPrintedLabel = null;
+
+      const formatTime = (seconds) => {
+        const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+        const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+        const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+        return `${h}:${m}:${s}`;
+      };
+
+      timeline.forEach(item => {
+        const rootId = aliasMap[item.id] || item.id;
+        const currentLabel = canonicalLabels[rootId];
+
+        if (currentLabel === lastPrintedLabel && finalLines.length > 0) {
+          finalLines[finalLines.length - 1] += ` ${item.text}`;
+        } else {
+          const timestamp = formatTime(item.start);
+          finalLines.push(`[${timestamp} ${currentLabel}]: ${item.text}`);
+          lastPrintedLabel = currentLabel;
+        }
+      });
+
+      return finalLines.join("\n");
+    }
+    
+    return data.text ?? "";
+
+
+  } catch (err) {
+	console.error("Network or script error:", err);
+	throw err;
+  }
 }
 
 function isDirectCliEntrypoint(metaUrl, entryPath) {

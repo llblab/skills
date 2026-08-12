@@ -9,7 +9,7 @@
 - `scripts/transcribe.mjs` must output only transcription text on stdout.
 - Never print `MISTRAL_API_KEY` or request headers in diagnostics.
 - Validate arguments and credentials before invoking the Mistral API.
-- Preserve positional invocation for `transcribe_mistral`: `transcribe.sh {file} {lang} {model}`.
+- Preserve positional invocation for `transcribe_mistral`: `transcribe.sh {file} {lang} {model} {diarize}`.
 
 ### Discovered Constraints
 

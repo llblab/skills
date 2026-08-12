@@ -4,10 +4,11 @@
   "args": [
     "file:path",
     "lang:string=ru",
-    "model:string=voxtral-mini-latest"
+    "model:string=voxtral-mini-latest",
+	"diarize:bool=false"
   ],
   "defaults": {
     "skill_dir": "~/.pi/agent/skills/mistral-stt"
   },
-  "template": "{skill_dir}/scripts/transcribe.sh {file} {lang} {model}"
+  "template": "{skill_dir}/scripts/transcribe.sh {file} {lang} {model} {diarize}"
 }
