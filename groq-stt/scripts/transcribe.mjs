@@ -2,11 +2,12 @@
 import { realpathSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { basename } from "node:path";
-import { argv, env, exit, stderr, stdout } from "node:process";
+import { argv, env, stderr, stdout } from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 // --- Constants ---
 
+const API_KEY = env.GROQ_API_KEY;
 const DEFAULTS = {
   model: "whisper-large-v3-turbo",
   endpoint: "https://api.groq.com/openai/v1/audio/transcriptions",
@@ -23,6 +24,8 @@ const CLI_VALUES = new Map([
   ["-l", "language"],
   ["--model", "model"],
   ["-m", "model"],
+  ["--diarize", "diarize"],
+  ["-d", "diarize"],
 ]);
 
 // --- CLI ---
@@ -30,8 +33,8 @@ const CLI_VALUES = new Map([
 function usage() {
   return [
     "Usage:",
-    `  GROQ_API_KEY=xxx ${argv[1]} audio.ogg [language] [model]`,
-    `  GROQ_API_KEY=xxx ${argv[1]} --file audio.ogg [--lang ru] [--model ${DEFAULTS.model}]`,
+    `  GROQ_API_KEY=xxx ${argv[1]} audio.ogg [language] [model] [diarize]`,
+    `  GROQ_API_KEY=xxx ${argv[1]} --file audio.ogg [--lang ru] [--model ${DEFAULTS.model}] [--diarize true]`,
     "",
     "Outputs only transcription text on stdout.",
   ].join("\n");
@@ -42,6 +45,7 @@ function parseArgs(args) {
     file: "",
     language: "",
     model: DEFAULTS.model,
+    diarize: false,
     help: false,
   };
   const positional = [];
@@ -69,6 +73,11 @@ function parseArgs(args) {
     options.model === DEFAULTS.model
       ? (positional[2] ?? options.model)
       : options.model;
+  const diarize =
+    options.diarize === false ? (positional[3] ?? false) : options.diarize;
+  if (![true, false, "true", "false"].includes(diarize))
+    throw new Error("diarize must be true or false");
+  options.diarize = diarize === true || diarize === "true";
   return options;
 }
 
@@ -96,25 +105,57 @@ function guessMimeType(file) {
   return "application/octet-stream";
 }
 
-async function transcribe({ file, language, model }) {
+function formatTime(seconds) {
+  const safeSeconds = Number.isFinite(Number(seconds)) ? Number(seconds) : 0;
+  const hours = Math.floor(safeSeconds / 3600)
+    .toString()
+    .padStart(2, "0");
+  const minutes = Math.floor((safeSeconds % 3600) / 60)
+    .toString()
+    .padStart(2, "0");
+  const wholeSeconds = Math.floor(safeSeconds % 60)
+    .toString()
+    .padStart(2, "0");
+  return `${hours}:${minutes}:${wholeSeconds}`;
+}
+
+function formatDiarizedSegments(segments) {
+  return segments
+    .map((segment) => {
+      const text = (segment.text ?? "").trim();
+      if (!text) return "";
+      const speaker = segment.speaker ?? "Unknown speaker";
+      return `[${formatTime(segment.start)}|${speaker}] ${text}`;
+    })
+    .filter(Boolean)
+    .join("\n");
+}
+
+async function transcribe({ file, language, model, diarize }) {
   await assertReadableFile(file);
-  if (!env.GROQ_API_KEY) throw new Error("GROQ_API_KEY is required");
+  if (!API_KEY) throw new Error("GROQ_API_KEY is required");
   const audio = await readFile(file);
   const form = new FormData();
   form.append("file", createAudioBlob(audio, file), basename(file));
   form.append("model", model);
-  form.append("response_format", "text");
+  form.append("response_format", diarize ? "verbose_json" : "text");
   if (language) form.append("language", language);
+  if (diarize) {
+    form.append("diarize", "true");
+    form.append("timestamp_granularities[]", "segment");
+  }
   const response = await fetch(DEFAULTS.endpoint, {
     method: "POST",
-    headers: { Authorization: `Bearer ${env.GROQ_API_KEY}` },
+    headers: { Authorization: `Bearer ${API_KEY}` },
     body: form,
   });
-  if (!response.ok)
-    throw new Error(
-      `Groq API error: ${response.status} ${response.statusText}`,
-    );
-  return response.text();
+  if (!response.ok) {
+    const details = await response.text().catch(() => response.statusText);
+    throw new Error(`Groq API error: ${response.status} ${details}`.trim());
+  }
+  if (!diarize) return response.text();
+  const data = await response.json();
+  return formatDiarizedSegments(data.segments ?? []) || data.text || "";
 }
 
 function isDirectCliEntrypoint(metaUrl, entryPath) {
@@ -127,19 +168,23 @@ function isDirectCliEntrypoint(metaUrl, entryPath) {
 }
 
 async function main() {
+  const options = parseArgs(argv.slice(2));
+  if (options.help) {
+    stdout.write(`${usage()}\n`);
+    return;
+  }
+  if (!options.file) throw new Error(usage());
+  const text = await transcribe(options);
+  stdout.write(text.endsWith("\n") ? text : `${text}\n`);
+}
+
+if (isDirectCliEntrypoint(import.meta.url, argv[1])) {
   try {
-    const options = parseArgs(argv.slice(2));
-    if (options.help) {
-      stdout.write(`${usage()}\n`);
-      exit(0);
-    }
-    if (!options.file) throw new Error(usage());
-    const text = await transcribe(options);
-    stdout.write(text.endsWith("\n") ? text : `${text}\n`);
+    await main();
   } catch (error) {
     stderr.write(`${error.message}\n`);
-    exit(2);
+    process.exitCode = 2;
   }
 }
 
-if (isDirectCliEntrypoint(import.meta.url, argv[1])) main();
+export { formatDiarizedSegments, parseArgs };

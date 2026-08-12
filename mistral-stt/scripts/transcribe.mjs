@@ -2,11 +2,12 @@
 import { realpathSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { basename } from "node:path";
-import { argv, env, exit, stderr, stdout } from "node:process";
+import { argv, env, stderr, stdout } from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 // --- Constants ---
 
+const API_KEY = env.MISTRAL_API_KEY;
 const DEFAULTS = {
   model: "voxtral-mini-latest",
   endpoint: "https://api.mistral.ai/v1/audio/transcriptions",
@@ -43,8 +44,8 @@ function parseArgs(args) {
   const options = {
     file: "",
     language: "",
-	diarize: false,
     model: DEFAULTS.model,
+    diarize: false,
     help: false,
   };
   const positional = [];
@@ -68,15 +69,15 @@ function parseArgs(args) {
   }
   options.file ||= positional[0] ?? "";
   options.language ||= positional[1] ?? "";
-  options.diarize = positional[3] ?? false;
-  options.diarize = options.diarize === true || String(options.diarize).toLowerCase() === "true";
-
-  if (options.diarize) {
-    options.model = "voxtral-mini-latest"; // works with diarization, so use it
-  } else if (options.model === DEFAULTS.model) {
-    options.model = positional[2] ?? options.model;
-  }
-
+  options.model =
+    options.model === DEFAULTS.model
+      ? (positional[2] ?? options.model)
+      : options.model;
+  const diarize =
+    options.diarize === false ? (positional[3] ?? false) : options.diarize;
+  if (![true, false, "true", "false"].includes(diarize))
+    throw new Error("diarize must be true or false");
+  options.diarize = diarize === true || diarize === "true";
   return options;
 }
 
@@ -104,142 +105,58 @@ function guessMimeType(file) {
   return "application/octet-stream";
 }
 
+function formatTime(seconds) {
+  const safeSeconds = Number.isFinite(Number(seconds)) ? Number(seconds) : 0;
+  const hours = Math.floor(safeSeconds / 3600)
+    .toString()
+    .padStart(2, "0");
+  const minutes = Math.floor((safeSeconds % 3600) / 60)
+    .toString()
+    .padStart(2, "0");
+  const wholeSeconds = Math.floor(safeSeconds % 60)
+    .toString()
+    .padStart(2, "0");
+  return `${hours}:${minutes}:${wholeSeconds}`;
+}
+
+function formatDiarizedSegments(segments) {
+  return segments
+    .map((segment) => {
+      const text = (segment.text ?? "").trim();
+      if (!text) return "";
+      const speaker = segment.speaker_id ?? "Unknown speaker";
+      return `[${formatTime(segment.start)}|${speaker}] ${text}`;
+    })
+    .filter(Boolean)
+    .join("\n");
+}
+
 async function transcribe({ file, language, model, diarize }) {
   await assertReadableFile(file);
-  if (!env.MISTRAL_API_KEY) throw new Error("MISTRAL_API_KEY is required");
+  if (!API_KEY) throw new Error("MISTRAL_API_KEY is required");
   const audio = await readFile(file);
   const form = new FormData();
   form.append("file", createAudioBlob(audio, file), basename(file));
   form.append("model", model);
   form.append("response_format", "json");
   if (language) form.append("language", language);
-  if (diarize) { // 
-    // Pass diarize and the mandatory timestamp granularities
-	form.append("diarize", "true");
-    form.append("timestamp_granularities", "segment"); 
+  if (diarize) {
+    form.append("diarize", "true");
+    form.append("timestamp_granularities", "segment");
   }
-  try {
-	const response = await fetch(DEFAULTS.endpoint, {
-	  method: "POST",
-	  headers: { Authorization: `Bearer ${env.MISTRAL_API_KEY}` },
-	  body: form,
-	});
-	if (!response.ok) {
-	  const errorText = await response.text().catch(() => "Unknown API Error");
-      throw new Error(`Mistral API error: ${response.status} - ${errorText}`);
-	}
-    const data = await response.json();
-
-    if (data.segments && data.segments.length > 0) {
-	  // Performing diarization
-      const timeline = data.segments
-        .map(s => {
-          const text = (s.text ?? "").trim();
-          if (!text) return null;
-
-          let rawId = s.speaker_id !== undefined ? s.speaker_id : (s.speaker_index ?? "0");
-          rawId = String(rawId).toLowerCase().replace("speaker_", "").trim();
-
-          return {
-            id: rawId,
-            text: text,
-            start: Number(s.start),
-            end: Number(s.end)
-          };
-        })
-        .filter(Boolean);
-
-      if (timeline.length === 0) return data.text ?? "";
-
-      // 1. Calculating text volume for every raw ID
-      const speakerVolume = {};
-      let totalConversationalWeight = 0;
-      timeline.forEach(item => {
-        speakerVolume[item.id] = (speakerVolume[item.id] || 0) + item.text.length;
-        totalConversationalWeight += item.text.length;
-      });
-
-      // Noise threshold (2%)
-      const strictNoiseThreshold = totalConversationalWeight * 0.02;
-
-      // 2. Splitting IDs to stable (base voices) and unstable (micro-fragments)
-      const stableIds = Object.keys(speakerVolume).filter(id => speakerVolume[id] >= strictNoiseThreshold);
-      const unstableIds = Object.keys(speakerVolume).filter(id => speakerVolume[id] < strictNoiseThreshold);
-
-      // 3. Local clustering
-      const aliasMap = {};
-      stableIds.forEach(id => {
-        aliasMap[id] = id;
-      });
-
-      unstableIds.forEach(unstableId => {
-        let bestTargetId = null;
-        let minDistance = Infinity;
-
-        const unstableSegments = timeline.filter(item => item.id === unstableId);
-
-        unstableSegments.forEach(unstableSeg => {
-          timeline.forEach(stableSeg => {
-            if (!stableIds.includes(stableSeg.id)) return;
-
-            const distance = Math.max(0, unstableSeg.start - stableSeg.end) + Math.max(0, stableSeg.start - unstableSeg.end);
-
-            if (distance < minDistance) {
-              minDistance = distance;
-              bestTargetId = stableSeg.id;
-            }
-          });
-        });
-
-        aliasMap[unstableId] = bestTargetId || unstableId;
-      });
-
-      // 4. Indexing stable clusters
-      const canonicalLabels = {};
-      let speakerCounter = 0;
-
-      timeline.forEach(item => {
-        const rootId = aliasMap[item.id] || item.id;
-        if (!canonicalLabels[rootId]) {
-          speakerCounter++;
-          canonicalLabels[rootId] = `Speaker ${speakerCounter}`;
-        }
-      });
-
-      // 5. Formatting output text
-      const finalLines = [];
-      let lastPrintedLabel = null;
-
-      const formatTime = (seconds) => {
-        const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
-        const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-        const s = Math.floor(seconds % 60).toString().padStart(2, '0');
-        return `${h}:${m}:${s}`;
-      };
-
-      timeline.forEach(item => {
-        const rootId = aliasMap[item.id] || item.id;
-        const currentLabel = canonicalLabels[rootId];
-
-        if (currentLabel === lastPrintedLabel && finalLines.length > 0) {
-          finalLines[finalLines.length - 1] += ` ${item.text}`;
-        } else {
-          const timestamp = formatTime(item.start);
-          finalLines.push(`[${timestamp} ${currentLabel}]: ${item.text}`);
-          lastPrintedLabel = currentLabel;
-        }
-      });
-
-      return finalLines.join("\n");
-    }
-    
-    return data.text ?? "";
-
-
-  } catch (err) {
-	console.error("Network or script error:", err);
-	throw err;
+  const response = await fetch(DEFAULTS.endpoint, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${API_KEY}` },
+    body: form,
+  });
+  if (!response.ok) {
+    const details = await response.text().catch(() => response.statusText);
+    throw new Error(`Mistral API error: ${response.status} ${details}`.trim());
   }
+  const data = await response.json();
+  if (diarize && Array.isArray(data.segments))
+    return formatDiarizedSegments(data.segments) || data.text || "";
+  return data.text ?? "";
 }
 
 function isDirectCliEntrypoint(metaUrl, entryPath) {
@@ -252,19 +169,23 @@ function isDirectCliEntrypoint(metaUrl, entryPath) {
 }
 
 async function main() {
+  const options = parseArgs(argv.slice(2));
+  if (options.help) {
+    stdout.write(`${usage()}\n`);
+    return;
+  }
+  if (!options.file) throw new Error(usage());
+  const text = await transcribe(options);
+  stdout.write(text.endsWith("\n") ? text : `${text}\n`);
+}
+
+if (isDirectCliEntrypoint(import.meta.url, argv[1])) {
   try {
-    const options = parseArgs(argv.slice(2));
-    if (options.help) {
-      stdout.write(`${usage()}\n`);
-      exit(0);
-    }
-    if (!options.file) throw new Error(usage());
-    const text = await transcribe(options);
-    stdout.write(text.endsWith("\n") ? text : `${text}\n`);
+    await main();
   } catch (error) {
     stderr.write(`${error.message}\n`);
-    exit(2);
+    process.exitCode = 2;
   }
 }
 
-if (isDirectCliEntrypoint(import.meta.url, argv[1])) main();
+export { formatDiarizedSegments, parseArgs };

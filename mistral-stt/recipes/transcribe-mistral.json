@@ -5,10 +5,8 @@
     "file:path",
     "lang:string=ru",
     "model:string=voxtral-mini-latest",
-	"diarize:bool=false"
+    "diarize:bool=false",
+    "skill_dir:path=~/.agents/skills/mistral-stt"
   ],
-  "defaults": {
-    "skill_dir": "~/.pi/agent/skills/mistral-stt"
-  },
   "template": "{skill_dir}/scripts/transcribe.sh {file} {lang} {model} {diarize}"
 }
