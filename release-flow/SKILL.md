@@ -38,6 +38,19 @@ Select the route before staging, committing, pushing, opening a PR, tagging, cre
 
 Once selected, keep that route for the entire run. A branch-state change, inconvenience, conflict, failed check, or failed PR action must not trigger fallback to another route.
 
+## Validation Evidence Identity
+
+Release validation is evidence about a specific input state and relevant environment, not a ceremony attached to every workflow phase.
+
+1. Record the subject of each expensive successful validation when later topology changes are expected. Prefer the exact Git tree OID for source-bound checks, the artifact digest for artifact/network checks, and the relevant lock/toolchain identities when they affect the claim.
+2. Classify whether the validation consumes commit SHA, parent, branch, tag, signature, commit timestamp, remote state, credentials, or another condition outside the tree. Inspect the validation owner when sensitivity is unclear.
+3. Reuse successful evidence after an operation when the active release contract is unchanged and equivalence proves every relevant input and condition unchanged. Exact tree equality preserves tree-bound build, test, lint, benchmark, and generated-artifact evidence.
+4. A squash, rebase, amend, fast-forward wrapper removal, branch rename, or other topology-only operation does not by itself justify rerunning tree-bound validation. Never rerun an expensive profile solely because a validated tree received a new commit identity.
+5. Rerun only the invalidated layer when a check is commit/ref-sensitive. Require a full rerun only when the tree changed, relevant environment authority changed, external evidence expired, the prior run was incomplete or failed, or validation sensitivity remains materially unknown after inspection.
+6. Record reused evidence, its original subject, the equivalence proof, and any narrow post-operation checks in the release handoff. Evidence reuse must be auditable rather than assumed.
+
+An explicit repository policy requiring a fresh run for a topology stage remains authoritative and must be followed even when exact equivalence preserves the validated subject. When creating or revising such policy, name the commit/ref-sensitive or freshness boundary it protects so future evidence reuse decisions remain auditable.
+
 ## Dedicated Version Branch Pre-PR Squash
 
 A dedicated version branch may contain many atomic development commits while work remains in progress. Those commits support review, bisecting, selective removal, and recovery during development. The release PR must nevertheless expose one release commit directly above the verified `main` baseline.
@@ -51,7 +64,7 @@ Apply this section only on the version PR route, after release files and validat
 5. Record the old source OID, remote source OID, and `origin/main` OID. Create a local safety ref named `archive/<sanitized-version-branch>-pre-squash-<short-oid>` at the old tip. Do not push the archive unless the operator explicitly requests a remote archive.
 6. Stage only intentional release files, inspect the complete staged diff, and reject any remaining unstaged or unintended untracked content. Record the exact prepared tree from the index with `git write-tree`. `HEAD^{tree}` is not a substitute because it omits staged or unstaged release changes that are not in the old commit.
 7. Soft-reset the version branch to `origin/main` without changing the prepared index, then create exactly one repository-style release commit. The resulting commit must have `origin/main` as its sole parent.
-8. Verify that `HEAD^{tree}` exactly equals the recorded prepared-tree OID and that `HEAD^` equals the recorded `origin/main` OID. Inspect the full `origin/main..HEAD` diff, rerun the release validation required for the final tree, and require a clean worktree.
+8. Verify that `HEAD^{tree}` exactly equals the recorded prepared-tree OID and that `HEAD^` equals the recorded `origin/main` OID. Inspect the full `origin/main..HEAD` diff and require a clean worktree. Apply the Validation Evidence Identity contract: carry forward prior validation when its recorded subject is this exact tree and the check is tree-bound; run only commit/ref-sensitive checks invalidated by the new identity. Rerun the full release profile only when equivalence or sensitivity cannot be established.
 9. If the version branch already exists on `origin`, update only that source branch with `--force-with-lease=<branch>:<recorded-remote-oid>`. Never use a broad `--force`, never rewrite `main`, and never move a tag.
 10. Open the release PR only after the remote version branch resolves to the one-commit release tip. The PR must show exactly one commit and the expected release diff against `main`.
 
@@ -156,7 +169,7 @@ After the hard gate passes:
 3. Detect whether the repository already owns a canonical project-level changelog, normally at the root or at a documented release-history path. If it exists, read only the intended version section and any `Unreleased` section, beginning with the first 50 lines and expanding to section boundaries as needed. If no canonical project changelog exists, record that fact and continue without creating one. A nested subsystem changelog does not become the package release source merely because it exists; update it only when that subsystem has meaningful shipped changes and repository convention assigns history there. A synchronized version bump alone does not require a subsystem changelog entry.
 4. Inspect the actual release diff. For a version PR route, compare the complete version-branch tree with `origin/main` before and after the squash. For a dev PR route, compare `dev` with the `main` PR base and include staged/unstaged release files. For direct-main, inspect staged/unstaged changes against verified `main`. Group development chronology into outcome-focused bullets while preserving behavior, safety, compatibility, migrations, limitations, and operator evidence. Remove fixed-then-reworked mechanics, repeated gates, superseded findings, and process residue. When a canonical changelog exists, consolidate its intended section without rewriting older history; otherwise create only temporary release notes.
 5. Confirm release-note freshness. When a canonical changelog exists, its intended version section must describe the release and must not leave the same shipped changes under `Unreleased`; stop if the section is missing, ambiguous, or conflicts with diff evidence. When no canonical changelog exists, its absence is not a blocker; instead verify that the temporary release narrative covers every meaningful shipped outcome. In either case, stop if safe consolidation would require guessing which behavior ships.
-6. Run the smallest meaningful validation first. Prefer the project release validation command when available.
+6. Run the smallest meaningful validation first. Prefer the project release validation command when available. Record the validated tree or artifact identity and relevant environment authority so later topology-only operations can reuse the evidence instead of rerunning it.
 7. Stage only intentional release files. On a version PR route, complete all release files first and then execute the dedicated pre-PR squash section; do not create a preliminary PR or a second release commit.
 8. Inspect the repository's recent commit-message style before writing the release commit message:
 
@@ -408,7 +421,7 @@ Report:
 - Eligibility evidence: GitHub repository, authenticated account, `ADMIN` permission, explicit release request, fork topology, and—when applicable—the independent-fork workflow classification
 - Selected route and branch-detection evidence
 - Release-narrative source: canonical changelog section or temporary diff-derived notes, including changelog-absence confirmation when applicable
-- Version-route squash evidence when applicable: baseline/source old/new OIDs, local archive ref, index-derived prepared-tree OID, final tree equality, one-parent topology, exact force-with-lease result, and post-merge main topology
+- Version-route squash evidence when applicable: baseline/source old/new OIDs, local archive ref, index-derived prepared-tree OID, final tree equality, one-parent topology, exact force-with-lease result, post-merge main topology, and reused-validation subject/equivalence evidence
 - Wrong-branch transfer, branch-alignment, stash cleanup, and any approved rebase/force-with-lease result when recovery ran
 - PR URL, checks result, and merge status for either PR route; `Not applicable — direct-main route` otherwise
 - `main` version confirmation

@@ -1,9 +1,7 @@
 {
-  "name": "validate-domain-dag",
   "description": "Validate Domain DAG architecture metadata for a repository root.",
   "args": [
-    "root:path=.",
-    "skill_dir:path=~/.agents/skills/domain-dag"
+    "root:path=."
   ],
   "template": "{skill_dir}/scripts/validate-domain-dag.mjs --root {root}"
 }

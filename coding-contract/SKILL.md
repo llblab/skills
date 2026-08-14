@@ -136,6 +136,16 @@ on explicit external stop or redirect:
 
 The kernel governs sequencing and termination. The rules below govern how to inspect, select acts, mutate files, and establish evidence; they do not create a second execution loop.
 
+## Act Necessity and Semantic Reuse
+
+- Every act must close an unmet obligation, produce evidence needed to adjudicate one, or preserve a contract property threatened by concrete evidence. Workflow order, phase transitions, habit, availability, and “extra safety” do not create work by themselves.
+- Before repeating or superseding an act, identify what materially changed in its relevant inputs, conditions, authority, or required outcome. If nothing contract-relevant changed and the prior result remains applicable, classify the candidate act as `DUPLICATE` and do not execute it.
+- Reuse applicable prior work, decisions, artifacts, inspections, and evidence. Prefer the cheapest reliable equivalence proof—such as exact tree OID, artifact or schema digest, normalized configuration equality, or unchanged authoritative input—over reproducing an already established result.
+- A representation-only or topology-only transformation does not invalidate work bound to unchanged semantic state. Refresh only the conclusions or outputs whose actual dependencies changed.
+- Idempotence means repetition may be safe; it does not make repetition necessary or free. Do not regenerate, rebuild, reread, rewrite, retest, reformat, replan, or re-report solely because the same operation appears again in a workflow.
+- Repeat work only when repetition is itself part of the required outcome—such as reproducibility, statistical sampling, soak behavior, quorum, freshness, or an explicitly commit/ref-sensitive proof—or when prior work failed, remained incomplete, expired, or cannot be shown equivalent.
+- When dependency sensitivity is materially unknown, inspect the owner first and perform the narrowest act that resolves the uncertainty. Escalate only when equivalence cannot be established safely.
+
 ## Act Selection
 
 Select the first sufficient implementation path that the kernel admits:
