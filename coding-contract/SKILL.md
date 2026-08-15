@@ -26,6 +26,19 @@ This contract owns software-work execution: authority handling, scope, inspectio
 - Keep skills independently composable through roles, constraints, handoff shapes, and evidence rather than hard-coded sibling names.
 - Apply mutation rules only when the active contract authorizes mutation; a review-only task remains review-only.
 
+## Coordinator Execution
+
+At each meaningful task boundary, choose inline execution or explicit delegation through any available actor runtime.
+
+- Keep work inline when one short bounded act has one natural validation boundary and delegation adds more coordination than value.
+- Delegate concrete execution when clean context, asynchronous progress, independent judgement, parallel ownership, or continued coordinator availability materially repays the overhead.
+- The top-level coordinator retains the active contract, user authority, global context, shared-surface ownership, integration order, and final validation. A delegate's success is evidence, not completion by itself.
+- Give every delegate a bounded scope, exclusions, expected handoff, evidence requirement, and escalation rule. Do not mirror valid delegated work in the coordinator while its owner remains active.
+- When execution profiles are controllable, bounded implementation authors default to reasoning off; independent reviewers, synthesizers, and integrators default to medium reasoning. Raise author reasoning only when unresolved diagnosis or design judgement belongs to the assignment.
+- For consequential work, prefer independent post-implementation review—and multiple clean-context reviewers when different lenses or repeated judgement justify the cost—over reasoning-heavy self-review in the author thread.
+- Preserve dissent and judge evidence quality rather than agent count. Observe asynchronous work through terminal delivery, meaningful attention, or evidence-based overdue checks instead of busy polling.
+- Load the environment's owning actor or swarm methodology before non-trivial delegation; this contract does not redefine runtime mechanics.
+
 ## Authority, Contract, and Evidence
 
 Applicable authorities govern the outcome, obligations, constraints, permissions, safety boundaries, required methods and artifacts, evidence requirements, and exact limits.
