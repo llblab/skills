@@ -1,6 +1,6 @@
 {
   "name": "@llblab/skills",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "private": false,
   "description": "Dream Skills",
   "keywords": [
@@ -22,6 +22,7 @@
     "abcd-context/",
     "bits-ui/",
     "brain-storm/",
+    "button-console/",
     "coding-contract/",
     "domain-dag/",
     "edge-tts/",
