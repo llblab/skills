@@ -58,7 +58,7 @@ A dedicated version branch may contain many atomic development commits while wor
 Apply this section only on the version PR route, after release files and validation are complete but before opening the PR:
 
 1. Require explicit confirmation that the operator authorizes rewriting the dedicated version branch with `--force-with-lease`. Release intent alone does not authorize rewriting a shared source branch.
-2. Require no existing open PR from the version branch. Never rewrite history already under PR review; stop and require an explicit close/recreate decision instead.
+2. Require no existing open PR from the version branch unless the exact PR qualifies for the separately authorized blocked-PR correction path below. Never rewrite an active or healthy review merely to tidy history.
 3. Fetch `origin/main` and the version branch. Require local and remote source tips to match, except for clearly identified intentional release work. Reject conflicts, merge/rebase/cherry-pick state, dirty submodules, unrelated work, or unknown remote state.
 4. Require `origin/main` to be an ancestor of the version branch. If `main` moved in content, align the version branch through a separately reviewed rebase or merge before squashing; never hide divergence inside the release commit.
 5. Record the old source OID, remote source OID, and `origin/main` OID. Create a local safety ref named `archive/<sanitized-version-branch>-pre-squash-<short-oid>` at the old tip. Do not push the archive unless the operator explicitly requests a remote archive.
@@ -67,6 +67,20 @@ Apply this section only on the version PR route, after release files and validat
 8. Verify that `HEAD^{tree}` exactly equals the recorded prepared-tree OID and that `HEAD^` equals the recorded `origin/main` OID. Inspect the full `origin/main..HEAD` diff and require a clean worktree. Apply the Validation Evidence Identity contract: carry forward prior validation when its recorded subject is this exact tree and the check is tree-bound; run only commit/ref-sensitive checks invalidated by the new identity. Rerun the full release profile only when equivalence or sensitivity cannot be established.
 9. If the version branch already exists on `origin`, update only that source branch with `--force-with-lease=<branch>:<recorded-remote-oid>`. Never use a broad `--force`, never rewrite `main`, and never move a tag.
 10. Open the release PR only after the remote version branch resolves to the one-commit release tip. The PR must show exactly one commit and the expected release diff against `main`.
+
+## Blocked Version PR Correction Rewrite
+
+An open version PR may keep its identity while its one release commit is replaced only to correct a concrete blocker discovered by that PR. This is a recovery path, not permission to rewrite healthy review history.
+
+1. Require explicit operator authorization to force-update the exact open PR branch after the blocker is known. Standing release intent and the original pre-PR rewrite approval are insufficient; the authorization may state a reusable preference for blocked release PRs.
+2. Verify the PR is open, belongs to the same repository, targets `main`, uses the current dedicated version branch, and is blocked by a failed, cancelled, timed-out, or configuration-invalid required check against its current head SHA. A pending healthy check, review inconvenience, desired cleanup, or unrelated scope growth does not qualify.
+3. Require that no release tag, GitHub Release, merge, deployment, publication, or downstream release consumption refers to the current PR head. Those states make replacement categorically unsafe.
+4. Inspect submitted reviews and unresolved review conversations. If human approval, requested changes, or substantive review comments exist, report that evidence and require separate confirmation that replacing the reviewed commit is intended; never silently orphan human review.
+5. Fetch `origin/main` and the version branch. Require local HEAD, the PR head, and the remote branch to equal one recorded old OID; require that commit to remain the sole child of the unchanged verified `origin/main` baseline. Stop on divergence or baseline movement instead of hiding it in the correction.
+6. Create a new local safety ref at the old PR head. Admit only the smallest release-scope correction and directly affected evidence or documentation, stage the complete intended tree, and inspect its diff against both the old PR head and `origin/main`.
+7. Recreate exactly one repository-style release commit with the same `origin/main` parent. Verify prepared-tree equality, one-parent topology, a clean worktree, and the narrow validation invalidated by the correction. Previous failed PR evidence is not reusable; unrelated tree-bound evidence may be reused only under the Validation Evidence Identity contract.
+8. Update only the exact version branch with `--force-with-lease=<branch>:<recorded-old-oid>`. Never use broad force, rewrite `main`, move a tag, or delete/recreate the PR.
+9. Verify the same PR number remains open, its head equals the new commit, it still contains exactly one release commit, and GitHub registered fresh required checks for that head. Treat review and check evidence attached to the replaced OID as stale.
 
 After a release PR merges, history cleanup is too late. This skill must never squash or force-rewrite `main` to make a completed release look cleaner. A post-merge mistake receives a new reviewed correction/hotfix; a release tag, published Release, or downstream consumption makes history rewriting categorically forbidden.
 
@@ -404,9 +418,9 @@ Stop further release actions and report the state already completed when:
 - On the direct-main route, local `main` does not initially equal `origin/main` or either `dev` branch appears before push.
 - The version source cannot be identified safely or multiple version files disagree.
 - A canonical project changelog exists but its intended version section is missing, ambiguous, conflicts with release evidence, or remains duplicated under `Unreleased`.
-- Version-branch pre-PR squash lacks explicit rewrite approval, finds an existing open PR, loses tree equality, cannot prove `origin/main` ancestry, or fails its exact `--force-with-lease` update.
+- Version-branch pre-PR squash lacks explicit rewrite approval, finds an open PR that does not qualify for the blocked-PR correction path, loses tree equality, cannot prove `origin/main` ancestry, or fails its exact `--force-with-lease` update.
 - Validation fails and cannot be fixed safely inside the release scope.
-- PR checks fail on either PR route.
+- PR checks fail on either PR route and no explicitly authorized bounded correction path applies.
 - The released `main` version or commit does not match the intended local and `origin/main` state.
 - The release tag exists on a different commit.
 - Repository-owned tag automation fails, creates incomplete or conflicting external state, or cannot be correlated to the exact tag and released commit.
