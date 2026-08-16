@@ -224,7 +224,7 @@ git tag v<version>
 git push origin v<version>
 ```
 
-If the tag already exists locally or remotely, verify it points to the current `main` commit before continuing. If an existing `v<version>` tag points anywhere else, stop and report the mismatch. Do not move, delete, or force-push tags.
+If the tag already exists locally or remotely, verify it points to the current `main` commit before continuing. If an existing `v<version>` tag points anywhere else, stop and report the mismatch unless it qualifies for the explicitly authorized failed-unpublished-tag replacement path below. Never move, delete, or force-push a tag that represents any published or consumed release state.
 
 If repository automation owns GitHub Release creation or npm publication, discover and watch every expected tag-triggered run now. Correlate each run to its recorded workflow, the exact tag, the `push` event, and the released commit SHA. Continue only after all owning runs succeed and create every expected external state. A failed or missing run is a release stop even when some external state exists; verify and report that partial state without racing it.
 
@@ -286,6 +286,21 @@ npm publish --access public
 ```
 
 If the package does not exist or the intended version is not newer, skip publication and report the reason. New packages must never be published by this skill.
+
+## Failed Unpublished Tag Replacement
+
+A tag whose workflow failed before producing any release state may be replaced at the same version only as an explicitly authorized recovery. A pushed tag is not automatically a published release, but uncertainty or partial publication fails closed.
+
+1. Require explicit operator authorization to delete and recreate the exact tag at the corrected commit. Ordinary release intent and generic retry permission are insufficient.
+2. Verify the repository and tag are administered by the authenticated `ADMIN`, the tag points to one recorded old commit, and the correlated tag workflow failed before any job began. Require zero workflow jobs, artifacts, attestations, deployments, packages, GitHub Releases, release assets, signatures advertised as final, or other publication state for that tag and commit.
+3. Inspect repository releases, workflow artifacts, attestations, deployments, package registries owned by the workflow, and known downstream automation. Any positive state or materially unavailable check makes replacement ineligible.
+4. Fix the root cause through the repository's normal protected-main route. Require fresh required checks, a verified corrected `main` commit and tree, unchanged intended version, and no release tag pointing at the corrected commit yet.
+5. Create a local safety ref at the old tagged commit and record the old tag object/peeled commit, failed workflow/run identity, corrected commit, and corrected tree. Do not publish the safety ref unless explicitly requested.
+6. Delete only the exact remote tag with an explicit lease bound to its recorded old object, then verify remote absence. Delete the matching local tag only after confirming its old target; never use wildcard deletion or broad force.
+7. Recreate the same tag once at the verified corrected `origin/main`, push it normally, and verify the remote tag resolves to that exact commit. Do not reuse, rerun, or reinterpret the failed workflow as evidence for the replacement.
+8. Discover and watch a fresh tag-triggered workflow correlated to the corrected commit. Continue through ordinary artifact, attestation, GitHub Release, and publication verification only after that new run succeeds.
+
+This recovery never applies after a job produced an artifact or attestation, after a GitHub Release or deployment exists, after registry publication, after signing was advertised as final, or when downstream consumption is known or materially uncertain. Those cases require a new version.
 
 ## Version And Release Narrative Contract
 
@@ -422,8 +437,8 @@ Stop further release actions and report the state already completed when:
 - Validation fails and cannot be fixed safely inside the release scope.
 - PR checks fail on either PR route and no explicitly authorized bounded correction path applies.
 - The released `main` version or commit does not match the intended local and `origin/main` state.
-- The release tag exists on a different commit.
-- Repository-owned tag automation fails, creates incomplete or conflicting external state, or cannot be correlated to the exact tag and released commit.
+- The release tag exists on a different commit and does not qualify for the explicitly authorized failed-unpublished-tag replacement path.
+- Repository-owned tag automation fails, creates incomplete or conflicting external state, or cannot be correlated to the exact tag and released commit, unless the run produced zero release state and the failed-unpublished-tag replacement path is explicitly authorized.
 - GitHub Release creation or verification fails, or an existing release conflicts with the confirmed tag/version state.
 - An applicable npm registry check or publication fails for reasons other than package absence or a non-newer version.
 
