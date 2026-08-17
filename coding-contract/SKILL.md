@@ -201,6 +201,8 @@ For bug fixes, inspect callers and sibling paths, then fix the narrowest shared 
 
 - Use project-mandated validation first; otherwise run the smallest decisive validation for the affected closure.
 - For changed non-trivial behavior, ensure the smallest project-native regression check that would have caught the failure; add one only when existing coverage does not provide it, and do not create test infrastructure for trivial changes.
+- Prefer property-first regressions: state the current invariant or accepted/rejected region, partition meaningful equivalence classes, and use the smallest representative boundary witnesses instead of accumulating one fixture per historical incident.
+- Retain a concrete incident regression only when it represents a distinct failure class, supported compatibility promise, security or data-loss boundary, temporal counterexample, or minimal diagnostic witness that a broader property does not subsume; remove superseded syntax and other fossilized fixtures when stronger property-level evidence preserves the contract.
 - Expand validation only when risk, integration boundaries, or failure evidence justifies it.
 - Treat each validation failure as new evidence: admit a correction only when that evidence supports it, then return to the kernel.
 - Distinguish failures caused by the task from unrelated or pre-existing failures; do not silently absorb the latter into scope.
