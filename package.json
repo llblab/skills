@@ -1,6 +1,6 @@
 {
   "name": "@llblab/skills",
-  "version": "1.13.0",
+  "version": "1.13.1",
   "private": false,
   "description": "Dream Skills",
   "keywords": [
@@ -17,6 +17,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/llblab/skills.git"
+  },
+  "scripts": {
+    "validate": "npm audit --omit=dev && npm pack --dry-run"
   },
   "files": [
     "abcd-context/",
