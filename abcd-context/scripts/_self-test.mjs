@@ -22,10 +22,33 @@ const missingPathOutput = run([path.join(fixtureRoot, "missing")], {
 });
 const jsonOptionOutput = run(["--json"]);
 const invalidLineRefRoot = createInvalidLineRefFixture();
+const tableRoot = createTableFixture();
 try {
   const invalidLineRefOutput = run([invalidLineRefRoot], {
     withoutRootEnv: true,
   });
+  const compactTableOutput = run([tableRoot], { withoutRootEnv: true });
+  fs.writeFileSync(
+    path.join(tableRoot, "docs/table.md"),
+    [
+      "# Table",
+      "",
+      `| ${"Wide header ".repeat(12)} | Value |`,
+      "|------------|---:|",
+      "| Content | 1 |",
+      "",
+      "LaTeX is allowed: $\\frac{a}{b}$.",
+      "",
+    ].join("\n"),
+  );
+  const nonCompactTableOutput = run([tableRoot], { withoutRootEnv: true });
+  fs.writeFileSync(
+    path.join(tableRoot, "docs/table.md"),
+    fs
+      .readFileSync(path.join(tableRoot, "docs/table.md"), "utf8")
+      .replace("|------------|---:|", "| --- | ---: |"),
+  );
+  const wideTableOutput = run([tableRoot], { withoutRootEnv: true });
 
   checkSuccess("default fixture", defaultOutput);
   checkSuccess("fixture path arg", pathOutput);
@@ -33,8 +56,12 @@ try {
   checkMissingPath(missingPathOutput);
   checkRejectedJsonOption(jsonOptionOutput);
   checkInvalidLineReference(invalidLineRefOutput);
+  checkCompactTableAndLatex(compactTableOutput);
+  checkNonCompactTable(nonCompactTableOutput);
+  checkWideTable(wideTableOutput);
 } finally {
   fs.rmSync(invalidLineRefRoot, { recursive: true, force: true });
+  fs.rmSync(tableRoot, { recursive: true, force: true });
 }
 
 console.log("PASS: validate-context fixture + self-reference regression");
@@ -88,6 +115,87 @@ function checkInvalidLineReference(result) {
     result.stdout.includes("Line ref out of range"),
     "out-of-range line reference is explained",
   );
+}
+
+function checkCompactTableAndLatex(result) {
+  assert(result.status === 0, "compact table and LaTeX are accepted");
+  assert(
+    result.stdout.includes("Markdown table checks passed"),
+    "compact table delimiter passes",
+  );
+  assert(!result.stdout.includes("LaTeX syntax"), "LaTeX is not checked");
+  assert(
+    result.stdout.includes("Documentation links validated"),
+    "links inside indented backtick and tilde fences are ignored",
+  );
+}
+
+function checkNonCompactTable(result) {
+  assert(result.status !== 0, "non-compact table delimiter fails validation");
+  assert(
+    result.stdout.includes("Non-compact Markdown table delimiter"),
+    "non-compact table delimiter is explained",
+  );
+}
+
+function checkWideTable(result) {
+  assert(result.status === 0, "wide table remains valid");
+  assert(
+    result.stdout.includes("Wide Markdown table"),
+    "table row over 120 chars warns",
+  );
+}
+
+function createTableFixture() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "abcd-context-table-"));
+  fs.mkdirSync(path.join(root, "docs"));
+  fs.writeFileSync(
+    path.join(root, "README.md"),
+    [
+      "# Probe",
+      "",
+      "- [Context](./AGENTS.md)",
+      "- [Backlog](./BACKLOG.md)",
+      "- [History](./CHANGELOG.md)",
+      "- [Docs](./docs/README.md)",
+      "",
+    ].join("\n"),
+  );
+  fs.writeFileSync(
+    path.join(root, "AGENTS.md"),
+    "# Context\n\n## Meta-Protocol Principles\n\n- Rule.\n\n## Operating Principles\n\n- Rule.\n",
+  );
+  fs.writeFileSync(path.join(root, "BACKLOG.md"), "# Backlog\n\nNo open work.\n");
+  fs.writeFileSync(path.join(root, "CHANGELOG.md"), "# Changelog\n\nNo releases.\n");
+  fs.writeFileSync(
+    path.join(root, "docs/README.md"),
+    "# Docs\n\n- [Table](./table.md)\n",
+  );
+  fs.writeFileSync(
+    path.join(root, "docs/table.md"),
+    [
+      "# Table",
+      "",
+      "| Left | Right | Center |",
+      "| --- | ---: | :---: |",
+      "| A | B | C |",
+      "",
+      "   ````markdown",
+      "|------------|---:|",
+      "[Ignored missing link](./missing-backtick.md)",
+      "```",
+      "````",
+      "",
+      "~~~markdown",
+      "|------------|---:|",
+      "[Ignored missing link](./missing-tilde.md)",
+      "~~~",
+      "",
+      "LaTeX is allowed: $\\frac{a}{b}$.",
+      "",
+    ].join("\n"),
+  );
+  return root;
 }
 
 function createInvalidLineRefFixture() {

@@ -102,9 +102,10 @@ Run the Node validator from the project root or pass an explicit root:
 node "${SKILL_DIR}/scripts/validate-context.mjs" /path/to/project
 ```
 
-Output is human-readable. Useful options:
+Output is human-readable. Markdown table checks always require compact delimiter cells such as `| --- | ---: | :--- |`; non-compact delimiters fail validation, while rows longer than 120 characters only warn without imposing a maximum length.
 
-- `--table-width N` for opt-in Markdown table-width warnings.
+Useful environment controls:
+
 - `VALIDATE_CONTEXT_ROOT=/path` as an environment fallback.
 - `NO_COLOR=1` for logs consumed by CI or agents.
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.3
+
+- `Markdown Freedom`: LaTeX syntax is now allowed, while table checks always enforce compact three-hyphen delimiter cells and warn on rows over 120 characters without imposing a maximum. Indented backtick and tilde code fences remain excluded from table validation. Impact: context authors can use mathematical notation and fenced examples while receiving default, noise-focused table formatting guidance.
+
 ## 1.5.2
 
 - `Human-First Validation`: The validator now has one Node implementation and prints classic readable logs by default; JSON output and the Bash runtime are removed. Impact: direct local use and agent calls receive the same concise report without format switches.

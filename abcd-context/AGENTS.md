@@ -33,9 +33,8 @@
 
 - `Single Runtime`: Keep `validate-context.mjs` as the only supported validator implementation.
 - `Anchor Validation`: Preserve underscores while normalizing GitHub-style heading anchors and validate line-reference bounds.
-- `LaTeX Precision`: Detect LaTeX commands rather than broad dollar-delimited patterns that catch shell variables.
 - `Path Portability`: Resolve paths through Node rather than platform-specific shell utilities.
 - `Human Output`: Emit concise readable logs and a summary; `NO_COLOR=1` suppresses color.
 - `Bounded Scanning`: Skip link scanning above the configured byte threshold while validating the surrounding graph.
-- `Opt-In Width`: Warn about Markdown table width only when the caller supplies a threshold.
+- `Compact Tables`: Fail non-compact delimiter cells; require exactly three hyphens with one space inside each pipe, while table rows over 120 characters only warn.
 - `Core Shape Flexibility`: Accept both numbered mature-project sections and compact skill-style durable sections.

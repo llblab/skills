@@ -5,35 +5,18 @@ import path from "node:path";
 import process from "node:process";
 
 let explicitRoot;
-let tableWidthWarnArg;
 const args = process.argv.slice(2);
 for (let index = 0; index < args.length; index += 1) {
   const arg = args[index];
-  if (arg === "--table-width" || arg === "--table-max-width") {
-    const value = args[index + 1];
-    if (
-      !value ||
-      value.startsWith("--") ||
-      !/^[0-9]+$/.test(value) ||
-      Number(value) <= 0
-    ) {
-      console.error(`ERROR: ${arg} requires a positive integer width`);
-      process.exit(1);
-    }
-    tableWidthWarnArg = value;
-    index += 1;
-    continue;
-  }
   if (arg === "--help" || arg === "-h") {
     console.log(
       [
-        "Usage: validate-context.mjs [--table-width N] [project-root]",
+        "Usage: validate-context.mjs [project-root]",
         "",
         "Validates the current directory by default, VALIDATE_CONTEXT_ROOT when set,",
         "or the explicit project-root argument when provided.",
         "",
-        "Markdown table width warnings are disabled by default. Pass --table-width N",
-        "to warn when a table row exceeds N characters.",
+        "Markdown table formatting is always checked. Rows over 120 characters warn.",
       ].join("\n"),
     );
     process.exit(0);
@@ -58,22 +41,7 @@ if (!fs.existsSync(root) || !fs.statSync(root).isDirectory()) {
   process.exit(1);
 }
 const noColor = process.env.NO_COLOR;
-const shapeChecks = process.env.ABCD_MARKDOWN_SHAPE_CHECKS !== "0";
-const tableWidthWarnValue =
-  tableWidthWarnArg ||
-  process.env.ABCD_TABLE_WIDTH_WARN_THRESHOLD ||
-  process.env.ABCD_TABLE_HARD_MAX_WIDTH ||
-  "";
-const tableWidthWarnThreshold = tableWidthWarnValue
-  ? Number(tableWidthWarnValue)
-  : undefined;
-if (
-  tableWidthWarnValue &&
-  (!Number.isInteger(tableWidthWarnThreshold) || tableWidthWarnThreshold <= 0)
-) {
-  console.error("ERROR: table width threshold must be a positive integer");
-  process.exit(1);
-}
+const tableWidthWarnThreshold = 120;
 const markdownLinkScanMaxBytes = Number(
   process.env.ABCD_MARKDOWN_LINK_SCAN_MAX_BYTES || 262144,
 );
@@ -177,17 +145,32 @@ function walk(dir, out = []) {
   return out;
 }
 
+function markdownLines(text) {
+  let fence = null;
+  return text.split(/\r?\n/).map((line) => {
+    if (fence) {
+      const closing = line.match(/^ {0,3}(`{3,}|~{3,})\s*$/);
+      if (
+        closing &&
+        closing[1][0] === fence.marker &&
+        closing[1].length >= fence.length
+      )
+        fence = null;
+      return { line, outsideFence: false };
+    }
+    const opening = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+    if (opening && (opening[1][0] === "~" || !opening[2].includes("`"))) {
+      fence = { marker: opening[1][0], length: opening[1].length };
+      return { line, outsideFence: false };
+    }
+    return { line, outsideFence: true };
+  });
+}
+
 function stripFences(text) {
-  let fenced = false;
-  return text
-    .split(/\r?\n/)
-    .filter((line) => {
-      if (line.startsWith("```")) {
-        fenced = !fenced;
-        return false;
-      }
-      return !fenced;
-    })
+  return markdownLines(text)
+    .filter(({ outsideFence }) => outsideFence)
+    .map(({ line }) => line)
     .join("\n");
 }
 
@@ -407,92 +390,63 @@ if (contextFile) {
       );
 }
 
-progress("Checking for LaTeX syntax...");
-let latex = false;
 const docsDir = path.join(root, "docs");
-const latexRe =
-  /\\(frac|sum|prod|int|rightarrow|leftarrow|alpha|beta|gamma|delta|sqrt|begin\{|end\{|mathbb|mathrm|textbf)/;
-for (const file of walk(docsDir))
-  if (latexRe.test(stripFences(read(file)))) {
-    fail(`LaTeX syntax in ${path.basename(file)}`);
-    latex = true;
-  }
-if (!latex) pass("No LaTeX syntax (GitHub compatible)");
 
-if (shapeChecks) {
-  progress("Checking Markdown shape...");
-  let shapeWarn = false;
-  for (const file of mdFiles) {
-    const lines = read(file).split(/\r?\n/);
-    let fenced = false;
-    let maybeDef = false;
-    let table = null;
-    const flushTable = () => {
-      if (!table) return;
-      if (
-        tableWidthWarnThreshold !== undefined &&
-        table.maxLen > tableWidthWarnThreshold
-      ) {
-        warn(
-          `Wide Markdown table: ${rel(file)}:${table.start}-${table.end} (max ${table.maxLen} chars, ${table.wideRows}/${table.rows} rows > ${tableWidthWarnThreshold}; prefer bullets for prose-heavy cells)`,
-        );
-        shapeWarn = true;
-      }
-      table = null;
-    };
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      if (line.startsWith("```")) {
-        flushTable();
-        fenced = !fenced;
-        continue;
-      }
-      if (fenced || !/^ *\|/.test(line)) {
-        flushTable();
-        continue;
-      }
-      if (!table)
-        table = {
-          start: i + 1,
-          end: i + 1,
-          rows: 0,
-          maxLen: 0,
-          wideRows: 0,
-        };
-      table.end = i + 1;
-      table.rows += 1;
-      table.maxLen = Math.max(table.maxLen, line.length);
-      if (
-        tableWidthWarnThreshold !== undefined &&
-        line.length > tableWidthWarnThreshold
-      )
-        table.wideRows += 1;
-      const cells = line
-        .replace(/^ *\|/, "")
-        .replace(/\| *$/, "")
-        .split("|")
-        .map((s) => s.toLowerCase().replace(/[^a-z]/g, ""));
-      if (
-        cells.length === 2 &&
-        /^(term|field|parameter|document|check|decision|error|layer)$/.test(
-          cells[0],
-        ) &&
-        /^(meaning|description|purpose|default|question|handling|status)$/.test(
-          cells[1],
-        )
-      )
-        maybeDef = true;
-    }
-    flushTable();
-    if (maybeDef) {
+progress("Checking Markdown tables...");
+let tableIssue = false;
+for (const file of mdFiles) {
+  const lines = markdownLines(read(file));
+  let table = null;
+  const flushTable = () => {
+    if (!table) return;
+    if (table.maxLen > tableWidthWarnThreshold) {
       warn(
-        `Definition-list style table: ${rel(file)} (prefer label/bullet definitions)`,
+        `Wide Markdown table: ${rel(file)}:${table.start}-${table.end} (max ${table.maxLen} chars, ${table.wideRows}/${table.rows} rows > ${tableWidthWarnThreshold})`,
       );
-      shapeWarn = true;
+      tableIssue = true;
+    }
+    table = null;
+  };
+  for (let i = 0; i < lines.length; i++) {
+    const { line, outsideFence } = lines[i];
+    if (!outsideFence || !/^ *\|.*\| *$/.test(line)) {
+      flushTable();
+      continue;
+    }
+    if (!table)
+      table = {
+        start: i + 1,
+        end: i + 1,
+        rows: 0,
+        maxLen: 0,
+        wideRows: 0,
+      };
+    table.end = i + 1;
+    table.rows += 1;
+    table.maxLen = Math.max(table.maxLen, line.length);
+    if (line.length > tableWidthWarnThreshold) table.wideRows += 1;
+
+    const cells = line
+      .slice(line.indexOf("|") + 1, line.lastIndexOf("|"))
+      .split("|");
+    if (
+      cells.length &&
+      cells.every((cell) => /^\s*:?-{3,}:?\s*$/.test(cell))
+    ) {
+      const compact = cells.every((cell) =>
+        /^ (?:---|---:|:---|:---:) $/.test(cell),
+      );
+      if (!compact) {
+        fail(
+          `Non-compact Markdown table delimiter: ${rel(file)}:${i + 1} (use exactly three hyphens and one space inside each pipe)`,
+        );
+        tableIssue = true;
+      }
     }
   }
-  if (!shapeWarn) pass("Markdown shape checks passed");
-} else info("Markdown shape checks disabled");
+  flushTable();
+}
+if (!tableIssue) pass("Markdown table checks passed");
 
 if (contextFile) {
   const age = Math.floor(
