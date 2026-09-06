@@ -1,8 +1,12 @@
 # Changelog
 
-## 1.5.3
+## 1.14.1
 
-- `Markdown Freedom`: LaTeX syntax is now allowed, while table checks always enforce compact three-hyphen delimiter cells and warn on rows over 120 characters without imposing a maximum. Indented backtick and tilde code fences remain excluded from table validation. Impact: context authors can use mathematical notation and fenced examples while receiving default, noise-focused table formatting guidance.
+- `Contiguous Markdown Lists`: The validator now rejects blank lines inside continuous lists, including multiline and nested item boundaries, while ignoring fenced examples and bounded large-reference scans. Impact: list items remain structural peers instead of being formatted as separate paragraphs.
+
+## 1.13.2
+
+- `Markdown Freedom`: LaTeX syntax is now allowed, while table checks always enforce compact three-hyphen delimiter cells and warn on rows over 120 characters without imposing a maximum. Indented backtick and tilde code fences remain excluded from table validation. Impact: context authors can use mathematical notation and fenced examples while receiving default, noise-focused table formatting guidance
 
 ## 1.5.2
 

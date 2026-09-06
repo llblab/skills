@@ -16,6 +16,7 @@ for (let index = 0; index < args.length; index += 1) {
         "Validates the current directory by default, VALIDATE_CONTEXT_ROOT when set,",
         "or the explicit project-root argument when provided.",
         "",
+        "Markdown list items must be contiguous; blank separators fail validation.",
         "Markdown table formatting is always checked. Rows over 120 characters warn.",
       ].join("\n"),
     );
@@ -165,6 +166,53 @@ function markdownLines(text) {
     }
     return { line, outsideFence: true };
   });
+}
+
+function markdownIndent(line) {
+  const leading = line.match(/^[ \t]*/)?.[0] || "";
+  return [...leading].reduce((width, char) => width + (char === "\t" ? 4 : 1), 0);
+}
+
+function findLooseListBlankLines(text) {
+  const lines = markdownLines(text);
+  const listIndents = [];
+  let pendingBlankLine;
+  const violations = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    const { line, outsideFence } = lines[index];
+    if (!outsideFence) {
+      listIndents.length = 0;
+      pendingBlankLine = undefined;
+      continue;
+    }
+    if (/^\s*$/.test(line)) {
+      if (listIndents.length > 0 && pendingBlankLine === undefined) {
+        pendingBlankLine = index + 1;
+      }
+      continue;
+    }
+    const item = line.match(/^([ \t]*)(?:[-+*]|\d+[.)])[ \t]+\S/);
+    if (item) {
+      const indent = markdownIndent(item[1]);
+      if (pendingBlankLine !== undefined) violations.push(pendingBlankLine);
+      while (listIndents.length > 0 && listIndents.at(-1) > indent) listIndents.pop();
+      if (listIndents.at(-1) !== indent) listIndents.push(indent);
+      pendingBlankLine = undefined;
+      continue;
+    }
+    if (pendingBlankLine !== undefined) {
+      if (markdownIndent(line) > (listIndents.at(-1) ?? 0)) {
+        violations.push(pendingBlankLine);
+        pendingBlankLine = undefined;
+        continue;
+      }
+      listIndents.length = 0;
+      pendingBlankLine = undefined;
+      continue;
+    }
+    if (/^ {0,3}(?:#{1,6}\s|>|\|)/.test(line)) listIndents.length = 0;
+  }
+  return violations;
 }
 
 function stripFences(text) {
@@ -391,6 +439,25 @@ if (contextFile) {
 }
 
 const docsDir = path.join(root, "docs");
+
+progress("Checking Markdown lists...");
+let listIssue = false;
+for (const file of mdFiles) {
+  const sourceSize = fs.statSync(file).size;
+  if (sourceSize > markdownLinkScanMaxBytes) {
+    info(
+      `Skipped list validation for large Markdown file: ${rel(file)} (${sourceSize} bytes > ${markdownLinkScanMaxBytes})`,
+    );
+    continue;
+  }
+  for (const line of findLooseListBlankLines(read(file))) {
+    fail(
+      `Blank line inside Markdown list: ${rel(file)}:${line} (keep adjacent list items contiguous)`,
+    );
+    listIssue = true;
+  }
+}
+if (!listIssue) pass("Markdown list checks passed");
 
 progress("Checking Markdown tables...");
 let tableIssue = false;

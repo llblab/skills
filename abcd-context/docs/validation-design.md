@@ -28,10 +28,11 @@ A missing or non-directory root fails before validation.
 6. `README reachability — Warning`: Finds subtree README files with no inbound Markdown link.
 7. `Meta-protocol presence — Warning`: Checks the durable file for `Meta-Protocol Principles`.
 8. `Bloat signals — Warning`: Reports low information density or sparse structure in the durable file.
-9. `Markdown tables — Error/Warning`: Always fails non-compact delimiter rows and warns about table rows longer than 120 characters.
-10. `Freshness — Warning`: Reports durable files older than 30 days.
-11. `Docs directory — Warning`: Checks for `/docs`.
-12. `Docs index coverage — Warning`: Detects docs missing from `docs/README.md` and indexed files that do not exist.
+9. `Markdown lists — Error`: Fails blank lines within one continuous list, including multiline and nested items, while ignoring fenced examples and files above the bounded Markdown scan limit.
+10. `Markdown tables — Error/Warning`: Always fails non-compact delimiter rows and warns about table rows longer than 120 characters.
+11. `Freshness — Warning`: Reports durable files older than 30 days.
+12. `Docs directory — Warning`: Checks for `/docs`.
+13. `Docs index coverage — Warning`: Detects docs missing from `docs/README.md` and indexed files that do not exist.
 
 ## Severity Contract
 
@@ -70,6 +71,10 @@ The validator avoids a hard file-length limit. It checks independent signals:
 
 Signals suggest consolidation; they do not replace judgment.
 
+## Markdown Lists
+
+List checks apply to Markdown within the bounded scan size and outside fenced code blocks. A blank line fails when it separates sibling list items, a list item from its nested list, nested sibling items, or a multiline item's continuation from its next item. Paragraphs and independent blocks remain separated by blank lines normally.
+
 ## Markdown Tables
 
 Table checks always run and have no enabling option.
@@ -93,7 +98,8 @@ Validation prints each check and a summary by default. `NO_COLOR=1` disables ANS
 3. A missing path, which must fail clearly.
 4. The removed `--json` option, which must fail clearly.
 5. A temporary fixture with an out-of-range line reference, which must fail clearly.
-6. Temporary fixtures proving that LaTeX and compact table delimiters pass, non-compact delimiters fail, and rows over 120 characters warn.
+6. Temporary fixtures proving that contiguous multiline/nested lists and fenced examples pass while blank separators inside lists fail.
+7. Temporary fixtures proving that LaTeX and compact table delimiters pass, non-compact delimiters fail, and rows over 120 characters warn.
 
 The fixture remains linked from [its README](../fixtures/abcd-project/README.md).
 

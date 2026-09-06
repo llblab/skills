@@ -210,7 +210,6 @@ After the hard gate passes:
 1.  Reconfirm immediately before push that local `dev` and `origin/dev` remain absent. Stop if either now exists or the remote check fails.
 2.  Push the release commit from local `main` to `origin/main` without creating a pull request.
 3.  Verify that `origin/main` resolves to the pushed local `main` commit.
-
 4.  Confirm the version on `main` matches the intended release version and that the current `main` commit is the released commit on `origin/main`.
 5.  Create and push exactly one release tag for the confirmed version on the current `main` commit:
 
@@ -268,9 +267,8 @@ npm view <package-name> version
 Treat an explicit npm not-found response as package absence. Authentication, authorization, network, registry-resolution, and other lookup failures are not absence; stop and report them. Automation-owned npm publication already performed this lookup before the hard gate and must not defer it until after tagging.
 
 15. Publish only when both conditions are true:
-
-- The package already exists on npm.
-- The `main` version matches the intended release version and is newer than the npm version established before publication.
+    - The package already exists on npm.
+    - The `main` version matches the intended release version and is newer than the npm version established before publication.
 
 When repository automation owns npm publication, never run `npm publish` manually. After all owning tag workflows succeed, require `npm view <package-name>@<version> version` to resolve to the intended version; stop if the package remains absent or mismatched.
 

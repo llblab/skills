@@ -23,6 +23,7 @@ const missingPathOutput = run([path.join(fixtureRoot, "missing")], {
 const jsonOptionOutput = run(["--json"]);
 const invalidLineRefRoot = createInvalidLineRefFixture();
 const tableRoot = createTableFixture();
+const listRoot = createListFixture();
 try {
   const invalidLineRefOutput = run([invalidLineRefRoot], {
     withoutRootEnv: true,
@@ -49,6 +50,12 @@ try {
       .replace("|------------|---:|", "| --- | ---: |"),
   );
   const wideTableOutput = run([tableRoot], { withoutRootEnv: true });
+  const tightListOutput = run([listRoot], { withoutRootEnv: true });
+  fs.appendFileSync(
+    path.join(listRoot, "docs/lists.md"),
+    "\n- First loose item.\n  Continued detail.\n\n- Second loose item.\n  - Nested item.\n\n  - Nested sibling.\n",
+  );
+  const looseListOutput = run([listRoot], { withoutRootEnv: true });
 
   checkSuccess("default fixture", defaultOutput);
   checkSuccess("fixture path arg", pathOutput);
@@ -59,9 +66,12 @@ try {
   checkCompactTableAndLatex(compactTableOutput);
   checkNonCompactTable(nonCompactTableOutput);
   checkWideTable(wideTableOutput);
+  checkTightLists(tightListOutput);
+  checkLooseLists(looseListOutput);
 } finally {
   fs.rmSync(invalidLineRefRoot, { recursive: true, force: true });
   fs.rmSync(tableRoot, { recursive: true, force: true });
+  fs.rmSync(listRoot, { recursive: true, force: true });
 }
 
 console.log("PASS: validate-context fixture + self-reference regression");
@@ -144,6 +154,57 @@ function checkWideTable(result) {
     result.stdout.includes("Wide Markdown table"),
     "table row over 120 chars warns",
   );
+}
+
+function checkTightLists(result) {
+  assert(result.status === 0, "contiguous lists and fenced examples pass");
+  assert(
+    result.stdout.includes("Markdown list checks passed"),
+    "contiguous list check reports success",
+  );
+}
+
+function checkLooseLists(result) {
+  assert(result.status !== 0, "blank lines inside lists fail validation");
+  assert(
+    result.stdout.includes("Blank line inside Markdown list: docs/lists.md"),
+    "loose list failure identifies its file",
+  );
+}
+
+function createListFixture() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "abcd-context-list-"));
+  fs.mkdirSync(path.join(root, "docs"));
+  fs.writeFileSync(
+    path.join(root, "README.md"),
+    "# Probe\n\n[Context](./AGENTS.md) [Backlog](./BACKLOG.md) [History](./CHANGELOG.md) [Docs](./docs/README.md)\n",
+  );
+  fs.writeFileSync(
+    path.join(root, "AGENTS.md"),
+    "# Context\n\n## Meta-Protocol Principles\n\n- First rule.\n- Second rule.\n\n## Operating Principles\n\n- Rule.\n",
+  );
+  fs.writeFileSync(path.join(root, "BACKLOG.md"), "# Backlog\n\nNo open work.\n");
+  fs.writeFileSync(path.join(root, "CHANGELOG.md"), "# Changelog\n\nNo releases.\n");
+  fs.writeFileSync(path.join(root, "docs/README.md"), "# Docs\n\n- [Lists](./lists.md)\n");
+  fs.writeFileSync(
+    path.join(root, "docs/lists.md"),
+    [
+      "# Lists",
+      "",
+      "1. First item.",
+      "2. Second item.",
+      "   - Nested item.",
+      "   - Nested sibling.",
+      "",
+      "```markdown",
+      "- Fenced item.",
+      "",
+      "- Fenced loose item.",
+      "```",
+      "",
+    ].join("\n"),
+  );
+  return root;
 }
 
 function createTableFixture() {

@@ -36,5 +36,6 @@
 - `Path Portability`: Resolve paths through Node rather than platform-specific shell utilities.
 - `Human Output`: Emit concise readable logs and a summary; `NO_COLOR=1` suppresses color.
 - `Bounded Scanning`: Skip link scanning above the configured byte threshold while validating the surrounding graph.
+- `Contiguous Lists`: Fail blank lines inside one Markdown list; list items are contiguous structural peers, not paragraphs. Ignore fenced examples and bounded-scan exclusions.
 - `Compact Tables`: Fail non-compact delimiter cells; require exactly three hyphens with one space inside each pipe, while table rows over 120 characters only warn.
 - `Core Shape Flexibility`: Accept both numbered mature-project sections and compact skill-style durable sections.
