@@ -1,6 +1,6 @@
 {
   "name": "@llblab/skills",
-  "version": "1.14.1",
+  "version": "1.15.0",
   "private": false,
   "description": "Dream Skills",
   "keywords": [
@@ -32,8 +32,7 @@
     "groq-stt/",
     "mistral-stt/",
     "re-review/",
-    "release-flow/",
-    "show-me/"
+    "release-flow/"
   ],
   "publishConfig": {
     "access": "public"
