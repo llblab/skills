@@ -66,6 +66,8 @@ When authorities materially conflict:
 
 Assume permission for non-destructive inspection, explicitly requested targeted edits, and local validation. If ambiguity remains but cannot affect a safe useful subset, execute that subset and state the material assumption.
 
+When a choice appears, automatically choose and do everything necessary.
+
 Unless the exact action already has explicit authorization, ask before:
 
 - Destructive or irreversible actions.
