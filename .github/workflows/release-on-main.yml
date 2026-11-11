@@ -1,0 +1,106 @@
+name: Release on version bump
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+      - package-lock.json
+
+# Keep different version-bump commits independent; serialize reruns of one commit.
+concurrency:
+  group: release-on-main-${{ github.sha }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - name: Check out exact version-bump commit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Check version increase and lockfile consistency
+        id: version
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { execFileSync } from "node:child_process";
+          import { appendFileSync, readFileSync } from "node:fs";
+
+          const git = (...args) => execFileSync("git", args, { encoding: "utf8" }).trim();
+          const before = process.env.BEFORE_SHA;
+          if (!before || !/^[0-9a-f]{40}$/.test(before) || /^0+$/.test(before)) {
+            throw new Error("A version-bump release requires an existing base commit.");
+          }
+          if (process.env.GITHUB_REF !== "refs/heads/main" || git("rev-parse", "HEAD") !== process.env.GITHUB_SHA) {
+            throw new Error("Release preparation must use the exact main push commit.");
+          }
+          git("merge-base", "--is-ancestor", before, "HEAD");
+
+          const previous = JSON.parse(git("show", `${before}:package.json`));
+          const current = JSON.parse(readFileSync("package.json", "utf8"));
+          const lock = JSON.parse(readFileSync("package-lock.json", "utf8"));
+          if (!current.name || current.name !== previous.name || current.private === true ||
+              lock.name !== current.name || lock.packages?.[""]?.name !== current.name ||
+              lock.version !== current.version || lock.packages?.[""]?.version !== current.version) {
+            throw new Error("Publishable package identity and lockfile versions must agree.");
+          }
+          if (current.version === previous.version) {
+            console.log("Package version unchanged; no release requested.");
+            appendFileSync(process.env.GITHUB_OUTPUT, "release=false\n");
+          } else {
+            const parseStable = (value) => {
+              if (typeof value !== "string" || !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(value)) {
+                throw new Error(`Automatic releases require stable semantic versions: ${value}. Use the tag workflow for prereleases.`);
+              }
+              return value.split(".").map(BigInt);
+            };
+            const oldParts = parseStable(previous.version);
+            const newParts = parseStable(current.version);
+            const changedPart = newParts.findIndex((value, index) => value !== oldParts[index]);
+            if (changedPart < 0 || newParts[changedPart] < oldParts[changedPart]) {
+              throw new Error(`Version must increase: ${previous.version} -> ${current.version}.`);
+            }
+            appendFileSync(process.env.GITHUB_OUTPUT, `release=true\ntag=v${current.version}\n`);
+          }
+          NODE
+      - name: Install exact dependencies
+        if: steps.version.outputs.release == 'true'
+        run: npm ci
+      - name: Validate before tagging
+        if: steps.version.outputs.release == 'true'
+        run: npm run validate
+      - name: Create immutable release tag and dispatch publisher
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ steps.version.outputs.tag }}
+        run: |
+          if git show-ref --verify --quiet "refs/tags/$TAG_NAME"; then
+            if [ "$(git rev-parse "refs/tags/$TAG_NAME^{commit}")" != "$GITHUB_SHA" ]; then
+              echo "Release tag $TAG_NAME already points to a different commit." >&2
+              exit 1
+            fi
+          else
+            git tag "$TAG_NAME" "$GITHUB_SHA"
+            git push origin "refs/tags/$TAG_NAME"
+          fi
+          # A tag pushed with GITHUB_TOKEN does not trigger another push workflow.
+          # Explicit dispatch reuses the exact-tag publisher, without a PAT.
+          gh workflow run release.yml --repo "$GITHUB_REPOSITORY" --ref "$TAG_NAME"
