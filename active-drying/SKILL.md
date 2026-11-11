@@ -85,7 +85,7 @@ For each material candidate, establish:
 - **Pressure and location:** the demonstrated cost or risk, and where it originates.
 - **Move:** delete, derive, narrow, merge, re-represent, extract or reuse. Prefer one change at the owning model or boundary over many symptom edits. Compare with leaving the code alone.
 - **Preservation:** required behavior, guarantees and consumers of the old shape.
-- **Ledger:** carrying cost before → after, new costs and risks, one-time investigation, implementation, migration and validation effort, and plausible payback over the project's actual change horizon. Keep unlike costs visible; avoid false precision. Uncertain speculative payback defers the candidate.
+- **Ledger:** carrying cost before → after, new costs and risks, one-time investigation, implementation, migration and validation effort, and plausible payback over the project's actual change horizon. Account for expected failure costs and uncertainty where evidence supports them; never trade mandatory guarantees for estimated savings. Keep unlike costs visible; avoid false precision. Uncertain speculative payback defers the candidate.
 - **Falsification:** the check, traced path, representative change or measurement that could show the proposal wrong or not cheaper. Challenge the preferred design with the strongest plausible keep-as-is case.
 
 Keep this implicit for obvious local changes; use a short note for material trade-offs, not a scoring sheet. A reform may add lines and still pay, or delete lines and still cost. Structural reasoning can justify a maintenance gain; performance claims require measurement.
