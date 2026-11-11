@@ -1,6 +1,6 @@
 {
   "name": "@llblab/skills",
-  "version": "1.17.0",
+  "version": "1.18.0",
   "private": false,
   "description": "Dream Skills",
   "keywords": [
@@ -23,11 +23,11 @@
   },
   "files": [
     "abcd-context/",
-    "active-drying/",
     "brain-storm/",
     "coding-contract/",
     "domain-dag/",
     "edge-tts/",
+    "ego-peer/",
     "extra-self/",
     "frontend-design/",
     "groq-stt/",
