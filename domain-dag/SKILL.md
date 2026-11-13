@@ -1,22 +1,11 @@
 ---
 name: domain-dag
-description: Validates and guides Domain DAG architecture for domain ownership, acyclic local dependency graphs, composition roots, boundary direction, public contracts, interface-surface pressure, and shared-bucket drift. Use when auditing, refactoring, or extending modular codebases across frontend, backend, extensions, CLIs, SDKs, and service packages.
+description: Guide and audit module ownership and dependency direction: acyclic imports, composition roots, public contracts, extraction limits, shared buckets, and validator calibration. Supplies graph-specific criteria during architecture design, implementation, or review rather than replacing the surrounding workflow.
 ---
 
 # Domain DAG
 
-## Purpose
-
-Maintain source code as a directed acyclic graph of cohesive responsibility modules.
-
-A Domain DAG keeps architecture readable by making every durable module answer four questions:
-
-1. **What does this module own?**
-2. **What does it explicitly not own?**
-3. **Which lower or peer contracts may it depend on?**
-4. **Where is live composition allowed to happen?**
-
-The skill is not tied to one stack or folder style. It applies to frontend features, backend bounded contexts, extension hosts, SDK packages, CLIs, workers, and service adapters.
+Maintain an acyclic graph of cohesive responsibility modules. Each durable module names what it owns, excludes, may depend on, and where live composition belongs. The graph is independent of stack and folder style.
 
 ## Core Model
 
@@ -31,8 +20,6 @@ composition root / delivery surface
 The filesystem may be flat, layered, package-based, or mixed. The graph is architectural, not decorative: ownership lives in module boundaries, import direction, public contracts, and explicit composition points.
 
 ## Common Shapes
-
-Domain DAG is a graph discipline, not one folder template.
 
 - **Flat domain DAG**: one entrypoint plus flat domain files/packages. Best for extensions, CLIs, small services, and runtimes where deep folders would hide rather than clarify ownership.
 - **Layered domain DAG**: routes/controllers/features/use-cases compose reusable domain and support modules. Best when delivery surfaces are numerous and entity capabilities are reused across screens or endpoints.
@@ -125,15 +112,13 @@ Do **not** keep decomposing just because a file is large. Stop when:
 
 At this point, switch to review: check for misplaced ownership, too-wide contracts, stale imports, and validator gaps.
 
-## Anti-Patterns
+## Common Boundary Failures
 
-- **Folder theater**: creating layers or domain folders without changing dependency direction or ownership clarity.
-- **Peer feature reach-through**: one workflow imports another workflow because it wants a reusable part.
-- **Shared bucket gravity**: generic `types`, `utils`, or `constants` become the real hidden domain.
-- **God facade**: a public contract exposes most internals and gives consumers no smaller capability boundary.
-- **RPC child component/module**: a child boundary accepts dozens of callbacks or flags instead of a named contract.
-- **Premature atomization**: many one-use files obscure the main control flow and make debugging harder.
-- **Validator absolutism**: heuristic warnings are promoted to errors before the signal is proven stable.
+- **Folder theater**: Moving files into layers changes neither their imports nor their owners. Judge the dependency graph, not directory depth.
+- **Shared bucket gravity**: A generic helpers/types folder accumulates one domain's policy. Move that responsibility to its real owner rather than renaming the bucket.
+- **RPC child**: An extraction needs most host state and many callbacks. Keep the cohesive host or introduce a genuinely smaller contract; do not disguise reach-through with an object of unrelated handlers.
+- **Premature atomization**: One-use files hide the main control flow without improving ownership, reuse, or testability. Rejoin them when the boundary's cost exceeds its value.
+- **Validator absolutism**: A heuristic warning becomes a hard gate before its signal is proven. Keep project-earned objective rules separate from pressure signals.
 
 ## Validation
 
@@ -235,23 +220,9 @@ Use severity deliberately:
 - **Warning**: architectural pressure — shared bucket names, missing headers, wide interfaces, large modules, broad exports, suspicious reach-through.
 - **Off / documented exception**: local shape intentionally violates a heuristic and the reason is durable.
 
-A mature Domain DAG has few hard rules and good explanations. It does not need many rules to be strong.
-
 ## Operating Protocol
 
 1. Apply the [Calibration Protocol](#calibration-protocol).
 2. Map domain and support owners, public contracts, and explicit exclusions beneath the identified composition roots.
 3. Fix hard failures before cosmetic refactors. Use [Placement Heuristics](#placement-heuristics) for misplaced responsibilities and [Extraction Protocol](#extraction-protocol) when decomposition is warranted.
 4. Stop after the smallest behavior-preserving slice that improves the graph.
-
-## Review Lens
-
-A good Domain DAG review asks:
-
-- Is every durable responsibility owned exactly once?
-- Are public contracts smaller than the internals behind them?
-- Are peer orchestration modules reusing each other instead of extracting a lower capability?
-- Are shared buckets hiding ownership decisions?
-- Are interface surfaces becoming RPC-style bags of callbacks or methods?
-- Did decomposition improve change locality without hiding essential control flow?
-- Are validator rules hard only where they are low-noise and project-earned?

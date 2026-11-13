@@ -1,6 +1,6 @@
 ---
 name: mistral-stt
-description: Transcribe audio files using Mistral AI Voxtral.
+description: Transcribe audio files through Mistral Voxtral, optionally preserving provider speaker labels. Use when the request, established workflow, or configuration selects Mistral. Ask only if the provider remains unresolved; not speech synthesis.
 ---
 
 # Mistral STT Skill

@@ -1,6 +1,6 @@
 ---
 name: motion-design
-description: Design purposeful motion for films, product launches, explainers, animated sequences and interface transitions. Owns story, choreography, pacing and audiovisual coherence, independent of source format or rendering engine. Use for motion direction, storyboards, animatics, motion polish and finished films; compose with interface-design and renderer-specific guidance for implementation and validation.
+description: Own narrative over time, choreography, pacing, continuity, and audiovisual coherence for films, animatics, and interface transitions. Not application information architecture, behavior, or rendering-engine mechanics.
 ---
 
 # Motion Design

@@ -1,55 +1,40 @@
 ---
 name: release-flow
-description: Select and run a guarded GitHub release flow for an administered repository, using a pre-PR squashed dedicated version branch, a dev-to-main pull request, or direct main as repository topology requires, then coordinating tags, GitHub Releases, and optional existing npm publication. Use only with explicit release intent and ADMIN permission; exclude contribution forks, ordinary feature integration, and non-GitHub workflows.
+description: "Run an explicitly requested GitHub release for an authenticated ADMIN: select a fixed version-branch, dev-PR, or direct-main route and verify tags, Releases, and existing npm publication. Not feature integration, contribution-fork delivery, or generic Git operations."
 ---
 
 # Release Flow
 
-Use this skill to select and run the release path that matches an eligible GitHub repository administered by the authenticated user: a dedicated version branch squashed to one commit before its `main` PR, a guarded `dev` → `main` PR, or direct `main` when neither PR source applies. Release notes and PR text come from the canonical project changelog when one exists; otherwise they come from a verified outcome-focused narrative derived from the release diff. This skill never creates a changelog.
+Release through the selected repository-topology route. Use an existing canonical changelog or a verified diff-derived narrative; never create a changelog.
 
 ## Eligibility Boundary
 
-Establish eligibility before selecting a branch route or changing repository state.
+Establish eligibility before route selection or mutation. Stop further release actions on an unmet gate, failed required check, ambiguity, or unverifiable state; report completed actions and the exact blocker. Fix validation failures only when safe within release scope. No implicit route, executor, or recovery fallback is permitted.
 
-1. Confirm that `origin` resolves to a repository on `github.com`. Non-GitHub hosts and merge-request-based workflows are outside this skill.
-2. Confirm active GitHub CLI authentication and identify the authenticated user with `gh api user --jq .login`. Authentication, network, host, and repository-resolution failures make eligibility unknown; stop.
-3. Inspect the repository with `gh repo view --json nameWithOwner,owner,isFork,viewerPermission`.
-4. Require `viewerPermission: ADMIN`. Treat this repository-scoped permission, together with the user's explicit release request required by the hard gate, as sufficient release authority. Do not require owner-login equality, organization classification, or a second maintainership attestation. `WRITE` or `MAINTAIN` alone remains insufficient for this generic flow.
-5. Require the repository to be either not a fork, or explicitly classified as an independently maintained historical fork with its own release line rather than a contribution fork whose changes should flow through an upstream pull request.
-6. Treat `isFork` as a topology fact, not an automatic permission failure. For a fork, require explicit workflow classification in the current conversation before any release mutation; repository age, divergence, package identity, prior releases, or permission level cannot establish whether work should ship independently or flow upstream. Record that classification in the final eligibility evidence.
-7. Stop when the authenticated user lacks `ADMIN`, repository access cannot be verified, or a fork remains unclassified or serves an upstream-contribution workflow. Do not add a separate ownership or organization-maintainership confirmation gate after an explicit release request.
-8. Exclude ordinary feature, staging, and arbitrary integration branches. This skill may operate from `main`, long-lived `dev`, or a dedicated version branch whose name exactly identifies the intended version: bare SemVer (`0.7.2`), `v`-prefixed SemVer (`v0.7.2`), or `release/<semver>`. A version branch is a release source only when the current branch matches the intended manifest/changelog version; naming alone never promotes a feature branch. On a `dev` PR route, release actions run from `dev`; on a version PR route, they run from that version branch.
+1. Require `origin` on `github.com`, active GitHub CLI authentication, and the user identity from `gh api user --jq .login`. Auth, network, host, or repository-resolution failure means unknown eligibility; stop. Non-GitHub and merge-request workflows are out of scope.
+2. Inspect `gh repo view --json nameWithOwner,owner,isFork,viewerPermission`. Require repository-scoped `ADMIN` plus explicit release intent. `WRITE`/`MAINTAIN` is insufficient; owner-login equality, organization classification, or another maintainership attestation is unnecessary.
+3. Require a non-fork or explicit current-conversation classification as an independently maintained historical fork with its own release line. `isFork` is topology, not permission; age, divergence, package identity, prior releases, and permission cannot classify the workflow. Stop for an unclassified or contribution fork; record independent-fork classification in final evidence.
+4. Operate only from `main`, long-lived `dev`, or a dedicated version branch exactly matching the intended manifest/changelog version: bare SemVer, `v<semver>`, or `release/<semver>`. Naming alone cannot promote feature, staging, or arbitrary integration work. Dev/version PR actions run from their selected source branch.
 
-These boundaries do not gain an automatic override. An ineligible repository needs its own project-specific release process.
+No automatic override applies; ineligible repositories need a project-specific release process.
 
 ## Route Selection
 
-Select the route before staging, committing, pushing, opening a PR, tagging, creating a GitHub Release, publishing, or modifying release files.
+Select before staging, committing, pushing, PRs, tags, Releases, publication, or release-file edits:
 
-1. Confirm that the repository has an `origin` remote and read the current branch.
-2. If the current branch is a dedicated version branch matching the intended manifest/changelog version, select the **version PR route**. This route takes precedence over `dev` detection because the version branch owns the prepared release tree.
-3. Otherwise, check for a local `dev` branch with `git show-ref --verify refs/heads/dev`. If it exists, select the **dev PR route**; remote `dev` detection cannot make the route less strict.
-4. Only when neither a version route nor local `dev` applies, query `origin` directly for `refs/heads/dev`, for example with `git ls-remote --exit-code --heads origin refs/heads/dev`. Do not infer remote absence from a missing or stale `origin/dev` remote-tracking ref.
-5. For `git ls-remote --exit-code`, treat exit status `2` with no matching ref as authoritative absence. Treat exit status `0` with the ref as presence. Authentication, authorization, network, repository-resolution, and other failures make route selection unknown; stop instead of choosing direct-main.
-6. Select exactly one route:
-   - **Version PR route:** Current branch is a dedicated version branch for the intended release.
-   - **Dev PR route:** No version route applies, and local or remote `dev` exists.
-   - **Direct-main route:** No version route applies, local `dev` is absent, and the authoritative query confirms `origin/dev` is absent.
+1. Confirm `origin` and the current branch. A current dedicated version branch matching the intended version selects **version PR**, before `dev` detection: it owns the prepared tree.
+2. Otherwise query local `dev` with `git show-ref --verify refs/heads/dev`. Presence selects **dev PR**; remote detection cannot relax it.
+3. Only if neither applies, query `origin` directly: `git ls-remote --exit-code --heads origin refs/heads/dev`. Missing/stale tracking refs do not prove absence. Exit `0` with the ref means presence (**dev PR**); exit `2` with no match means authoritative absence (**direct-main**). Auth, authorization, network, resolution, or other failures mean unknown; stop, never infer direct-main.
 
-Once selected, keep that route for the entire run. A branch-state change, inconvenience, conflict, failed check, or failed PR action must not trigger fallback to another route.
+Keep exactly that route throughout. Branch changes, inconvenience, conflicts, failed checks, and failed PR actions never authorize fallback.
 
 ## Validation Evidence Identity
 
-Release validation is evidence about a specific input state and relevant environment, not a ceremony attached to every workflow phase.
-
-1. Record the subject of each expensive successful validation when later topology changes are expected. Prefer the exact Git tree OID for source-bound checks, the artifact digest for artifact/network checks, and the relevant lock/toolchain identities when they affect the claim.
-2. Classify whether the validation consumes commit SHA, parent, branch, tag, signature, commit timestamp, remote state, credentials, or another condition outside the tree. Inspect the validation owner when sensitivity is unclear.
-3. Reuse successful evidence after an operation when the active release contract is unchanged and equivalence proves every relevant input and condition unchanged. Exact tree equality preserves tree-bound build, test, lint, benchmark, and generated-artifact evidence.
-4. A squash, rebase, amend, fast-forward wrapper removal, branch rename, or other topology-only operation does not by itself justify rerunning tree-bound validation. Never rerun an expensive profile solely because a validated tree received a new commit identity.
-5. Rerun only the invalidated layer when a check is commit/ref-sensitive. Require a full rerun only when the tree changed, relevant environment authority changed, external evidence expired, the prior run was incomplete or failed, or validation sensitivity remains materially unknown after inspection.
-6. Record reused evidence, its original subject, the equivalence proof, and any narrow post-operation checks in the release handoff. Evidence reuse must be auditable rather than assumed.
-
-An explicit repository policy requiring a fresh run for a topology stage remains authoritative and must be followed even when exact equivalence preserves the validated subject. When creating or revising such policy, name the commit/ref-sensitive or freshness boundary it protects so future evidence reuse decisions remain auditable.
+1. Before expected topology changes, record expensive successful checks' subjects: exact tree OID for source, artifact digest for artifact/network checks, and relevant lock/toolchain/environment identities.
+2. Determine sensitivity to commit SHA/parent, branch, tag, signature, timestamp, remote state, credentials, or other non-tree conditions; inspect the validation owner when unclear.
+3. Reuse only when the active contract and every relevant input/condition remain equivalent. Exact tree equality preserves tree-bound build, test, lint, benchmark, and generated-artifact evidence. Squash, rebase, amend, wrapper removal, or branch rename alone never justify an expensive tree-bound rerun.
+4. Rerun only invalidated commit/ref-sensitive layers. Full reruns require a changed tree, changed relevant environment authority, expired external evidence, failed/incomplete prior run, or materially unknown sensitivity after inspection.
+5. Report reused evidence, original subject, equivalence proof, and narrow post-operation checks. Honor explicit repository topology-stage freshness policy despite equivalence; when revising such policy, name its commit/ref-sensitive or freshness boundary.
 
 ## Dedicated Version Branch Pre-PR Squash
 
@@ -146,8 +131,6 @@ A prior direct-main release, a small hotfix, urgency, PR inconvenience, branch p
 
 Before committing on the direct-main route, fetch `origin/main` and require local `main` HEAD to equal `origin/main`. Stop on divergence, unpushed local commits, a missing `origin/main`, or a fetch failure; do not merge, rebase, reset, or pull automatically while prepared release changes are present.
 
-The direct-main route retains every shared release safeguard: current-state audit, release-narrative freshness, validation, intentional staging, repository-style release commit, push verification, version confirmation, immutable tag checks, GitHub Release verification, and guarded registry publication.
-
 ## Repository-Owned Release Automation
 
 Inspect the intended tagged commit before the hard gate for active repository workflows, normally under `.github/workflows`, that trigger on version-tag pushes. Classify ownership by behavior rather than filename:
@@ -183,7 +166,7 @@ After the hard gate passes:
 3. Detect whether the repository already owns a canonical project-level changelog, normally at the root or at a documented release-history path; a nested subsystem changelog does not become the package release source merely because it exists. If a canonical changelog exists, read only the intended version section and any `Unreleased` section, beginning with the first 50 lines and expanding to section boundaries as needed. Otherwise record its absence and use the contract's temporary-narrative path. The same contract owns when subsystem history needs an update.
 4. Inspect the actual release diff. For a version PR route, compare the complete version-branch tree with `origin/main` before and after the squash. For a dev PR route, compare `dev` with the `main` PR base and include staged/unstaged release files. For direct-main, inspect staged/unstaged changes against verified `main`. Apply the [Release Narrative Consolidation Rules](#release-narrative-consolidation-rules) to this evidence. When a canonical changelog exists, edit only its intended section without rewriting older history; otherwise create only temporary release notes.
 5. Confirm release-note freshness. When a canonical changelog exists, its intended version section must describe the release and must not leave the same shipped changes under `Unreleased`; stop if the section is missing, ambiguous, or conflicts with diff evidence. When no canonical changelog exists, its absence is not a blocker; instead verify that the temporary release narrative covers every meaningful shipped outcome. In either case, stop if safe consolidation would require guessing which behavior ships.
-6. Run the smallest meaningful validation first. Prefer the project release validation command when available. Record the validated tree or artifact identity and relevant environment authority so later topology-only operations can reuse the evidence instead of rerunning it.
+6. Run the smallest meaningful validation, preferring the project release command; stop on failure that cannot be fixed safely in release scope. Record subject/environment under [Validation Evidence Identity](#validation-evidence-identity) for later reuse.
 7. Stage only intentional release files and apply the [Release Commit Message Contract](#release-commit-message-contract) before any release commit is written.
 8. On a version PR route, complete all release files first and then execute the dedicated pre-PR squash section; do not create a preliminary PR or a second release commit.
 9. Create exactly one release commit. On a version PR route, use the one-parent commit already produced by the pre-PR squash; on dev/direct-main, create the normal release commit.
@@ -210,8 +193,13 @@ After the hard gate passes:
 1.  Reconfirm immediately before push that local `dev` and `origin/dev` remain absent. Stop if either now exists or the remote check fails.
 2.  Push the release commit from local `main` to `origin/main` without creating a pull request.
 3.  Verify that `origin/main` resolves to the pushed local `main` commit.
-4.  Confirm the version on `main` matches the intended release version and that the current `main` commit is the released commit on `origin/main`.
-5.  Create and push exactly one release tag for the confirmed version on the current `main` commit:
+
+### Shared Publication
+
+After any selected route completes:
+
+1. Confirm the version on `main` matches the intended release version and that the current `main` commit is the released commit on `origin/main`.
+2. Create and push exactly one release tag for the confirmed version on the current `main` commit:
 
 ```bash
 git tag v<version>
@@ -222,7 +210,7 @@ If the tag already exists locally or remotely, verify it points to the current `
 
 If repository automation owns GitHub Release creation or npm publication, discover and watch every expected tag-triggered run now. Correlate each run to its recorded workflow, the exact tag, the `push` event, and the released commit SHA. Continue only after all owning runs succeed and create every expected external state. A failed or missing run is a release stop even when some external state exists; verify and report that partial state without racing it.
 
-13. Ensure exactly one published GitHub Release exists for the confirmed tag. First determine whether the intended version is stable or a prerelease from the version and verified release narrative, then check whether a release already exists:
+3. Ensure exactly one published GitHub Release exists for the confirmed tag. First determine whether the intended version is stable or a prerelease from the version and verified release narrative, then check whether a release already exists:
 
 ```bash
 gh release view v<version> --json tagName,isDraft,isPrerelease,publishedAt,url
@@ -248,7 +236,7 @@ gh release create v<version> --verify-tag --prerelease --latest=false --title "<
 
 If a release already exists, verify that `tagName` equals `v<version>`, `isDraft` is false, `publishedAt` is present, and `isPrerelease` matches the intended stable/prerelease state. Reuse it instead of creating a duplicate. If any field conflicts, stop and report the mismatch; do not silently edit, delete, or replace it.
 
-After creation or reuse, verify latest state. For a stable release, the latest-release endpoint must resolve to the intended tag:
+After creation or reuse, verify the release URL and latest state. For a stable release, the latest-release endpoint must resolve to the intended tag:
 
 ```bash
 gh api repos/{owner}/{repo}/releases/latest --jq .tag_name
@@ -256,7 +244,7 @@ gh api repos/{owner}/{repo}/releases/latest --jq .tag_name
 
 For a prerelease, confirm that the endpoint does not resolve to the prerelease tag. A missing latest stable release is acceptable for a prerelease-only repository.
 
-14. Determine whether npm publication applies. Require a project-owned `package.json` with a package name and no `private: true`. If the project is not a publishable npm package, skip npm checks and publication unless a tag workflow claims npm ownership; that conflict must already have stopped the flow during automation preflight. Do not guess or trigger another registry workflow.
+4. Determine whether npm publication applies. Require a project-owned `package.json` with a package name and no `private: true`. If the project is not a publishable npm package, skip npm checks and publication unless a tag workflow claims npm ownership; that conflict must already have stopped the flow during automation preflight. Do not guess or trigger another registry workflow.
 
 For an applicable npm package without automation-owned npm publication, check whether that package already exists:
 
@@ -266,7 +254,7 @@ npm view <package-name> version
 
 Treat an explicit npm not-found response as package absence. Authentication, authorization, network, registry-resolution, and other lookup failures are not absence; stop and report them. Automation-owned npm publication already performed this lookup before the hard gate and must not defer it until after tagging.
 
-15. Publish only when both conditions are true:
+5. Publish only when both conditions are true:
     - The package already exists on npm.
     - The `main` version matches the intended release version and is newer than the npm version established before publication.
 
@@ -322,118 +310,53 @@ Before creating the release commit:
 
 The consolidated canonical section, when present, or temporary diff-derived narrative otherwise becomes the sole source for the PR body and GitHub Release notes. If repository evidence cannot establish the final shipped behavior without guessing, stop and ask instead of manufacturing a clean story.
 
-## GitHub Release Contract
-
-The GitHub Release and Git tag are one release unit. A successful tag push is not a completed release until a matching published GitHub Release exists. Exactly one executor owns creation: a verified tag-triggered repository workflow when present, otherwise the manual release-flow path.
-
-- Derive the title from the canonical changelog heading when available by removing the Markdown prefix, for example `## 0.4.0: Bounded Worker Meta-Protocol` becomes `0.4.0: Bounded Worker Meta-Protocol`. Without a canonical changelog, use `<version>: <concise release theme>` from the verified release narrative.
-- Derive notes from the verified release narrative. Compress when needed, but cover every meaningful release group and never include unrelated older history.
-- Use the already-pushed `v<version>` tag; never create a second tag through release creation.
-- Mark a normal stable release as latest with `--latest`. Mark an explicit prerelease with `--prerelease --latest=false`; never promote a prerelease to latest.
-- Verify the resulting release URL, tag, published state, prerelease state, and latest state before continuing to registry publication.
-
 ## Release Commit Message Contract
 
-The release commit subject is a repository-local convention, not a universal template.
-
-Before committing, inspect recent history with `git log -5 --pretty=%s` (or fewer commits if the repository has fewer). Infer the broad subject style from nearby commits, especially prior release/version commits when present. Preserve observable conventions such as version prefixing, separators, casing, imperative vs noun-phrase wording, and whether a secondary theme is included.
-
-Examples of adaptation, not mandatory formats:
-
-- Recent: `0.8.1: outbound voice translation hotfix, queue safety` -> next release may use `<version>: <theme>, <secondary theme>`.
-- Recent: `release: 0.8.1` -> next release may use `release: <version>`.
-- Recent: `v0.8.1` -> next release may use `v<version>`.
-
-If no stable pattern can be inferred, use the latest relevant commit subject as the fallback style template and adapt only the version/theme content. Do not stop solely because the style is mixed; stop only when the commit subject would be misleading or the release version/theme cannot be identified safely.
+Before committing, inspect `git log -5 --pretty=%s` (fewer if unavailable), especially prior version/release subjects. Preserve observable prefix, separator, casing, grammatical form, and theme conventions. If mixed, adapt the latest relevant subject's version/theme; do not block on mixed style alone. Stop only for a misleading subject or a version/theme that cannot be identified safely.
 
 ## PR Body Contract
 
-This contract applies only to the PR route. The direct-main route skips PR creation but uses the same verified release narrative for GitHub Release notes.
+For either PR route, derive the body from the sole verified release narrative. Include `## Summary` with 1–2 short paragraphs and `## Validation` naming commands/results. Start with `This release` or `This hotfix` and the primary user-visible outcome; add a useful second paragraph for safety, compatibility, or architecture impact.
 
-The PR body must include at minimum:
+- Add `## Why` for bugs, races, stale state, missing context, or confusing behavior; always include it for hotfixes.
+- Add `## User-visible behavior` or `## Behavior` for operator-facing changes; `## Highlights` may suit broad feature releases.
+- Add `## Changed areas` only when domain-level implementation boundaries clarify risk, not a file inventory.
+- Add `## Risk Notes` for runtime, queue, rendering, locks, delivery, migrations, configuration, or external-service behavior.
+- Cover every meaningful narrative group, favor exact operator verbs and concrete effects, and mention internals only to explain behavior, compatibility, or risk reduction.
+- Do not paste the changelog/raw diff or use vague safety/test/version-bump filler.
 
-```md
+A compact PR body can use this shape; expand only for the conditional sections above:
+
+```markdown
 ## Summary
 
-This release <primary outcome from the verified release narrative>.
+This release <primary user-visible outcome>.
 
-It also <secondary behavior/safety/compatibility outcome from the verified release narrative>.
+It also <meaningful safety or compatibility impact, when relevant>.
 
 ## Validation
 
-- <Validation command> — <result>
+- <Command> — <result and relevant evidence identity>
 ```
 
-Prefer this fuller shape when the release narrative has enough substance:
-
-```md
-## Summary
-
-This release <primary outcome from the verified release narrative>.
-
-It also <secondary behavior/safety/compatibility outcome from the verified release narrative>.
-
-## Why
-
-<One short paragraph explaining the user/operator problem solved. Omit only when obvious. For hotfixes, include this section.>
-
-## User-visible behavior
-
-- <User-facing change>
-- <Operational or safety behavior>
-- <Compatibility or UI behavior>
-
-## Changed areas
-
-- `<domain/file>`: <review-relevant implementation summary>
-- Docs/package metadata: <docs/version summary>
-
-## Risk Notes
-
-- <Runtime, queue, rendering, lock, config, migration, external-service risk and mitigation, or `No migration/config changes required.`>
-
-## Validation
-
-- <Validation command> — <result>
-```
-
-## PR Writing Rules
-
-- Start `## Summary` with 1-2 short release paragraphs, not only bullets.
-- First paragraph starts with `This release` or `This hotfix` and names the primary user-visible behavior.
-- Second paragraph, when useful, explains the main safety, compatibility, or architecture impact.
-- Add `## Why` when the release fixes a bug, race, stale state, missing context, or confusing behavior. Hotfixes must include it.
-- Add `## User-visible behavior` or `## Behavior` for operator-facing behavior changes.
-- Add `## Highlights` for broad feature releases where bullet scanning is better than a long changed-area list.
-- Add `## Changed areas` only when implementation boundaries help reviewers understand risk. Group by domain, not every file.
-- Add `## Risk Notes` for runtime, queue, rendering, locks, delivery, migrations, config, or external-service behavior.
-- Cover every meaningful release-narrative group in compressed form.
-- Keep wording release-focused and user-facing where possible.
-- Mention implementation-only items only when they explain behavior, compatibility, or risk reduction.
-- Do not paste a full changelog or raw diff.
-- Avoid vague filler bullets such as “improves safety”, “updates tests”, or “bumps version” unless they name concrete behavior, risk reduction, or package version.
-- Prefer exact operator verbs: “clears”, “preserves”, “blocks”, “forwards”, “retries”, “falls back”, “renders”, “strips”, “uploads”.
+Direct-main skips the PR, not the verified narrative for Release notes.
 
 ## Stop Conditions
 
-Stop further release actions and report the state already completed when:
+This is a final navigation check over the gates above, not a substitute for them or a new recovery authorization. Stop further release actions and report completed state when:
 
-- GitHub hosting, authenticated `ADMIN` permission, explicit release intent, required independent-fork classification, or repository release-automation ownership cannot be verified.
-- The repository is ineligible because `ADMIN` is absent, it is an unclassified or contribution fork, it uses a non-GitHub host, or it requires an integration workflow outside `dev` and `main`.
-- Route selection is ambiguous, the authoritative remote query fails, or the branch state no longer matches the selected route.
-- Run criteria fail.
-- Wrong-branch recovery encounters mixed work, unsafe repository state, transfer mismatch, conflicts, or branch divergence without the required separate approval.
-- On the direct-main route, local `main` does not initially equal `origin/main` or either `dev` branch appears before push.
-- The version source cannot be identified safely or multiple version files disagree.
-- A canonical project changelog exists but its intended version section is missing, ambiguous, conflicts with release evidence, or remains duplicated under `Unreleased`.
-- Version-branch pre-PR squash lacks explicit rewrite approval, finds an open PR that does not qualify for the blocked-PR correction path, loses tree equality, cannot prove `origin/main` ancestry, or fails its exact `--force-with-lease` update.
-- Validation fails and cannot be fixed safely inside the release scope.
-- PR checks fail on either PR route and no explicitly authorized bounded correction path applies.
-- The released `main` version or commit does not match the intended local and `origin/main` state.
-- The release tag exists on a different commit and does not qualify for the explicitly authorized failed-unpublished-tag replacement path.
-- Repository-owned tag automation fails, creates incomplete or conflicting external state, or cannot be correlated to the exact tag and released commit, unless the run produced zero release state and the failed-unpublished-tag replacement path is explicitly authorized.
-- GitHub Release creation or verification fails, or an existing release conflicts with the confirmed tag/version state.
-- An applicable npm registry check or publication fails for reasons other than package absence or a non-newer version.
+- Eligibility, authenticated `ADMIN`, explicit release intent, or required fork classification is absent or cannot be verified, or automation ownership remains unclassified. Verified absence of an automation owner selects the manual executor; it is not a blocker.
+- Route detection fails, an absence proof required by that route cannot be established, or the current branch no longer matches the selected route. Never fall back to direct-main or another executor.
+- Baseline alignment, clean release scope, or wrong-branch transfer cannot be proved; recovery encounters mixed work, conflicts, or divergence without its separate approval.
+- Direct-main does not initially equal `origin/main`, or either `dev` branch appears before push.
+- The authoritative version is unclear, version sources disagree, or the release narrative is missing, stale, duplicated under `Unreleased`, or requires guessing shipped behavior. An absent canonical changelog alone is not a blocker.
+- A version-branch rewrite lacks its exact authorization, encounters a non-qualifying open PR, loses prepared-tree equality or required ancestry/topology, or fails the OID-bound lease. Do not rewrite healthy review history or published/consumed release state.
+- Validation cannot be fixed safely inside release scope, or required PR checks fail without an explicitly authorized bounded correction path.
+- Released `main`, the remote commit, version, or existing tag disagree. A mismatched tag requires the separately authorized failed-unpublished-tag path; uncertainty or partial publication disqualifies that recovery.
+- Automation fails, cannot be correlated to the exact tag/commit, or leaves missing/conflicting external state. Only the explicit zero-release-state recovery may permit tag replacement; manual publication is never an implicit fallback.
+- GitHub Release creation/verification fails, an existing Release conflicts, or an applicable npm lookup/publication fails for a reason other than package absence or a non-newer version. Those two npm conditions skip manual publication, not the other release gates.
+
+A tag push alone is not a completed release: require the matching published GitHub Release and every applicable registry result or justified skip. After merge or publication, use a new reviewed correction rather than cleaning history.
 
 ## Final Report
 
@@ -450,5 +373,5 @@ Report:
 - Release tag push/result
 - Repository release-automation classification and, for every owner, the workflow/run URL, responsibility, correlation evidence, and terminal result
 - GitHub Release URL and published/prerelease/latest state
-- npm applicability and package existence/version check
+- Registry applicability and npm package existence/version check
 - Publish result or publish skip reason

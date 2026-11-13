@@ -1,15 +1,11 @@
 ---
 name: abcd-context
-description: ABCd context protocol across ABC root files (AGENTS.md, BACKLOG.md, CHANGELOG.md), human entrypoint README.md files tree, and /docs. Use after meaningful project changes, backlog drift, documentation refactors, self-evolving context maintenance, or a forced context reconciliation pass.
+description: "Reconcile durable project context after meaningful changes or on explicit context-audit requests: protocol, open work, delivery history, README navigation, and docs ownership. Not implementation or artifact review."
 ---
 
 # ABCd Context
 
 Keep project context truthful, separated, connected, and small enough to use. Treat `AGENTS.md`, `BACKLOG.md`, `CHANGELOG.md`, the README tree, and `/docs` as one context graph with distinct ownership.
-
-## Core Guarantee
-
-Durable rules stay durable. Open work stays open. Completed delivery moves to history. README entrypoints remain trustworthy. Docs remain discoverable. Each fact has one authoritative home.
 
 ## Activation Modes
 
@@ -45,15 +41,11 @@ For non-trivial work, model the plan as `outcome or epic → acceptance checkpoi
 
 ## Invariants
 
-1. `Single source of truth`: Do not track the same state across durable protocol, open work, completed history, and docs.
-2. `Reality before prose`: Inspect the implementation, diff, plans, and existing conventions before updating context.
-3. `Constraint-driven structure`: Add hierarchy only when discovered constraints justify it; restructure inherited context when accidental shape hides truth.
-4. `Hierarchical execution`: Group compatible non-trivial work under acceptance checkpoints with attributable item-level evidence; do not force independent work into a false sequence or replay broad gates after every edit.
-5. `Human entrypoint continuity`: Keep root and relevant subtree README files reachable and current when setup, usage, topology, or ownership changes.
-6. `Backlog truth`: A completed or narrowed slice must not remain falsely open.
-7. `Impact-oriented history`: Record meaningful delivered outcomes, not bookkeeping or duplicated commit logs.
-8. `Local convention compatibility`: Cooperate with stricter project overlays; do not copy project-specific gates into this portable protocol.
-9. `Farmville guard`: If an edit would not preserve durable wisdom, correct open-work truth, record meaningful delivery, or repair discoverability, skip it. Silence is valid.
+- **Single source of truth**: One authoritative home per fact; durable rules, open work, delivery history, and docs do not mirror state.
+- **Reality before prose**: Inspect implementation, diff, plans, and conventions; documentation alone cannot establish completion.
+- **Constraint-driven structure**: Add hierarchy only for discovered constraints; restructure inherited shape when it obscures truth.
+- **Local convention compatibility**: Preserve stricter project overlays rather than copying their gates into this portable protocol.
+- **Farmville guard**: Skip edits that preserve no durable wisdom, open-work truth, meaningful delivery, or discoverability. Silence is valid.
 
 ## POST_TASK Flow
 
@@ -76,12 +68,7 @@ Use a light pass for small scoped changes. Use the full protocol in [`docs/proto
 
 ## ON_REQUEST Flow
 
-1. Map the current context graph and canonical files.
-2. Run both automated validation and manual truth checks.
-3. Compare claims against repository reality.
-4. Reconcile state ownership, stale content, duplicates, missing entrypoints, links, backlog drift, and docs coverage.
-5. Restructure only where current shape obstructs navigation or truth.
-6. Rerun validation and report remaining uncertainty.
+Map canonical files and overlays; run automated validation and manual truth checks against repository reality. Apply POST_TASK's reconciliation and routing across the full graph, repairing missing entrypoints, links, coverage, and ownership. Restructure only where navigation or truth requires it. Rerun validation and report remaining uncertainty.
 
 ## Mutation Rules
 
@@ -111,12 +98,11 @@ Useful environment controls:
 
 Exit `0` means no errors; warnings may still require judgment. Exit `1` means validation errors or invalid invocation. Validator design and check semantics live in [`docs/validation-design.md`](./docs/validation-design.md).
 
-## Completion Checklist
+## Completion Check
 
-- [ ] Canonical open work matches reality.
-- [ ] Completed delivery left the backlog and reached the canonical history surface when meaningful.
-- [ ] Durable constraints live in `AGENTS.md`, not delivery history.
-- [ ] Relevant README entrypoints still explain and connect the changed area.
-- [ ] Docs describe current contracts and remain indexed.
-- [ ] Duplicate or stale context was removed rather than layered over.
-- [ ] Automated validation ran after context mutation, and warnings were reviewed.
+Use this as a final scan, not another documentation pass:
+
+- Confirm that open work contains only real remaining work; record meaningful delivery in the established history surface.
+- Keep durable rules, current contracts, and human navigation in their authoritative homes, with relevant entrypoints reachable.
+- Remove stale or duplicate claims rather than layering a new explanation over them.
+- Validate changed context, inspect warnings, and report unresolved drift. If nothing passes the Farmville guard, make no context edit.

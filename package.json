@@ -1,14 +1,19 @@
 {
   "name": "@llblab/skills",
-  "version": "1.19.0",
+  "version": "1.20.0",
   "private": false,
-  "description": "Dream Skills",
+  "description": "14 standalone agent skills for software execution, design, review, context, releases, collaboration, skill development, and speech.",
   "keywords": [
-    "skills",
+    "agent-skills",
     "ai",
-    "agent",
-    "tts",
-    "stt"
+    "software-engineering",
+    "design",
+    "code-review",
+    "project-context",
+    "release",
+    "collaboration",
+    "text-to-speech",
+    "speech-to-text"
   ],
   "license": "MIT",
   "bugs": {

@@ -59,32 +59,9 @@ Use [templates.md](./templates.md) for new/empty files and as target shapes for 
 
 Do not preserve accidental formatting merely because it exists. Do not impose a mature hierarchy on a tiny project.
 
-## Proportional Reconciliation
+## Reconciliation Scope
 
-### Light Pass
-
-Use after a small meaningful slice:
-
-1. Reconcile the affected backlog item.
-2. Update the nearest README or contract doc only if user-facing or operator-facing truth changed.
-3. Record a changelog outcome only when delivery is meaningful.
-4. Promote a durable lesson only when it will change future behavior.
-5. Validate changed context and stop.
-
-### Full Pass
-
-Use for architecture changes, broad documentation refactors, migration of context ownership, or explicit audits:
-
-1. Map root files, README entrypoints, docs index, and local overlays.
-2. Identify canonical owners for durable protocol, open work, shipped history, and subsystem contracts.
-3. Compare claims with repository reality.
-4. Repair backlog truth first.
-5. Repair README entrypoints and navigation.
-6. Reconcile subsystem docs and docs index coverage.
-7. Record meaningful delivered outcomes.
-8. Promote only reusable constraints into durable protocol.
-9. Merge duplicates and remove stale context.
-10. Run validation, inspect warnings, and repeat only for concrete remaining drift.
+Use [SKILL.md's POST_TASK flow](../SKILL.md#post_task-flow) for a light pass over affected state, or [ON_REQUEST](../SKILL.md#on_request-flow) for a full context graph and overlay audit. Repeat only for concrete remaining drift; do not promote a small change into a full audit.
 
 ## Backlog State Transitions
 
@@ -108,15 +85,7 @@ Rules:
 
 ## Completed Delivery Sync
 
-Record meaningful outcomes from reality, not intention.
-
-A good entry names:
-
-- The affected area.
-- What changed for users, operators, developers, or system behavior.
-- Material compatibility, migration, or safety impact when relevant.
-
-Avoid version-bump-only notes, test bookkeeping, and duplicates of `AGENTS.md` rules.
+Record the affected area, delivered user/operator/developer effect, and material compatibility, migration, or safety impact. Exclude intention, version-bump-only notes, test bookkeeping, and copied durable rules.
 
 ## Consolidation
 
@@ -177,20 +146,9 @@ Local overlays own project-specific behavior:
 
 Run ABCd to verify the context surface, then run the stricter local overlay. Do not copy local rules into ABCd unless they become portable across projects. Tune style warnings through documented options or environment variables rather than forking the validator for one repository.
 
-## Full Audit Checklist
+## Manual Audit
 
-After automated validation, manually verify what scripts cannot prove:
-
-- [ ] Repository claims match implementation and current operations.
-- [ ] One authoritative home owns each material fact.
-- [ ] Canonical open work reflects real remaining work.
-- [ ] Completed work no longer appears open.
-- [ ] Durable protocol contains reusable constraints rather than delivery history.
-- [ ] Relevant README entrypoints describe current setup, topology, usage, and ownership.
-- [ ] Subtree entrypoints remain reachable.
-- [ ] Docs index covers current docs without phantom entries.
-- [ ] Active epics expose an executable next slice.
-- [ ] Local overlays remain authoritative for project-specific gates.
+Automated checks cannot prove claims match implementation/operations or that work really completed. Verify canonical ownership, remaining work, meaningful history, reusable rules, current/reachable entrypoints, docs coverage, executable epic slices, and overlay authority against reality.
 
 ## Related
 

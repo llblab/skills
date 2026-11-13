@@ -1,6 +1,6 @@
 ---
 name: groq-stt
-description: Transcribe audio files using Groq API (Whisper).
+description: Transcribe audio files through Groq Whisper, optionally preserving provider speaker labels. Use when the request, established workflow, or configuration selects Groq. Ask only if the provider remains unresolved; not speech synthesis.
 ---
 
 # Groq STT Skill

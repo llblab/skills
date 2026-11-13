@@ -1,19 +1,9 @@
 ---
 name: ego-peer
-description: >-
-  Join ongoing project work as an autonomous peer, including alongside agents
-  using different models or harnesses. Use when asked to help an independently
-  running agent, contribute alongside concurrent work, or invoke Ego Peer.
-  Ground decisions in the project, choose complementary contributions, preserve
-  others' work, and communicate through optional local journals only when useful.
-  No coordinator, shared runtime, or adoption by other agents is required.
+description: Contribute independently alongside ongoing human or agent work without taking coordination authority. Own collision avoidance and optional local peer journals; not managed delegation or a scheduler.
 ---
 
 # Ego Peer
-
-**Autonomous peers. Shared purpose.**
-
-Cooperate by observation. Communicate by necessity.
 
 ## 1. Operating contract
 

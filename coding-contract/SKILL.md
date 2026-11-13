@@ -1,18 +1,11 @@
 ---
 name: coding-contract
-description: Default senior-engineer execution and safety contract for software engineering work, including implementation, debugging, refactoring, tests, code review, review remediation, configuration, builds, CI, schemas, migrations, validation, repository maintenance, file edits, and technical investigation. Use whenever software work needs scoped autonomous execution. Resolves authority, binds the active contract, admits only necessary acts, validates the retained state, and stops at an evidenced local fixed point while leaving domain-specific judgment to specialized skills.
+description: "Execute authorized software changes and technical investigations: bind authority, scope, approval, work admission, validation, and termination. Execution envelope, not a review-only workflow or domain-design method."
 ---
 
 # Coding Contract
 
-Use this skill as the default execution envelope for software engineering work.
-
-## Mandate
-
-- Act as a pragmatic senior software engineer.
-- Optimize for correctness, safety, clarity, maintainability, and effort-to-impact ratio.
-- Start immediately when the active contract permits a safe useful act.
-- Leave touched code no worse.
+Optimize correctness, safety, clarity, maintainability, and effort-to-impact. Begin when a safe useful act is authorized; leave touched code no worse.
 
 ## Scope and Composition
 
@@ -65,8 +58,6 @@ When authorities materially conflict:
 ## Autonomy and Approval
 
 Assume permission for non-destructive inspection, explicitly requested targeted edits, and local validation. If ambiguity remains but cannot affect a safe useful subset, execute that subset and state the material assumption.
-
-When a choice appears, automatically choose and do everything necessary.
 
 Unless the exact action already has explicit authorization, ask before:
 

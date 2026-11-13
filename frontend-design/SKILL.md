@@ -1,11 +1,13 @@
 ---
 name: frontend-design
-description: Design, implement, refactor, or review user-facing interfaces. Use whenever work changes how a web or app surface looks, reads, responds, or is operated, including components, pages, forms, dashboards, responsive behavior, accessibility, visual polish, and design systems.
+description: Design, implement, refine, or review user-facing interfaces: structure, appearance, content, interaction states, responsive layout, and accessibility. Supplies interface-specific judgment within the active design, implementation, or review task; motion choreography and rendering mechanics remain separate responsibilities.
 ---
 
 # Frontend Design
 
 Create interfaces that are clear, distinctive, usable, adaptive, and coherent with the product. Fit the existing stack and conventions; treat visible UI coding as design work even when the requested change is small.
+
+For review-only work, use the criteria below to inspect the existing surface without editing it. Prioritize concrete comprehension, accessibility, state, or layout failures over taste; cite the affected element and triggering user scenario. Distinguish observed rendered behavior from static inference. Remediation starts only when authorized; a broader review process can use these interface-specific criteria without surrendering its evidence or reporting rules.
 
 ## Core Loop
 

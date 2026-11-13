@@ -1,117 +1,89 @@
 ---
 name: brain-storm
-description: Collaborative idea-to-design and inquiry protocol. Use for product/architecture exploration, research-style question shaping, feature design, standards, specs, UX concepts, module boundaries, and non-trivial behavior changes when uncertainty matters.
+description: Collaboratively resolve open product, architecture, protocol, or UX decisions into approved designs or bounded inquiry briefs. Use when intent, alternatives, or acceptance criteria remain unsettled, including revisions of an existing proposal; skip settled mechanical work.
 ---
 
 # Brain Storm
 
-Turn rough ideas into clear, implementation-ready designs or research-ready inquiry briefs through lightweight collaborative exploration.
+Resolve uncertainty into an approved direction, design/specification, inquiry brief, smaller slices, or a stop/defer decision. Do not impose ceremony on obvious edits, direct settled changes, or emergency fixes with clear acceptance criteria; two sentences may suffice.
 
-This skill is intentionally independent. It does not require or name any other skill, project, repository, framework, or workflow. It composes by producing clean design truth that surrounding processes can store, review, plan, or implement in their own way.
+## Ownership and Boundaries
 
-## Purpose
+- Decide what should exist; the local context protocol owns where durable rules, open work, history, navigation, and contracts belong. Align with it without duplicating facts.
+- Produce a self-contained handoff, not dependencies on named skills, projects, stacks, or workflows. Use generic lenses and interfaces.
+- After acceptance, hand off to the local implementation process. Implementation may start when uncertainty for the current slice is resolved and approval is explicit or the user asks to implement the proposed direction.
+- For risky, broad, or security-sensitive designs, request evidence-grounded review before implementation; name the artifact, assumptions, rejected alternatives, and open risks.
+- For many small tasks, define stop conditions and let the existing execution process iterate. Do not become a second execution loop.
+- Do not invent evidence or speculative architecture. Add complexity only for discovered constraints. Guide a vague interest before producing an unwanted report.
 
-Use this skill when the useful next step is clarification rather than immediate execution:
+## Orient
 
-- New feature or behavior design
-- Architecture or module-boundary choices
-- Standards / protocol drafting
-- Product or ecosystem-shaping decisions
-- UI/UX concept exploration
-- Research-style inquiry shaping before evidence collection
-- Literature, market, policy, or technical exploration when the question is still vague
-- Scope decomposition before implementation
-- Risky changes where intent and constraints matter more than speed
+Read the nearest relevant project context before proposing design:
 
-Do not use it as bureaucracy for obvious mechanical edits, typo fixes, direct user-specified changes, or emergency fixes with clear acceptance criteria. For small work, a two-sentence design note is enough.
+- Local contributor instructions
+- Backlog or roadmap
+- Root README and relevant subtree README files
+- Documentation index and relevant docs
+- Recent delivery history when shipped baseline matters
+- Existing code only when implementation constraints shape the design
 
-## Core Contract
+For small or conversational work, summarize only the relevant facts. Do not dump context.
 
-Brainstorming produces one of:
+## Classify Scope
 
-1. A concise approved direction
-2. A written design/specification
-3. A research or exploration brief
-4. A decomposed set of smaller slices
-5. A decision to stop or defer
+Classify the request:
 
-Implementation may begin once design uncertainty for the current slice is resolved. Approval can be explicit (`yes`, `approved`, `do it`) or implicit when the user directly asks to implement the proposed direction.
+```text
+Tiny:        obvious design, compact note enough
+Small:       one feature/module, few choices
+Medium:      needs alternatives and a short spec
+Large:       decompose into slices before designing slice 1
+Ambiguous:   ask one blocking question first
+```
 
-## Operating Principles
+If the request spans independent subsystems, decompose before designing details.
 
-- Separate portable mechanism from product-specific content.
-- Treat durable context, documentation, and open-work state as part of design truth.
-- Avoid speculative architecture. Add complexity only when a discovered constraint earns it.
-- If the user has a vague interest rather than a clear question, guide first instead of producing an unwanted report.
-- Treat claims, assumptions, and evidence needs as design material; do not invent certainty before investigation.
+## Clarify
 
-## Composition Contract
+Ask one question at a time, only when its answer can change the design. Prefer multiple-choice questions when they reduce friction. Stop when the main uncertainty is resolved.
 
-This skill should fit into any surrounding workflow without knowing its names.
+Prefer questions about:
 
-### Context systems
+- Goal / success criteria
+- User or operator workflow
+- Hard constraints
+- Ownership boundary
+- Data/state lifecycle
+- Safety and rollback
+- What must be portable vs product-specific
+- The decision the inquiry should support
+- What evidence would confirm, weaken, or falsify the current direction
 
-If the repository has a living context protocol, align with it before designing and leave outputs in the expected places. Typical durable surfaces are:
-
-- Contributor/agent instructions for durable rules
-- Backlog/roadmap for open work
-- Changelog/history for completed delivery
-- Root and subtree README files for human navigation
-- Documentation indexes and subsystem docs for contracts and architecture
-
-Brainstorming decides what should exist; the local context protocol decides where that truth belongs.
-
-### Implementation workflows
-
-After design acceptance, hand off to the local implementation workflow. Do not prescribe a specific planning or coding skill. The next step may be a plan, a small patch, a prototype, a review, or a backlog item depending on project norms.
-
-### Review workflows
-
-When the design is risky, broad, or security-sensitive, request an evidence-grounded review before implementation. A good review handoff names the artifact, assumptions, alternatives rejected, and open risks.
-
-### Execution loops
-
-When the accepted direction contains many small tasks, define stop conditions and let the local execution process iterate. Brainstorming should not become the execution loop itself.
+Skip questions when the user already gave enough constraints for a safe first design.
 
 ## Inquiry Lens
 
-Use this when the user is exploring a topic, policy, technical direction, market, literature area, or problem space and the right question is not yet clear. Brainstorm is a form of research when it shapes inquiry before evidence collection.
+Shape inquiry before collecting evidence. Use genuine Socratic questions, not a predetermined conclusion:
 
-Guide toward:
+1. Clarify the interest or decision and probe definitions/assumptions.
+2. Ask what evidence would change the answer; explore alternatives and counterexamples.
+3. Bound the question, non-goals, uncertainty, needed evidence, likely sources/stakeholders, contradictions to seek, supported decision, next probe, and “enough research” stop condition.
 
-- Research or exploration question
-- Scope boundaries and non-goals
-- Known assumptions and uncertainty
-- Evidence needed to answer the question
-- Likely source classes or stakeholders
-- Contradictions to look for
-- Decision the research should support
-- Stop condition for "enough research"
+A compact inquiry brief can use this shape; omit fields already settled in the surrounding context:
 
-Prefer Socratic guidance when the user expresses uncertainty. Ask genuine questions that expose assumptions; do not lead the user to a predetermined conclusion. Good layers are:
-
-1. Clarify the interest or decision.
-2. Probe assumptions and definitions.
-3. Ask what evidence would change the answer.
-4. Explore alternative perspectives or counter-examples.
-5. Convert the insight into a bounded question, plan, or next slice.
-
-A compact inquiry brief can use:
-
-```markdown
-## Inquiry Brief
-
+```text
 Question:
-Scope:
+Scope and non-goals:
 Assumptions:
-Evidence needed:
-Likely sources or probes:
-Counter-questions:
+Evidence needed and likely sources:
+Counter-question:
 Decision this supports:
-Next slice:
+Next probe and stop condition:
 ```
 
-Do not run a full research pipeline inside brainstorming. If the question is now clear and the user wants evidence, hand off to the local research, review, or implementation workflow.
+For example, “Should this work offline?” first needs a bounded user scenario: viewing cached records, editing them, or resolving concurrent edits imply different evidence and contracts. Ask which action must survive lost connectivity before proposing a sync architecture.
+
+Once the question is clear and evidence is requested, hand off; do not run a full research pipeline inside brainstorming.
 
 ## Portability Lens
 
@@ -156,80 +128,13 @@ Useful extension questions:
 - What happens when the owner disappears?
 - How are conflicts diagnosed?
 
-## Process
+## Choose and Present
 
-### 1. Orient
+Present 2–3 approaches when real trade-offs exist. Lead with your recommendation and include what each option optimizes, what it costs, and when it fails. Do not generate alternatives for a settled direction.
 
-Read the nearest relevant project context before proposing design:
+For example, distinguish a minimal local patch from a reusable capability or platform boundary by the actual consumers and constraints, not by which option sounds more architectural. If only one path satisfies the contract without unnecessary machinery, explain that path rather than inventing a comparison.
 
-- Local contributor instructions
-- Backlog or roadmap
-- Root README and relevant subtree README files
-- Documentation index and relevant docs
-- Recent delivery history when shipped baseline matters
-- Existing code only when implementation constraints shape the design
-
-For small or conversational work, summarize only the relevant facts. Do not dump context.
-
-### 2. Classify Scope
-
-Classify the request:
-
-```text
-Tiny:        obvious design, compact note enough
-Small:       one feature/module, few choices
-Medium:      needs alternatives and a short spec
-Large:       decompose into slices before designing slice 1
-Ambiguous:   ask one blocking question first
-```
-
-If the request spans independent subsystems, decompose before designing details.
-
-### 3. Clarify
-
-Ask one question at a time, only when its answer can change the design. Prefer multiple-choice questions when they reduce friction. Stop when the main uncertainty is resolved.
-
-Prefer questions about:
-
-- Goal / success criteria
-- User or operator workflow
-- Hard constraints
-- Ownership boundary
-- Data/state lifecycle
-- Safety and rollback
-- What must be portable vs product-specific
-- The decision the inquiry should support
-- What evidence would confirm, weaken, or falsify the current direction
-
-Skip questions when the user already gave enough constraints for a safe first design.
-
-### 4. Offer Approaches
-
-Present 2–3 approaches when real trade-offs exist.
-
-For each approach include:
-
-- What it optimizes
-- What it costs
-- When it fails
-
-Lead with your recommendation.
-
-Compact format:
-
-```text
-Recommendation: B.
-
-A. Minimal patch — fastest, but narrow.
-B. Modular contract — slightly more work, best future fit.
-C. Platform layer — powerful, premature unless X is true.
-```
-
-### 5. Present Design
-
-Scale the design to the work.
-
-Cover only relevant sections:
+Cover only relevant design decisions:
 
 - Goal
 - Non-goals
@@ -247,75 +152,44 @@ Cover only relevant sections:
 - Documentation/backlog updates
 - Rollout plan
 
-Ask for approval when the next step would commit the design into durable docs, backlog, or implementation.
-
-### 6. Choose Artifact
-
-Pick the smallest durable artifact that matches the project:
-
-- No artifact: ephemeral clarification only
-- Inquiry brief: research-style question, assumptions, evidence needs, and next probe
-- Backlog item: future work only
-- Short doc section: small standard/behavior update
-- Full spec/design doc: medium or large design
-- Architecture/decision note: durable trade-off or boundary decision
-
-Follow existing project naming and location conventions. Do not force a new spec directory. Do not commit unless the user or repository workflow requires it.
-
-### 7. Self-Review
-
-Before handing off, check:
-
-- No `TBD` / vague placeholders unless intentionally marked open
-- No contradiction with existing project docs
-- Scope is implementable as one slice, or explicitly decomposed
-- Terminology matches local vocabulary; new ontology resolves a real ambiguity
-- Optional vs mandatory modules are labeled honestly
-- Data/state ownership is clear
-- Validation path is named
-
-### 8. Handoff
-
-End with the next concrete step:
-
-- “Approve this direction and I’ll implement it.”
-- “I’ll add this to the backlog.”
-- “I’ll draft the documentation section.”
-- “Next step is a focused implementation plan.”
-- “Next step is evidence review before implementation.”
-
-## Design Quality Heuristics
-
-A good brainstormed design is:
-
-- Easy to remove if wrong
-- Easy to test in isolation
-- Honest about ownership
-- Honest about what is optional
-- Small enough to ship
-- Compatible with existing project memory
-- Clear about what it refuses to solve
-
-Warning signs:
-
-- New ontology for one local edge case
-- Hidden indexer or service dependency
-- Optional module presented as framework core
-- Callback/action ownership unclear
-- “Generic platform” proposed before a second real user exists
-- Design doc duplicates facts already owned elsewhere
-- Backlog closes work that only docs discussed but implementation did not land
-
-## Visual Aids
-
-Use visual aids only when the decision is genuinely visual: UI layouts, diagrams, flows, spatial comparisons, or architecture maps.
-
-Do not interrupt text-first brainstorming with visual tooling for conceptual choices.
-
-If a local visual companion exists, offer it once before using it:
+For a substantial design, a compact handoff can state:
 
 ```text
-Some of this may be easier with diagrams or mockups. Want a visual companion, or should we keep it text-only?
+Goal and acceptance:
+Non-goals and constraints:
+Recommended approach and rejected alternatives:
+Ownership, state lifecycle, and public contracts:
+Edge behavior, safety, and rollback:
+Validation and next slice:
 ```
 
-If no such tool exists, use concise ASCII diagrams or Markdown sketches.
+A small change may need only a paragraph. Do not expand a known direction into a full specification merely to fill the outline.
+
+Ask approval before committing a proposed design into durable docs, backlog, or implementation unless already authorized.
+
+Choose the smallest durable artifact that fits the project:
+
+- **No artifact**: Ephemeral clarification only.
+- **Inquiry brief**: Research question, assumptions, evidence needs, and next probe.
+- **Backlog item**: Future work, with truthful remaining scope.
+- **Short doc section**: Small standard or behavior update.
+- **Full specification**: A medium or large design that needs an implementable contract.
+- **Decision note**: A durable trade-off or ownership boundary.
+
+Follow existing naming and location conventions. Do not force a new specification directory or commit unless the user or project workflow requires it.
+
+## Check and Handoff
+
+Before delivery, check:
+
+- No vague placeholders unless explicitly open; no contradictions with current project truth.
+- One implementable slice or explicit decomposition, with a named validation path.
+- Local vocabulary; new ontology only when it resolves real ambiguity.
+- Explicit data/state ownership and honest mandatory/optional classification.
+- Isolated testability, removability, and clear non-goals.
+
+Watch for one-edge-case ontology, hidden service dependencies, optional modules promoted to core, unclear callback owners, premature platforms without a second real user, duplicated design facts, or backlog closure based only on discussion rather than implementation.
+
+End with the next concrete step: approval, implementation planning, evidence review, an authorized doc/backlog update, or stop. Do not imply an unapproved action will happen automatically.
+
+Use visuals only for genuinely visual decisions such as layout, flow, spatial comparison, or architecture maps. Offer an available visual companion once before use; otherwise concise ASCII/Markdown sketches suffice. Do not interrupt conceptual text-first work with visual tooling.

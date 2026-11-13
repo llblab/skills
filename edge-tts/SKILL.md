@@ -1,6 +1,6 @@
 ---
 name: edge-tts
-description: Text-to-speech via Microsoft Edge TTS (free, neural voices).
+description: Synthesize speech from text through Microsoft Edge TTS; save audio, subtitles, or boundary metadata, or play locally. Not audio transcription.
 ---
 
 # Edge TTS
@@ -37,7 +37,7 @@ Default candidates:
 
 - Cross-platform if installed: `ffplay`, `mpv`, `vlc`/`cvlc`.
 - Linux/BSD extras: `mpg123`.
-- macOS default: `afplay`.
+- On macOS: `afplay`.
 - Windows default fallback: the system-registered MP3 app through PowerShell `Start-Process`.
 
 If no player exists, generation is still available through `--write-media`; the agent can then play the MP3 with any system-specific tool. Windows default-app playback uses delayed temp cleanup because registered apps usually detach immediately.
