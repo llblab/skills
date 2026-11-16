@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-description: Design, implement, refine, or review user-facing interfaces: structure, appearance, content, interaction states, responsive layout, and accessibility. Supplies interface-specific judgment within the active design, implementation, or review task; motion choreography and rendering mechanics remain separate responsibilities.
+description: "Design, implement, refine, or review user-facing interfaces: structure, appearance, content, interaction states, responsive layout, and accessibility. Supplies interface-specific judgment within the active design, implementation, or review task; motion choreography and rendering mechanics remain separate responsibilities."
 ---
 
 # Frontend Design

@@ -1,6 +1,6 @@
 ---
 name: domain-dag
-description: Guide and audit module ownership and dependency direction: acyclic imports, composition roots, public contracts, extraction limits, shared buckets, and validator calibration. Supplies graph-specific criteria during architecture design, implementation, or review rather than replacing the surrounding workflow.
+description: "Guide and audit module ownership and dependency direction: acyclic imports, composition roots, public contracts, extraction limits, shared buckets, and validator calibration. Supplies graph-specific criteria during architecture design, implementation, or review rather than replacing the surrounding workflow."
 ---
 
 # Domain DAG

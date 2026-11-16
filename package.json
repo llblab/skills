@@ -1,6 +1,6 @@
 {
   "name": "@llblab/skills",
-  "version": "1.20.0",
+  "version": "1.20.1",
   "private": false,
   "description": "14 standalone agent skills for software execution, design, review, context, releases, collaboration, skill development, and speech.",
   "keywords": [
